@@ -36,3 +36,80 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Ignore Python bytecode and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore Django migrations (optional, but useful)
+**/migrations/*
+!**/migrations/__init__.py  # Keep __init__.py for Django to recognize migrations
+
+# Ignore Virtual Environment
+venv/
+env/
+ENV/
+*.venv
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Ignore Django secret key & settings overrides
+*.env
+.env
+config/settings/local.py
+config/settings/dev.py
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Ignore logs and database files
+*.log
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+debug.log
+
+# Ignore static and media files
+staticfiles/
+media/
+node_modules/
+
+# Ignore coverage and testing reports
+.coverage
+htmlcov/
+nosetests.xml
+coverage.xml
+*.cover
+.pytest_cache/
+
+# Ignore Celery and other task-related files
+celerybeat-schedule
+celerybeat.pid
+
+# Ignore Docker files (if using Docker)
+.dockerignore
+docker-compose.override.yml
+
+# Ignore Gunicorn and uWSGI logs
+gunicorn.log
+gunicorn.err
+uwsgi.log
+uwsgi.err
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore build files
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Ignore temporary files
+*.swp
+*.swo
