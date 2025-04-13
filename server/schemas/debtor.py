@@ -13,9 +13,6 @@ class DebtHistory(DebtHistoryBase):
     id: int
     timestamp: datetime
 
-    class Config:
-        orm_mode = True
-
 class DebtorBase(BaseModel):
     name: str
     amount_owed: float = 0.0
@@ -33,5 +30,5 @@ class Debtor(DebtorBase):
     updated_at: Optional[datetime]
     history: List[DebtHistory] = []
 
-    class Config:
-        orm_mode = True
+class TokenData(BaseModel):
+    email: str | None = None
