@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt
 from jwt.exceptions import InvalidTokenError
 from typing import Optional
-from . import schemas
+from .schemas import debtors
 
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
@@ -24,6 +24,6 @@ def verify_token(token:str,credentials_exception):
         email = payload.get("sub")
         if email is None:
             raise credentials_exception
-        token_data = schemas.TokenData(email=email)
+        token_data = debtors.TokenData(email=email)
     except InvalidTokenError:
         raise credentials_exception
