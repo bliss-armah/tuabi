@@ -1,5 +1,7 @@
 import LandingScreen from "@/Features/LandingScreen.tsx/LandingScreen";
 
-export default function index() {
+const index = () => {
   return <LandingScreen />;
-}
+};
+
+export default index;

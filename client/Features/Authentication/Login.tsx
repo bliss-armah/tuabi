@@ -2,12 +2,20 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { useLoginMutation } from "./AuthAPI";
 
 const Login = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("bliss@test.com");
+  const [password, setPassword] = useState("secret");
   const [rememberMe, setRememberMe] = useState(false);
+  const [login, { isLoading, error }] = useLoginMutation();
+
+  const handleLogin = async () => {
+    await login({ username: email, password });
+    // router.push("/home");
+    // Handle login logic here
+  };
 
   return (
     <View className="flex-1 bg-white p-6 justify-center">
@@ -69,7 +77,8 @@ const Login = () => {
       {/* Login Button */}
       <TouchableOpacity
         className="bg-indigo-600 py-4 rounded-lg mb-4"
-        onPress={() => router.push("/home")}
+        // onPress={() => router.push("/home")}
+        onPress={handleLogin}
       >
         <Text className="text-white font-semibold text-center">Log in</Text>
       </TouchableOpacity>

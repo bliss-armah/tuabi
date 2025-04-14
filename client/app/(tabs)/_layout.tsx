@@ -2,8 +2,8 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 
-import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { Colors } from "@/Shared/Constants/Colors";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();

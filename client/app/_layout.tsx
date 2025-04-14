@@ -10,8 +10,14 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
+import { Provider } from "react-redux";
+import { persistStore } from "redux-persist";
+import { PersistGate } from "redux-persist/integration/react";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import store from "@/Shared/Store/store";
+
+const persistor = persistStore(store);
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -33,12 +39,18 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack screenOptions={{ headerShown: false }}>
-        {/* No need to explicitly define index, login, etc., unless you want specific options per screen */}
-      </Stack>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <Stack screenOptions={{ headerShown: false }}>
+            {/* No need to explicitly define index, login, etc., unless you want specific options per screen */}
+          </Stack>
 
-      <StatusBar style="auto" />
-    </ThemeProvider>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </PersistGate>
+    </Provider>
   );
 }

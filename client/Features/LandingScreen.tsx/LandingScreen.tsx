@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import CardComponent from "@/shared/components/CardComponent";
+import CardComponent from "@/Shared/Components/CardComponent";
 
 export default function LandingScreen() {
   const router = useRouter();
