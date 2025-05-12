@@ -19,9 +19,6 @@ export default function LandingScreen() {
       <SafeAreaView className="flex-1 justify-center items-center">
         <View className="p-10">
           <View className="flex-row items-center mb-4">
-            <View className="bg-white rounded-lg p-1 mr-2">
-              <Ionicons name="image-outline" size={24} color="#4F46E5" />
-            </View>
             <Text className="text-2xl font-bold text-white">Tuabi</Text>
           </View>
 

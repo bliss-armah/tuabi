@@ -1,15 +1,12 @@
-import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const createBaseQuery = (token: string | null, printerId: string | null) => {
+const createBaseQuery = (token: string | null) => {
   return fetchBaseQuery({
-    baseUrl: 'http://192.168.0.139:8000',// Also note: make sure to use http:// and not /localhost
-    prepareHeaders: headers => {
+    baseUrl: "http://192.168.3.157:8000",
+    prepareHeaders: (headers) => {
       if (token) {
-        headers.set('Authorization', `Bearer ${token}`);
-      }
-      if (printerId) {
-        headers.set('X-Printer-ID', printerId);
+        headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
     },
@@ -17,24 +14,22 @@ const createBaseQuery = (token: string | null, printerId: string | null) => {
 };
 
 const logErrorLocally = (errorDetails: any) => {
-  console.error('API Error:', errorDetails);
+  console.error("API Error:", errorDetails);
 };
 
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
-  const token = await AsyncStorage.getItem('token');
-  const tokenExpiryStr = await AsyncStorage.getItem('tokenExpiry');
-  const user = await AsyncStorage.getItem('user');
-  const printerId = await AsyncStorage.getItem('selectedPrinter');
+  const token = await AsyncStorage.getItem("token");
+  const tokenExpiryStr = await AsyncStorage.getItem("tokenExpiry");
+  const user = await AsyncStorage.getItem("user");
 
-  const tokenExpiry = parseInt(tokenExpiryStr ?? '0');
+  const tokenExpiry = parseInt(tokenExpiryStr ?? "0");
 
   if (tokenExpiry && Date.now() >= tokenExpiry) {
     await AsyncStorage.clear();
-    // You can't use window.location in React Native, navigate programmatically
-    return { error: { status: 401, data: 'Token expired' } };
+    return { error: { status: 401, data: "Token expired" } };
   }
 
-  const baseQueryFunction = createBaseQuery(token, printerId);
+  const baseQueryFunction = createBaseQuery(token);
   const result = await baseQueryFunction(args, api, extraOptions);
 
   if (result.error) {
@@ -43,7 +38,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       data: result.error.data,
       args,
       timestamp: new Date().toISOString(),
-      user: user ? user : 'Anonymous',
+      user: user ? user : "Anonymous",
       path: args.url,
     };
 

@@ -6,7 +6,6 @@ export enum UserRole {
   export interface LoginFormData {
     username: string;
     password: string;
-    sessionId: string;
   }
   
   export interface LoginResponse {
