@@ -20,6 +20,7 @@ class Debtor(Base):
     name = Column(String, nullable=False)  # name of debtor
     amount_owed = Column(Float, default=0.0)  # how much they owe
     description = Column(String, nullable=True)
+    phone_number = Column(String, nullable=True)  # phone number for calling feature
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
