@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from models import models
 from database import engine
-from routers import authentication,debtor,user
+from routers import authentication, debtor, user, debt_history
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(authentication.router)
 app.include_router(user.router)
 app.include_router(debtor.router)
+app.include_router(debt_history.router)
 
 
 

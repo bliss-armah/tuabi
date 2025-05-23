@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from pydantic import BaseModel, Field
+from typing import Optional, List, Union
 from datetime import datetime
 
 class DebtHistoryBase(BaseModel):
@@ -12,23 +12,39 @@ class DebtHistoryCreate(DebtHistoryBase):
 class DebtHistory(DebtHistoryBase):
     id: int
     timestamp: datetime
+    action: str  # 'add', 'reduce', 'settled'
+    
+    class Config:
+        orm_mode = True
 
 class DebtorBase(BaseModel):
     name: str
     amount_owed: float = 0.0
     description: Optional[str] = None
+    phone_number: Optional[str] = None  # Added for calling feature
 
 class DebtorCreate(DebtorBase):
     pass
 
 class DebtorUpdate(DebtorBase):
-    pass
+    name: Optional[str] = None
+    amount_owed: Optional[float] = None
+    description: Optional[str] = None
+    phone_number: Optional[str] = None
 
 class Debtor(DebtorBase):
     id: int
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
     history: List[DebtHistory] = []
+    
+    class Config:
+        orm_mode = True
+
+class DebtorSummary(BaseModel):
+    total_debtors: int
+    total_debt: float
+    recent_activities: int
 
 class TokenData(BaseModel):
     email: str | None = None

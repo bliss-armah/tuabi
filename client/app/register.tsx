@@ -3,77 +3,89 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,
 import { router } from 'expo-router';
 import { authService } from '../Shared/Api/api';
 import { StatusBar } from 'expo-status-bar';
-import { Colors } from '@/Shared/Constants/Colors';
-import { useColorScheme } from '@/Shared/Hooks/useColorScheme';
 
-export default function LoginScreen() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? 'light';
-  
+export default function Register() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+  const handleRegister = async () => {
+    if (!name || !email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
     setIsLoading(true);
     try {
-      await authService.login(email, password);
-      // Explicitly navigate to the home tab after login
-      router.replace('/(tabs)/home');
+      await authService.register(name, email, password);
+      Alert.alert(
+        'Registration Successful',
+        'You can now login with your credentials',
+        [{ text: 'OK', onPress: () => router.push('/login') }]
+      );
     } catch (error) {
-      console.error('Login error:', error);
-      Alert.alert('Login Failed', 'Invalid email or password');
+      console.error('Registration error:', error);
+      Alert.alert('Registration Failed', 'Email may already be in use');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+    <View style={styles.container}>
+      <StatusBar style="auto" />
       <View style={styles.logoContainer}>
-        <Text style={[styles.logoText, { color: Colors[theme].primary }]}>Tuabi</Text>
-        <Text style={[styles.tagline, { color: Colors[theme].text }]}>Track customer debts with ease</Text>
+        <Text style={styles.logoText}>Tuabi</Text>
+        <Text style={styles.tagline}>Create your account</Text>
       </View>
 
-      <View style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}>
+      <View style={styles.formContainer}>
         <TextInput
-          style={[styles.input, { borderColor: Colors[theme].border, color: Colors[theme].text }]}
+          style={styles.input}
+          placeholder="Full Name"
+          value={name}
+          onChangeText={setName}
+        />
+        <TextInput
+          style={styles.input}
           placeholder="Email"
-          placeholderTextColor={Colors[theme].icon}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
         <TextInput
-          style={[styles.input, { borderColor: Colors[theme].border, color: Colors[theme].text }]}
+          style={styles.input}
           placeholder="Password"
-          placeholderTextColor={Colors[theme].icon}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+        />
 
-        <TouchableOpacity 
-          style={[styles.loginButton, { backgroundColor: Colors[theme].primary }]} 
-          onPress={handleLogin} 
-          disabled={isLoading}
-        >
+        <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={isLoading}>
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
+            <Text style={styles.registerButtonText}>Register</Text>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerLink} onPress={() => router.push('/register')}>
-          <Text style={[styles.registerText, { color: Colors[theme].primary }]}>Don't have an account? Register</Text>
+        <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/login')}>
+          <Text style={styles.loginText}>Already have an account? Login</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -88,8 +100,8 @@ const styles = StyleSheet.create({
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 80,
-    marginBottom: 50,
+    marginTop: 60,
+    marginBottom: 30,
   },
   logoText: {
     fontSize: 40,
@@ -120,7 +132,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
   },
-  loginButton: {
+  registerButton: {
     backgroundColor: '#3498db',
     height: 50,
     borderRadius: 8,
@@ -128,16 +140,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  loginButtonText: {
+  registerButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  registerLink: {
+  loginLink: {
     marginTop: 20,
     alignItems: 'center',
   },
-  registerText: {
+  loginText: {
     color: '#3498db',
     fontSize: 14,
   },

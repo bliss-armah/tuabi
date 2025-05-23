@@ -21,7 +21,7 @@ const Login = () => {
   const handleLogin = async () => {
     try {
       await login({ username: email, password }).unwrap();
-      router.push("/home");
+      router.push("/(tabs)/home");
     } catch (err) {
       console.error("Login failed:", err);
     }
