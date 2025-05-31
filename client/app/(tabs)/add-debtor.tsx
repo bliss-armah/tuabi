@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,27 +10,27 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { debtorService } from '@/Shared/Api/api';
+} from "react-native";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { debtorService } from "@/Shared/Api/api";
 
 export default function AddDebtor() {
-  const [name, setName] = useState('');
-  const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [note, setNote] = useState('');
+  const [name, setName] = useState("");
+  const [amount, setAmount] = useState("");
+  const [description, setDescription] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter the debtor name');
+      Alert.alert("Error", "Please enter the debtor name");
       return false;
     }
 
     if (!amount.trim() || isNaN(parseFloat(amount))) {
-      Alert.alert('Error', 'Please enter a valid amount');
+      Alert.alert("Error", "Please enter a valid amount");
       return false;
     }
 
@@ -47,7 +47,7 @@ export default function AddDebtor() {
         name: name.trim(),
         amount_owed: 0, // Start with zero, we'll add the debt in the next step
         description: description.trim() || null,
-        phone_number: phoneNumber.trim() || null
+        phone_number: phoneNumber.trim() || null,
       };
 
       const response = await debtorService.createDebtor(debtorData);
@@ -57,26 +57,23 @@ export default function AddDebtor() {
       if (parseFloat(amount) > 0) {
         await debtorService.addPayment(newDebtorId, {
           amount_changed: parseFloat(amount),
-          note: note.trim() || 'Initial debt'
+          note: note.trim() || "Initial debt",
         });
       }
 
-      Alert.alert(
-        'Success',
-        'Debtor added successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.push({
-              pathname: '/debtor-detail',
-              params: { id: newDebtorId }
-            })
-          }
-        ]
-      );
+      Alert.alert("Success", "Debtor added successfully", [
+        {
+          text: "OK",
+          onPress: () =>
+            router.push({
+              pathname: "/debtor-detail",
+              params: { id: newDebtorId },
+            }),
+        },
+      ]);
     } catch (error) {
-      console.error('Error adding debtor:', error);
-      Alert.alert('Error', 'Failed to add debtor');
+      console.error("Error adding debtor:", error);
+      Alert.alert("Error", "Failed to add debtor");
     } finally {
       setIsLoading(false);
     }
@@ -85,11 +82,14 @@ export default function AddDebtor() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Add New Debtor</Text>
@@ -176,35 +176,35 @@ export default function AddDebtor() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#3498db',
+    backgroundColor: "#3498db",
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
   },
   formContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     margin: 15,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -215,33 +215,33 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#2c3e50',
+    color: "#2c3e50",
     marginBottom: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 5,
     padding: 12,
     fontSize: 16,
   },
   textArea: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   addButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: "#3498db",
     borderRadius: 5,
     padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 10,
   },
   addButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 10,
   },
 });

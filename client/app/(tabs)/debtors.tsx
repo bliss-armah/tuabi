@@ -12,6 +12,11 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { debtorService } from '../../Shared/Api/api';
+import { Colors } from '@/Shared/Constants/Colors';
+import { useColorScheme } from '@/Shared/Hooks/useColorScheme';
+
+type ColorScheme = 'light' | 'dark';
+type ColorType = typeof Colors[ColorScheme];
 
 type Debtor = {
   id: number;
@@ -22,6 +27,8 @@ type Debtor = {
   created_at: string;
   updated_at: string | null;
 };
+const colorScheme = useColorScheme();
+const color: ColorType = colorScheme === 'dark' ? Colors.dark : Colors.light;
 
 export default function Debtors() {
   const [debtors, setDebtors] = useState<Debtor[]>([]);
@@ -179,39 +186,39 @@ export default function Debtors() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: color.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#3498db',
+    backgroundColor: color.primary,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#fff',
+    color: color.background,
   },
   addButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: color.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: color.card,
     borderRadius: 8,
     marginHorizontal: 15,
     marginTop: -15,
     marginBottom: 10,
     paddingHorizontal: 15,
     height: 50,
-    shadowColor: '#000',
+    shadowColor: color.background,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -224,17 +231,18 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 50,
     fontSize: 16,
+    color: color.text,
   },
   listContainer: {
     padding: 15,
   },
   debtorCard: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: color.card,
     borderRadius: 10,
     padding: 15,
     marginBottom: 10,
-    shadowColor: '#000',
+    shadowColor: color.background,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
@@ -246,7 +254,7 @@ const styles = StyleSheet.create({
   debtorName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2c3e50',
+    color: color.text,
   },
   debtorDescription: {
     fontSize: 14,

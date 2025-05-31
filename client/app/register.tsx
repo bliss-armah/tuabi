@@ -1,24 +1,32 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
-import { router } from 'expo-router';
-import { authService } from '../Shared/Api/api';
-import { StatusBar } from 'expo-status-bar';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { router } from "expo-router";
+import { authService } from "../Shared/Api/api";
+import { StatusBar } from "expo-status-bar";
 
 export default function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
@@ -26,13 +34,19 @@ export default function Register() {
     try {
       await authService.register(name, email, password);
       Alert.alert(
-        'Registration Successful',
-        'You can now login with your credentials',
-        [{ text: 'OK', onPress: () => router.push('/login') }]
+        "Registration Successful",
+        "You can now login with your credentials",
+        [{ text: "OK", onPress: () => router.push("/login") }]
       );
-    } catch (error) {
-      console.error('Registration error:', error);
-      Alert.alert('Registration Failed', 'Email may already be in use');
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      let errorMessage = "Registration Failed";
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +90,11 @@ export default function Register() {
           secureTextEntry
         />
 
-        <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={isLoading}>
+        <TouchableOpacity
+          style={styles.registerButton}
+          onPress={handleRegister}
+          disabled={isLoading}
+        >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
           ) : (
@@ -84,7 +102,10 @@ export default function Register() {
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginLink} onPress={() => router.push('/login')}>
+        <TouchableOpacity
+          style={styles.loginLink}
+          onPress={() => router.push("/login")}
+        >
           <Text style={styles.loginText}>Already have an account? Login</Text>
         </TouchableOpacity>
       </View>
@@ -95,29 +116,29 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
     padding: 20,
   },
   logoContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 60,
     marginBottom: 30,
   },
   logoText: {
     fontSize: 40,
-    fontWeight: 'bold',
-    color: '#3498db',
+    fontWeight: "bold",
+    color: "#3498db",
   },
   tagline: {
     fontSize: 16,
-    color: '#7f8c8d',
+    color: "#7f8c8d",
     marginTop: 10,
   },
   formContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -126,31 +147,31 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
   },
   registerButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: "#3498db",
     height: 50,
     borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 10,
   },
   registerButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   loginLink: {
     marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   loginText: {
-    color: '#3498db',
+    color: "#3498db",
     fontSize: 14,
   },
 });

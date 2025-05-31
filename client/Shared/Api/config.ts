@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const createBaseQuery = (token: string | null) => {
   return fetchBaseQuery({
-    baseUrl: "http://192.168.3.157:8000",
+    baseUrl: "http://192.168.0.163:8000",
     prepareHeaders: (headers) => {
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
