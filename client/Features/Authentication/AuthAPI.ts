@@ -5,14 +5,12 @@ import baseQuery from "@/Shared/Api/config";
 import {
   LoginFormData,
   LoginResponse,
-  User,
 } from "./types";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery,
   endpoints: (builder) => ({
-    // Login
     login: builder.mutation<LoginResponse, LoginFormData>({
       query: ({ username, password }) => ({
         url: "/login",
@@ -25,7 +23,7 @@ export const authApi = createApi({
     }),
 
     // Register
-    register: builder.mutation<User, any>({
+    register: builder.mutation<any, any>({
       query: (data) => ({
         url: "/user/",
         method: "POST",
@@ -34,7 +32,7 @@ export const authApi = createApi({
     }),
 
     // Get current user
-    getCurrentUser: builder.query<User, void>({
+    getCurrentUser: builder.query<any, void>({
       query: () => ({
         url: "/user/me",
         method: "GET",

@@ -1,14 +1,16 @@
 import { Tabs } from "expo-router";
-import React from "react";
-import { Platform, SafeAreaView, View } from "react-native";
+import React, { useEffect } from "react";
+import { Platform, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

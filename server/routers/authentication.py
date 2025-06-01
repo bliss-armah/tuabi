@@ -21,5 +21,8 @@ def login(request:OAuth2PasswordRequestForm=Depends(),db:Session=Depends(get_db)
     if not Hash.verify(user.password,request.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
         detail=f'incorrect password')
-    access_token = create_access_token(data={"sub": user.email, "user_id": user.id})
-    return {"access_token":access_token, "token_type":"bearer"}
+    token_data = create_access_token(data={"sub": user.email, "user_id": user.id})
+    return {
+        "token":token_data,
+        "user":user,
+    }

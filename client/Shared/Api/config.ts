@@ -18,19 +18,23 @@ const logErrorLocally = (errorDetails: any) => {
 };
 
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
-  const token = await AsyncStorage.getItem("access_token");
-  const tokenExpiryStr = await AsyncStorage.getItem("tokenExpiry");
-  const user = await AsyncStorage.getItem("user");
+ const tokenString = await AsyncStorage.getItem("token");
+ const userString = await AsyncStorage.getItem("user");
 
-  const tokenExpiry = parseInt(tokenExpiryStr ?? "0");
+ const tokenObj = tokenString ? JSON.parse(tokenString) : null;
+ const user = userString ? JSON.parse(userString) : null;
 
-  if (tokenExpiry && Date.now() >= tokenExpiry) {
-    await AsyncStorage.clear();
-    return { error: { status: 401, data: "Token expired" } };
-  }
+ const token = tokenObj?.access_token;
+ const tokenExpiry = tokenObj?.expires_in;
 
-  const baseQueryFunction = createBaseQuery(token);
-  const result = await baseQueryFunction(args, api, extraOptions);
+ if (tokenExpiry && Date.now() >= tokenExpiry * 1000) {
+   await AsyncStorage.clear();
+   return { error: { status: 401, data: "Token expired" } };
+ }
+
+ const baseQueryFunction = createBaseQuery(token);
+ const result = await baseQueryFunction(args, api, extraOptions);
+
 
   if (result.error) {
     const errorDetails = {

@@ -4,10 +4,10 @@ import { useEffect } from "react";
 import { router } from "expo-router";
 
 const index = () => {
-  const { token } = useAuth() 
-      useEffect(() => {
-        router.replace("/(tabs)")
-      }, [token])
+  // const { token } = useAuth() 
+  //     useEffect(() => {
+  //       router.replace("/(tabs)")
+  //     }, [token])
   return <LandingScreen />;
 };
 

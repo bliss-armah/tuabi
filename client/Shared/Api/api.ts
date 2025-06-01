@@ -36,7 +36,6 @@ const response = await axios.post(`${API_URL}/login`, formData, {
     "Content-Type": "application/x-www-form-urlencoded",
   },
 });
-    console.log(response.data)
     if (response.data.access_token) {
       await AsyncStorage.setItem('access_token', response.data.access_token);
     }

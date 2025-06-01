@@ -33,9 +33,16 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      const response = await loginMutation({ username: email, password }).unwrap();
-      if (response.access_token) {
-        await AsyncStorage.setItem("access_token", response.access_token);
+      const response = await loginMutation({
+        username: email,
+        password,
+      }).unwrap();
+      if (response.token) {
+        await AsyncStorage.setItem(
+          "token",
+          JSON.stringify(response.token)
+        );
+        await AsyncStorage.setItem("user", JSON.stringify(response.user));
       }
       router.replace("/(tabs)");
     } catch (error) {
