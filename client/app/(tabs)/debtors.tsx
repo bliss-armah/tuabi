@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { debtorService } from '../../Shared/Api/api';
 import { Colors } from '@/Shared/Constants/Colors';
 import { useColorScheme } from '@/Shared/Hooks/useColorScheme';
+import { useGetDebtorsQuery } from '@/Features/Debtors/DebtorsApi';
 
 type ColorScheme = 'light' | 'dark';
 type ColorType = typeof Colors[ColorScheme];
@@ -33,14 +34,16 @@ const color: ColorType = colorScheme === 'dark' ? Colors.dark : Colors.light;
 export default function Debtors() {
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
+  const { data, isLoading: debtorsLoading, error: debtorsError, refetch } =
+    useGetDebtorsQuery();
 
   useEffect(() => {
-    loadDebtors();
-  }, []);
+    if (data) {
+      setDebtors(data);
+      setFilteredDebtors(data);
+    }
+  }, [data]);
 
   useEffect(() => {
     if (searchQuery.trim() === '') {
@@ -53,25 +56,10 @@ export default function Debtors() {
     }
   }, [searchQuery, debtors]);
 
-  const loadDebtors = async () => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const response = await debtorService.getDebtors();
-      setDebtors(response.data);
-      setFilteredDebtors(response.data);
-    } catch (err) {
-      console.error('Error loading debtors:', err);
-      setError('Failed to load debtors');
-    } finally {
-      setIsLoading(false);
-      setRefreshing(false);
-    }
-  };
+
 
   const onRefresh = () => {
-    setRefreshing(true);
-    loadDebtors();
+    refetch();
   };
 
   const renderDebtorItem = ({ item }: { item: Debtor }) => (
@@ -104,7 +92,7 @@ export default function Debtors() {
     </TouchableOpacity>
   );
 
-  if (isLoading && !refreshing) {
+  if (debtorsLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3498db" />
@@ -142,10 +130,10 @@ export default function Debtors() {
         )}
       </View>
 
-      {error ? (
+      {debtorsError ? (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={loadDebtors}>
+          <Text style={styles.errorText}>{debtorsError?.data?.message}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
         </View>
@@ -175,7 +163,7 @@ export default function Debtors() {
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContainer}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl refreshing={debtorsLoading} onRefresh={onRefresh} />
           }
         />
       )}

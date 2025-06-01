@@ -11,6 +11,7 @@ export enum UserRole {
   export interface LoginResponse {
     nextStep: string;
     success: string;
+    access_token: string;
   }
   
   export interface OtpRequestData {
@@ -26,9 +27,9 @@ export enum UserRole {
   }
   
   interface tokenData {
-    accessToken: string;
+    access_token: string;
     tokenExpiry: number;
-    refreshToken: string;
+    refresh_token: string;
   }
   
   interface userData {

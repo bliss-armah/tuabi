@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { debtorService } from "@/Shared/Api/api";
+import { useCreateDebtorMutation, useAddPaymentMutation } from "@/Features/Debtors/DebtorsApi";
 
 export default function AddDebtor() {
   const [name, setName] = useState("");
@@ -22,6 +22,8 @@ export default function AddDebtor() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [createDebtor] = useCreateDebtorMutation();
+  const [addPayment] = useAddPaymentMutation();
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -50,14 +52,17 @@ export default function AddDebtor() {
         phone_number: phoneNumber.trim() || null,
       };
 
-      const response = await debtorService.createDebtor(debtorData);
-      const newDebtorId = response.data.id;
+      const response = await createDebtor(debtorData).unwrap();
+      const newDebtorId = response.id;
 
       // Then add the initial debt with the note
       if (parseFloat(amount) > 0) {
-        await debtorService.addPayment(newDebtorId, {
-          amount_changed: parseFloat(amount),
-          note: note.trim() || "Initial debt",
+        await addPayment({
+          id: newDebtorId,
+          data: {
+            amount_changed: parseFloat(amount),
+            note: note.trim() || "Initial debt",
+          },
         });
       }
 

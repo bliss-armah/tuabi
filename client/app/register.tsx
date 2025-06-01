@@ -32,6 +32,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
+      console.log({name,email,password})
       await authService.register(name, email, password);
       Alert.alert(
         "Registration Successful",

@@ -30,11 +30,13 @@ export const authService = {
     const formData = new FormData();
     formData.append('username', email);
     formData.append('password', password);
-    const response = await axios.post(`${API_URL}/login`, formData, {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-    });
+    
+const response = await axios.post(`${API_URL}/login`, formData, {
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded",
+  },
+});
+    console.log(response.data)
     if (response.data.access_token) {
       await AsyncStorage.setItem('access_token', response.data.access_token);
     }
@@ -42,7 +44,7 @@ export const authService = {
   },
   
   register: async (name: string, email: string, password: string) => {
-    return api.post('/user/', { name, email, password });
+    return await api.post('/user/', { name, email, password });
   },
   
   logout: async () => {
@@ -50,38 +52,38 @@ export const authService = {
   },
   
   getCurrentUser: async () => {
-    return api.get('/user/me');
+    return await api.get('/user/me');
   },
 };
 
 // Debtor services
 export const debtorService = {
   getDebtors: async () => {
-    return api.get('/debtors/');
+    return await api.get('/debtors/');
   },
   
   getDebtor: async (id: number) => {
-    return api.get(`/debtors/${id}`);
+    return await api.get(`/debtors/${id}`);
   },
   
   createDebtor: async (debtor: any) => {
-    return api.post('/debtors/', debtor);
+    return await api.post('/debtors/', debtor);
   },
   
   updateDebtor: async (id: number, debtor: any) => {
-    return api.put(`/debtors/${id}`, debtor);
+    return await api.put(`/debtors/${id}`, debtor);
   },
   
   deleteDebtor: async (id: number) => {
-    return api.delete(`/debtors/${id}`);
+    return await api.delete(`/debtors/${id}`);
   },
   
   getDebtorHistory: async (id: number) => {
-    return api.get(`/debt-history/${id}`);
+    return await api.get(`/debt-history/${id}`);
   },
   
   addPayment: async (id: number, payment: any) => {
-    return api.post(`/debt-history/${id}`, payment);
+    return await api.post(`/debt-history/${id}`, payment);
   },
   
   getDashboardSummary: async () => {

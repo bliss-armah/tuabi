@@ -13,7 +13,7 @@ export default function TabLayout() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Tabs
-        initialRouteName="home"
+        initialRouteName="index"
         screenOptions={{
           tabBarActiveTintColor: Colors[theme].primary,
           tabBarInactiveTintColor: Colors[theme].icon,
@@ -43,7 +43,7 @@ export default function TabLayout() {
         }}
       >
         <Tabs.Screen
-          name="home"
+          name="index"
           options={{
             title: "Dashboard",
             tabBarIcon: ({ color, focused }) => (

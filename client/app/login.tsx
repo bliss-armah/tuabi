@@ -13,11 +13,14 @@ import { authService } from "../Shared/Api/api";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
+  const [loginMutation] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,9 +33,11 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      await authService.login(email, password);
-      // Explicitly navigate to the home tab after login
-      router.replace("/(tabs)/home");
+      const response = await loginMutation({ username: email, password }).unwrap();
+      if (response.access_token) {
+        await AsyncStorage.setItem("access_token", response.access_token);
+      }
+      router.replace("/(tabs)");
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Login Failed", "Invalid email or password");

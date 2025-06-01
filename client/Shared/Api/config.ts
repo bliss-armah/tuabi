@@ -18,7 +18,7 @@ const logErrorLocally = (errorDetails: any) => {
 };
 
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
-  const token = await AsyncStorage.getItem("token");
+  const token = await AsyncStorage.getItem("access_token");
   const tokenExpiryStr = await AsyncStorage.getItem("tokenExpiry");
   const user = await AsyncStorage.getItem("user");
 
