@@ -18,6 +18,8 @@ import {
   useGetDebtorQuery,
   useUpdateDebtorMutation,
 } from "@/Features/Debtors/DebtorsApi";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Colors } from "@/Shared/Constants/Colors";
 
 type Debtor = {
   id: number;
@@ -40,6 +42,7 @@ export default function EditDebtor() {
     refetch,
   } = useGetDebtorQuery(Number(id));
   const [updateDebtor] = useUpdateDebtorMutation();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     if (debtor) {
@@ -114,7 +117,9 @@ export default function EditDebtor() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header,
+          {backgroundColor: Colors[colorScheme ?? "light"].primary}
+        ]}>
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
@@ -167,7 +172,9 @@ export default function EditDebtor() {
           </View>
 
           <TouchableOpacity
-            style={styles.saveButton}
+            style={[styles.saveButton,
+               {backgroundColor: Colors[colorScheme ?? "light"].primary}
+            ]}
             onPress={handleUpdateDebtor}
             disabled={isSaving}
           >
@@ -196,7 +203,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#3498db",
   },
   backButton: {
     width: 40,

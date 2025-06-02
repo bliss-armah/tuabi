@@ -3,16 +3,21 @@ import { useEffect, useState } from "react";
 import { router } from "expo-router";
 
 export const useAuth = () => {
-  const [user, setUser] = useState<any | null>(null);
+  const userString = AsyncStorage.getItem("user")
+  const tokenString = AsyncStorage.getItem("token")
+  const [user, setUser] = useState<any | null>();
   const [token, setToken] = useState<string | null>(null);
   const [tokenExpiry, setTokenExpiry] = useState<number | null>(null);
 
+  console.log(user);
+  
+
  useEffect(() => {
-   AsyncStorage.getItem("user").then((data) => {
+    userString.then((data) => {
      setUser(data ? JSON.parse(data) : null);
    });
 
-   AsyncStorage.getItem("token").then((data) => {
+   tokenString.then((data) => {
      if (data) {
        const parsed = JSON.parse(data);
        setToken(parsed.access_token);

@@ -7,15 +7,25 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import { router } from "expo-router";
+import { Redirect, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDashboardSummaryQuery } from "@/Features/Debtors/DebtorsApi";
+import { useAuth } from "@/Shared/Hooks/useAuth";
 
 export default function Home() {
   const colorScheme = useColorScheme();
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
+
+  const { user } = useAuth();
+
+  
+  
+  if (!user) {
+    return <Redirect href="/login" />;
+  }
+
   if (isLoading) {
     return (
       <View

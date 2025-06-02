@@ -13,7 +13,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useCreateDebtorMutation, useAddPaymentMutation } from "@/Features/Debtors/DebtorsApi";
+import {
+  useCreateDebtorMutation,
+  useAddPaymentMutation,
+} from "@/Features/Debtors/DebtorsApi";
+import { Colors } from "@/Shared/Constants/Colors";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme.web";
 
 export default function AddDebtor() {
   const [name, setName] = useState("");
@@ -24,6 +29,7 @@ export default function AddDebtor() {
   const [isLoading, setIsLoading] = useState(false);
   const [createDebtor] = useCreateDebtorMutation();
   const [addPayment] = useAddPaymentMutation();
+  const colorScheme = useColorScheme();
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -89,8 +95,13 @@ export default function AddDebtor() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
+      <ScrollView style={[styles.container]}>
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: Colors[colorScheme ?? "light"].primary },
+          ]}
+        >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
@@ -159,7 +170,10 @@ export default function AddDebtor() {
           </View>
 
           <TouchableOpacity
-            style={styles.addButton}
+            style={[
+              styles.addButton,
+              { backgroundColor: Colors[colorScheme ?? "light"].primary },
+            ]}
             onPress={handleAddDebtor}
             disabled={isLoading}
           >
@@ -181,14 +195,12 @@ export default function AddDebtor() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#3498db",
   },
   backButton: {
     width: 40,
@@ -235,7 +247,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   addButton: {
-    backgroundColor: "#3498db",
     borderRadius: 5,
     padding: 15,
     flexDirection: "row",
