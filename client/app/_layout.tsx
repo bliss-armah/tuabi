@@ -16,6 +16,7 @@ import { PersistGate } from "redux-persist/integration/react";
 
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import store from "@/Shared/Store/store";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const persistor = persistStore(store);
 
@@ -39,16 +40,18 @@ export default function RootLayout() {
   }
 
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider
-          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-        >
-          <Stack screenOptions={{ headerShown: false }}></Stack>
+    <SafeAreaView style={{ flex: 1 }}>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ThemeProvider
+            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+          >
+            <Stack screenOptions={{ headerShown: false }}></Stack>
 
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </PersistGate>
-    </Provider>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </PersistGate>
+      </Provider>
+    </SafeAreaView>
   );
 }
