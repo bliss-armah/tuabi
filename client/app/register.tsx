@@ -9,8 +9,8 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { authService } from "../Shared/Api/api";
 import { StatusBar } from "expo-status-bar";
+import { useRegisterMutation } from "@/Features/Authentication/AuthAPI";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -18,7 +18,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
+  const [registerMutation] = useRegisterMutation();
   const handleRegister = async () => {
     if (!name || !email || !password) {
       Alert.alert("Error", "Please fill in all fields");
@@ -32,7 +32,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await authService.register(name, email, password);
+      await registerMutation({ name, email, password });
       Alert.alert(
         "Registration Successful",
         "You can now login with your credentials",

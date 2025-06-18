@@ -9,7 +9,6 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { authService } from "../Shared/Api/api";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
@@ -46,7 +45,6 @@ export default function LoginScreen() {
       }
       router.replace("/(tabs)");
     } catch (error) {
-      console.error("Login error:", error);
       Alert.alert("Login Failed", "Invalid email or password");
     } finally {
       setIsLoading(false);

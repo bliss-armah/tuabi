@@ -15,6 +15,7 @@ export const debtorApi = createApi({
 
     getDebtor: builder.query<any, number>({
       query: (id) => `/debtors/${id}`,
+      providesTags: ["Debtor"],
     }),
 
     createDebtor: builder.mutation<any, any>({
@@ -45,6 +46,7 @@ export const debtorApi = createApi({
 
     getDebtorHistory: builder.query<any, number>({
       query: (id) => `/debt-history/${id}`,
+      providesTags: ["Debtor"],
     }),
 
     addPayment: builder.mutation<any, { id: number; data: any }>({
@@ -53,6 +55,7 @@ export const debtorApi = createApi({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Debtor"],
     }),
 
     getDashboardSummary: builder.query<any, void>({

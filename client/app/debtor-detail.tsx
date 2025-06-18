@@ -57,6 +57,8 @@ export default function DebtorDetail() {
   const [addPayment] = useAddPaymentMutation();
   const [deleteDebtor] = useDeleteDebtorMutation();
 
+  console.log("history", history);
+
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
@@ -553,7 +555,7 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 15,
     marginTop: 10,
   },
   actionButton: {

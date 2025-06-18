@@ -1,40 +1,27 @@
+// baseQuery.ts
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const createBaseQuery = (token: string | null) => {
-  return fetchBaseQuery({
-    baseUrl: "http://192.168.0.163:8000",
-    prepareHeaders: (headers) => {
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  });
-};
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl: "http://192.168.2.121:8000",
+  prepareHeaders: async (headers) => {
+    const tokenString = await AsyncStorage.getItem("token");
+    const tokenObj = tokenString ? JSON.parse(tokenString) : null;
+    const token = tokenObj?.access_token;
 
-const logErrorLocally = (errorDetails: any) => {
-  console.error("API Error:", errorDetails);
-};
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    return headers;
+  },
+});
 
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
- const tokenString = await AsyncStorage.getItem("token");
- const userString = await AsyncStorage.getItem("user");
+  const result = await rawBaseQuery(args, api, extraOptions);
 
- const tokenObj = tokenString ? JSON.parse(tokenString) : null;
- const user = userString ? JSON.parse(userString) : null;
-
- const token = tokenObj?.access_token;
- const tokenExpiry = tokenObj?.expires_in;
-
- if (tokenExpiry && Date.now() >= tokenExpiry * 1000) {
-   await AsyncStorage.clear();
-   return { error: { status: 401, data: "Token expired" } };
- }
-
- const baseQueryFunction = createBaseQuery(token);
- const result = await baseQueryFunction(args, api, extraOptions);
-
+  const userString = await AsyncStorage.getItem("user");
+  const user = userString ? JSON.parse(userString) : null;
 
   if (result.error) {
     const errorDetails = {
@@ -42,11 +29,10 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       data: result.error.data,
       args,
       timestamp: new Date().toISOString(),
-      user: user ? user : "Anonymous",
+      user: user || "Anonymous",
       path: args.url,
     };
-
-    logErrorLocally(errorDetails);
+    console.error("API Error:", errorDetails);
   }
 
   return result;

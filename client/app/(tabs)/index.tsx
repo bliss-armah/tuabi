@@ -18,15 +18,9 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
 
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
-  
-  
-  if (!user) {
-    return <Redirect href="/login" />;
-  }
-
-  if (isLoading) {
+  if (loading || isLoading) {
     return (
       <View
         style={[
@@ -48,6 +42,10 @@ export default function Home() {
         </Text>
       </View>
     );
+  }
+
+  if (!user) {
+    return <Redirect href="/login" />;
   }
 
   if (error) {
