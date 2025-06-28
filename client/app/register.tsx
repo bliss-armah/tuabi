@@ -9,15 +9,21 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { authService } from "../Shared/Api/api";
 import { StatusBar } from "expo-status-bar";
+import { Colors } from "@/Shared/Constants/Colors";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { useRegisterMutation } from "@/Features/Authentication/AuthAPI";
 
 export default function Register() {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [registerMutation] = useRegisterMutation();
 
   const handleRegister = async () => {
     if (!name || !email || !password) {
@@ -32,7 +38,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await authService.register(name, email, password);
+      await registerMutation({ name, email, password });
       Alert.alert(
         "Registration Successful",
         "You can now login with your credentials",
@@ -53,45 +59,72 @@ export default function Register() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
+    <View
+      style={[styles.container, { backgroundColor: Colors[theme].background }]}
+    >
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
       <View style={styles.logoContainer}>
-        <Text style={styles.logoText}>Tuabi</Text>
-        <Text style={styles.tagline}>Create your account</Text>
+        <Text style={[styles.logoText, { color: Colors[theme].primary }]}>
+          Tuabi
+        </Text>
+        <Text style={[styles.tagline, { color: Colors[theme].text }]}>
+          Create your account
+        </Text>
       </View>
 
-      <View style={styles.formContainer}>
+      <View
+        style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}
+      >
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: Colors[theme].border, color: Colors[theme].text },
+          ]}
           placeholder="Full Name"
+          placeholderTextColor={Colors[theme].icon}
           value={name}
           onChangeText={setName}
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: Colors[theme].border, color: Colors[theme].text },
+          ]}
           placeholder="Email"
+          placeholderTextColor={Colors[theme].icon}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: Colors[theme].border, color: Colors[theme].text },
+          ]}
           placeholder="Password"
+          placeholderTextColor={Colors[theme].icon}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            { borderColor: Colors[theme].border, color: Colors[theme].text },
+          ]}
           placeholder="Confirm Password"
+          placeholderTextColor={Colors[theme].icon}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
         />
 
         <TouchableOpacity
-          style={styles.registerButton}
+          style={[
+            styles.registerButton,
+            { backgroundColor: Colors[theme].primary },
+          ]}
           onPress={handleRegister}
           disabled={isLoading}
         >
@@ -106,7 +139,9 @@ export default function Register() {
           style={styles.loginLink}
           onPress={() => router.push("/login")}
         >
-          <Text style={styles.loginText}>Already have an account? Login</Text>
+          <Text style={[styles.loginText, { color: Colors[theme].primary }]}>
+            Already have an account? Login
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -116,7 +151,6 @@ export default function Register() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
     padding: 20,
   },
   logoContainer: {
@@ -127,15 +161,12 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "#3498db",
   },
   tagline: {
     fontSize: 16,
-    color: "#7f8c8d",
     marginTop: 10,
   },
   formContainer: {
-    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
     shadowColor: "#000",
@@ -147,14 +178,12 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#ddd",
     borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
   },
   registerButton: {
-    backgroundColor: "#3498db",
     height: 50,
     borderRadius: 8,
     justifyContent: "center",
@@ -171,7 +200,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginText: {
-    color: "#3498db",
     fontSize: 14,
   },
 });

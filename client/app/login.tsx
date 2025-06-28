@@ -9,15 +9,17 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
-import { authService } from "../Shared/Api/api";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
+  const [loginMutation] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -30,11 +32,16 @@ export default function LoginScreen() {
 
     setIsLoading(true);
     try {
-      await authService.login(email, password);
-      // Explicitly navigate to the home tab after login
-      router.replace("/(tabs)/home");
+      const response = await loginMutation({
+        username: email,
+        password,
+      }).unwrap();
+      if (response.token) {
+        await AsyncStorage.setItem("token", JSON.stringify(response.token));
+        await AsyncStorage.setItem("user", JSON.stringify(response.user));
+      }
+      router.replace("/(tabs)");
     } catch (error) {
-      console.error("Login error:", error);
       Alert.alert("Login Failed", "Invalid email or password");
     } finally {
       setIsLoading(false);
@@ -113,7 +120,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
     padding: 20,
   },
   logoContainer: {
@@ -124,15 +130,12 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "#3498db",
   },
   tagline: {
     fontSize: 16,
-    color: "#7f8c8d",
     marginTop: 10,
   },
   formContainer: {
-    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
     shadowColor: "#000",
@@ -144,14 +147,12 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#ddd",
     borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
   },
   loginButton: {
-    backgroundColor: "#3498db",
     height: 50,
     borderRadius: 8,
     justifyContent: "center",
@@ -168,7 +169,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   registerText: {
-    color: "#3498db",
     fontSize: 14,
   },
 });

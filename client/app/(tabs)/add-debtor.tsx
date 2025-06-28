@@ -13,7 +13,12 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { debtorService } from "@/Shared/Api/api";
+import {
+  useCreateDebtorMutation,
+  useAddPaymentMutation,
+} from "@/Features/Debtors/DebtorsApi";
+import { Colors } from "@/Shared/Constants/Colors";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 
 export default function AddDebtor() {
   const [name, setName] = useState("");
@@ -22,6 +27,10 @@ export default function AddDebtor() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [createDebtor] = useCreateDebtorMutation();
+  const [addPayment] = useAddPaymentMutation();
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -50,14 +59,17 @@ export default function AddDebtor() {
         phone_number: phoneNumber.trim() || null,
       };
 
-      const response = await debtorService.createDebtor(debtorData);
-      const newDebtorId = response.data.id;
+      const response = await createDebtor(debtorData).unwrap();
+      const newDebtorId = response.id;
 
       // Then add the initial debt with the note
       if (parseFloat(amount) > 0) {
-        await debtorService.addPayment(newDebtorId, {
-          amount_changed: parseFloat(amount),
-          note: note.trim() || "Initial debt",
+        await addPayment({
+          id: newDebtorId,
+          data: {
+            amount_changed: parseFloat(amount),
+            note: note.trim() || "Initial debt",
+          },
         });
       }
 
@@ -84,8 +96,10 @@ export default function AddDebtor() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
+      <ScrollView style={[styles.container]}>
+        <View
+          style={[styles.header, { backgroundColor: Colors[theme].primary }]}
+        >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
@@ -154,7 +168,10 @@ export default function AddDebtor() {
           </View>
 
           <TouchableOpacity
-            style={styles.addButton}
+            style={[
+              styles.addButton,
+              { backgroundColor: Colors[theme].primary },
+            ]}
             onPress={handleAddDebtor}
             disabled={isLoading}
           >
@@ -176,14 +193,12 @@ export default function AddDebtor() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#3498db",
   },
   backButton: {
     width: 40,
@@ -230,7 +245,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   addButton: {
-    backgroundColor: "#3498db",
     borderRadius: 5,
     padding: 15,
     flexDirection: "row",

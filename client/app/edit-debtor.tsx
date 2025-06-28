@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,17 @@ import {
   Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
-  Platform
-} from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { debtorService } from '../Shared/Api/api';
+  Platform,
+} from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { debtorService } from "../Shared/Api/api";
+import {
+  useGetDebtorQuery,
+  useUpdateDebtorMutation,
+} from "@/Features/Debtors/DebtorsApi";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Colors } from "@/Shared/Constants/Colors";
 
 type Debtor = {
   id: number;
@@ -25,40 +31,31 @@ type Debtor = {
 
 export default function EditDebtor() {
   const { id } = useLocalSearchParams();
-  const [debtor, setDebtor] = useState<Debtor | null>(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
+  const {
+    data: debtor,
+    isLoading,
+    error,
+    refetch,
+  } = useGetDebtorQuery(Number(id));
+  const [updateDebtor] = useUpdateDebtorMutation();
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
 
   useEffect(() => {
-    if (id) {
-      loadDebtorDetails(Number(id));
+    if (debtor) {
+      setName(debtor.name);
+      setDescription(debtor.description || "");
+      setPhoneNumber(debtor.phone_number || "");
     }
-  }, [id]);
-
-  const loadDebtorDetails = async (debtorId: number) => {
-    setIsLoading(true);
-    setError('');
-    try {
-      const response = await debtorService.getDebtor(debtorId);
-      setDebtor(response.data);
-      setName(response.data.name || '');
-      setDescription(response.data.description || '');
-      setPhoneNumber(response.data.phone_number || '');
-    } catch (err) {
-      console.error('Error loading debtor details:', err);
-      setError('Failed to load debtor details');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [debtor]);
 
   const validateForm = () => {
     if (!name.trim()) {
-      Alert.alert('Error', 'Please enter the debtor name');
+      Alert.alert("Error", "Please enter the debtor name");
       return false;
     }
     return true;
@@ -72,27 +69,24 @@ export default function EditDebtor() {
       const updatedData = {
         name: name.trim(),
         description: description.trim() || null,
-        phone_number: phoneNumber.trim() || null
+        phone_number: phoneNumber.trim() || null,
       };
 
-      await debtorService.updateDebtor(Number(id), updatedData);
+      await updateDebtor({ id: Number(id), data: updatedData });
 
-      Alert.alert(
-        'Success',
-        'Debtor updated successfully',
-        [
-          {
-            text: 'OK',
-            onPress: () => router.push({
-              pathname: '/debtor-detail',
-              params: { id }
-            })
-          }
-        ]
-      );
+      Alert.alert("Success", "Debtor updated successfully", [
+        {
+          text: "OK",
+          onPress: () =>
+            router.push({
+              pathname: "/debtor-detail",
+              params: { id },
+            }),
+        },
+      ]);
     } catch (error) {
-      console.error('Error updating debtor:', error);
-      Alert.alert('Error', 'Failed to update debtor');
+      console.error("Error updating debtor:", error);
+      Alert.alert("Error", "Failed to update debtor");
     } finally {
       setIsSaving(false);
     }
@@ -100,18 +94,38 @@ export default function EditDebtor() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3498db" />
-        <Text style={styles.loadingText}>Loading debtor details...</Text>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: Colors[theme].background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={Colors[theme].primary} />
+        <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
+          Loading debtor details...
+        </Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => loadDebtorDetails(Number(id))}>
+      <View
+        style={[
+          styles.errorContainer,
+          { backgroundColor: Colors[theme].background },
+        ]}
+      >
+        <Text style={[styles.errorText, { color: Colors[theme].text }]}>
+          {error?.data?.message}
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.retryButton,
+            { backgroundColor: Colors[theme].primary },
+          ]}
+          onPress={() => refetch()}
+        >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -121,33 +135,61 @@ export default function EditDebtor() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <View
+          style={[styles.header, { backgroundColor: Colors[theme].primary }]}
+        >
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.back()}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Edit Debtor</Text>
           <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.formContainer}>
+        <View
+          style={[
+            styles.formContainer,
+            { backgroundColor: Colors[theme].card },
+          ]}
+        >
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name *</Text>
+            <Text style={[styles.label, { color: Colors[theme].text }]}>
+              Name *
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  borderColor: Colors[theme].border,
+                  color: Colors[theme].text,
+                },
+              ]}
               placeholder="Enter debtor name"
+              placeholderTextColor={Colors[theme].icon}
               value={name}
               onChangeText={setName}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Phone Number (Optional)</Text>
+            <Text style={[styles.label, { color: Colors[theme].text }]}>
+              Phone Number (Optional)
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  borderColor: Colors[theme].border,
+                  color: Colors[theme].text,
+                },
+              ]}
               placeholder="Enter phone number"
+              placeholderTextColor={Colors[theme].icon}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
@@ -155,10 +197,20 @@ export default function EditDebtor() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Description (Optional)</Text>
+            <Text style={[styles.label, { color: Colors[theme].text }]}>
+              Description (Optional)
+            </Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[
+                styles.input,
+                styles.textArea,
+                {
+                  borderColor: Colors[theme].border,
+                  color: Colors[theme].text,
+                },
+              ]}
               placeholder="Enter description"
+              placeholderTextColor={Colors[theme].icon}
               multiline
               numberOfLines={3}
               value={description}
@@ -166,14 +218,28 @@ export default function EditDebtor() {
             />
           </View>
 
-          <View style={styles.amountInfo}>
-            <Text style={styles.amountInfoText}>
-              Note: To update the amount owed, please record a payment or add debt from the debtor details screen.
+          <View
+            style={[
+              styles.amountInfo,
+              {
+                backgroundColor: Colors[theme].background,
+                borderLeftColor: Colors[theme].primary,
+              },
+            ]}
+          >
+            <Text
+              style={[styles.amountInfoText, { color: Colors[theme].text }]}
+            >
+              Note: To update the amount owed, please record a payment or add
+              debt from the debtor details screen.
             </Text>
           </View>
 
           <TouchableOpacity
-            style={styles.saveButton}
+            style={[
+              styles.saveButton,
+              { backgroundColor: Colors[theme].primary },
+            ]}
             onPress={handleUpdateDebtor}
             disabled={isSaving}
           >
@@ -195,35 +261,32 @@ export default function EditDebtor() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
-    backgroundColor: '#3498db',
   },
   backButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
+    fontWeight: "bold",
+    color: "#fff",
+    textAlign: "center",
   },
   formContainer: {
-    backgroundColor: '#fff',
     borderRadius: 10,
     margin: 15,
     padding: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -234,79 +297,68 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: '#2c3e50',
     marginBottom: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 5,
     padding: 12,
     fontSize: 16,
   },
   textArea: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   amountInfo: {
-    backgroundColor: '#f8f9fa',
     borderRadius: 5,
     padding: 15,
     marginBottom: 20,
     borderLeftWidth: 4,
-    borderLeftColor: '#3498db',
   },
   amountInfoText: {
-    color: '#34495e',
     fontSize: 14,
   },
   saveButton: {
-    backgroundColor: '#3498db',
     borderRadius: 5,
     padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 10,
   },
   saveButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 10,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: 10,
-    color: '#7f8c8d',
     fontSize: 16,
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
     padding: 20,
   },
   errorText: {
-    color: '#e74c3c',
     fontSize: 16,
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   retryButton: {
-    backgroundColor: '#3498db',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
   },
   retryButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
   },
 });
