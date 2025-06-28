@@ -17,6 +17,7 @@ import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
   const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
 
   const { user, loading } = useAuth();
@@ -26,19 +27,11 @@ export default function Home() {
       <View
         style={[
           styles.loadingContainer,
-          { backgroundColor: Colors[colorScheme ?? "light"].background },
+          { backgroundColor: Colors[theme].background },
         ]}
       >
-        <ActivityIndicator
-          size="large"
-          color={Colors[colorScheme ?? "light"].primary}
-        />
-        <Text
-          style={[
-            styles.loadingText,
-            { color: Colors[colorScheme ?? "light"].text },
-          ]}
-        >
+        <ActivityIndicator size="large" color={Colors[theme].primary} />
+        <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
           Loading dashboard...
         </Text>
       </View>
@@ -54,15 +47,10 @@ export default function Home() {
       <View
         style={[
           styles.errorContainer,
-          { backgroundColor: Colors[colorScheme ?? "light"].background },
+          { backgroundColor: Colors[theme].background },
         ]}
       >
-        <Text
-          style={[
-            styles.errorText,
-            { color: Colors[colorScheme ?? "light"].accent },
-          ]}
-        >
+        <Text style={[styles.errorText, { color: Colors[theme].accent }]}>
           {error &&
           "data" in error &&
           typeof error.data === "object" &&
@@ -74,7 +62,7 @@ export default function Home() {
         <TouchableOpacity
           style={[
             styles.retryButton,
-            { backgroundColor: Colors[colorScheme ?? "light"].primary },
+            { backgroundColor: Colors[theme].primary },
           ]}
           onPress={refetch}
         >
@@ -86,17 +74,9 @@ export default function Home() {
 
   return (
     <ScrollView
-      style={[
-        styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].background },
-      ]}
+      style={[styles.container, { backgroundColor: Colors[theme].background }]}
     >
-      <View
-        style={[
-          styles.header,
-          { backgroundColor: Colors[colorScheme ?? "light"].primary },
-        ]}
-      >
+      <View style={[styles.header, { backgroundColor: Colors[theme].primary }]}>
         <Text style={styles.headerTitle}>Dashboard</Text>
         <Text style={styles.headerSubtitle}>
           Overview of your store's debt records
@@ -108,117 +88,64 @@ export default function Home() {
 
       <View style={styles.statsContainer}>
         <View
-          style={[
-            styles.statCard,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
-          ]}
+          style={[styles.statCard, { backgroundColor: Colors[theme].card }]}
         >
           <View
             style={[
               styles.statIconContainer,
               {
-                backgroundColor: `${Colors[colorScheme ?? "light"].primary}20`,
+                backgroundColor: `${Colors[theme].primary}20`,
               },
             ]}
           >
-            <Ionicons
-              name="people"
-              size={24}
-              color={Colors[colorScheme ?? "light"].primary}
-            />
+            <Ionicons name="people" size={24} color={Colors[theme].primary} />
           </View>
-          <Text
-            style={[
-              styles.statValue,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
-          >
+          <Text style={[styles.statValue, { color: Colors[theme].text }]}>
             {data?.totalDebtors || 0}
           </Text>
-          <Text
-            style={[
-              styles.statLabel,
-              { color: Colors[colorScheme ?? "light"].icon },
-            ]}
-          >
+          <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Total Debtors
           </Text>
         </View>
 
         <View
-          style={[
-            styles.statCard,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
-          ]}
+          style={[styles.statCard, { backgroundColor: Colors[theme].card }]}
         >
           <View
             style={[
               styles.statIconContainer,
               {
-                backgroundColor: `${
-                  Colors[colorScheme ?? "light"].secondary
-                }20`,
+                backgroundColor: `${Colors[theme].secondary}20`,
               },
             ]}
           >
-            <Ionicons
-              name="cash"
-              size={24}
-              color={Colors[colorScheme ?? "light"].secondary}
-            />
+            <Ionicons name="cash" size={24} color={Colors[theme].secondary} />
           </View>
-          <Text
-            style={[
-              styles.statValue,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
-          >
+          <Text style={[styles.statValue, { color: Colors[theme].text }]}>
             ${(data?.totalDebt || 0).toFixed(2)}
           </Text>
-          <Text
-            style={[
-              styles.statLabel,
-              { color: Colors[colorScheme ?? "light"].icon },
-            ]}
-          >
+          <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Total Amount Owed
           </Text>
         </View>
 
         <View
-          style={[
-            styles.statCard,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
-          ]}
+          style={[styles.statCard, { backgroundColor: Colors[theme].card }]}
         >
           <View
             style={[
               styles.statIconContainer,
               {
-                backgroundColor: `${Colors[colorScheme ?? "light"].accent}20`,
+                backgroundColor: `${Colors[theme].accent}20`,
               },
             ]}
           >
-            <Ionicons
-              name="time"
-              size={24}
-              color={Colors[colorScheme ?? "light"].accent}
-            />
+            <Ionicons name="time" size={24} color={Colors[theme].accent} />
           </View>
-          <Text
-            style={[
-              styles.statValue,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
-          >
+          <Text style={[styles.statValue, { color: Colors[theme].text }]}>
             {data?.recentActivities || 0}
           </Text>
-          <Text
-            style={[
-              styles.statLabel,
-              { color: Colors[colorScheme ?? "light"].icon },
-            ]}
-          >
+          <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Recent Activities
           </Text>
         </View>
@@ -228,7 +155,7 @@ export default function Home() {
         <TouchableOpacity
           style={[
             styles.actionButton,
-            { backgroundColor: Colors[colorScheme ?? "light"].primary },
+            { backgroundColor: Colors[theme].primary },
           ]}
           onPress={() => router.push("/debtors" as any)}
         >
@@ -239,7 +166,7 @@ export default function Home() {
         <TouchableOpacity
           style={[
             styles.actionButton,
-            { backgroundColor: Colors[colorScheme ?? "light"].secondary },
+            { backgroundColor: Colors[theme].secondary },
           ]}
           onPress={() => router.push("/add-debtor" as any)}
         >
@@ -249,71 +176,32 @@ export default function Home() {
       </View>
 
       <View style={styles.tipsContainer}>
-        <Text
-          style={[
-            styles.tipsTitle,
-            { color: Colors[colorScheme ?? "light"].text },
-          ]}
-        >
+        <Text style={[styles.tipsTitle, { color: Colors[theme].text }]}>
           Tips for Managing Debtors
         </Text>
-        <View
-          style={[
-            styles.tipCard,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
-          ]}
-        >
+        <View style={[styles.tipCard, { backgroundColor: Colors[theme].card }]}>
           <Ionicons
             name="information-circle"
             size={20}
-            color={Colors[colorScheme ?? "light"].primary}
+            color={Colors[theme].primary}
           />
-          <Text
-            style={[
-              styles.tipText,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
-          >
+          <Text style={[styles.tipText, { color: Colors[theme].text }]}>
             Regularly update payment records to keep track of all transactions.
           </Text>
         </View>
-        <View
-          style={[
-            styles.tipCard,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
-          ]}
-        >
-          <Ionicons
-            name="call"
-            size={20}
-            color={Colors[colorScheme ?? "light"].primary}
-          />
-          <Text
-            style={[
-              styles.tipText,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
-          >
+        <View style={[styles.tipCard, { backgroundColor: Colors[theme].card }]}>
+          <Ionicons name="call" size={20} color={Colors[theme].primary} />
+          <Text style={[styles.tipText, { color: Colors[theme].text }]}>
             Use the call feature to quickly contact debtors about payments.
           </Text>
         </View>
-        <View
-          style={[
-            styles.tipCard,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
-          ]}
-        >
+        <View style={[styles.tipCard, { backgroundColor: Colors[theme].card }]}>
           <Ionicons
             name="notifications"
             size={20}
-            color={Colors[colorScheme ?? "light"].primary}
+            color={Colors[theme].primary}
           />
-          <Text
-            style={[
-              styles.tipText,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
-          >
+          <Text style={[styles.tipText, { color: Colors[theme].text }]}>
             Set reminders for follow-ups with customers who have outstanding
             debts.
           </Text>

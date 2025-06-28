@@ -18,7 +18,7 @@ import {
   useAddPaymentMutation,
 } from "@/Features/Debtors/DebtorsApi";
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme.web";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 
 export default function AddDebtor() {
   const [name, setName] = useState("");
@@ -30,6 +30,7 @@ export default function AddDebtor() {
   const [createDebtor] = useCreateDebtorMutation();
   const [addPayment] = useAddPaymentMutation();
   const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
 
   const validateForm = () => {
     if (!name.trim()) {
@@ -97,10 +98,7 @@ export default function AddDebtor() {
     >
       <ScrollView style={[styles.container]}>
         <View
-          style={[
-            styles.header,
-            { backgroundColor: Colors[colorScheme ?? "light"].primary },
-          ]}
+          style={[styles.header, { backgroundColor: Colors[theme].primary }]}
         >
           <TouchableOpacity
             style={styles.backButton}
@@ -172,7 +170,7 @@ export default function AddDebtor() {
           <TouchableOpacity
             style={[
               styles.addButton,
-              { backgroundColor: Colors[colorScheme ?? "light"].primary },
+              { backgroundColor: Colors[theme].primary },
             ]}
             onPress={handleAddDebtor}
             disabled={isLoading}

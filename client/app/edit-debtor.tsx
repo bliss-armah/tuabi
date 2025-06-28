@@ -43,6 +43,7 @@ export default function EditDebtor() {
   } = useGetDebtorQuery(Number(id));
   const [updateDebtor] = useUpdateDebtorMutation();
   const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
 
   useEffect(() => {
     if (debtor) {
@@ -96,19 +97,11 @@ export default function EditDebtor() {
       <View
         style={[
           styles.loadingContainer,
-          { backgroundColor: Colors[colorScheme ?? "light"].background },
+          { backgroundColor: Colors[theme].background },
         ]}
       >
-        <ActivityIndicator
-          size="large"
-          color={Colors[colorScheme ?? "light"].primary}
-        />
-        <Text
-          style={[
-            styles.loadingText,
-            { color: Colors[colorScheme ?? "light"].text },
-          ]}
-        >
+        <ActivityIndicator size="large" color={Colors[theme].primary} />
+        <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
           Loading debtor details...
         </Text>
       </View>
@@ -120,21 +113,16 @@ export default function EditDebtor() {
       <View
         style={[
           styles.errorContainer,
-          { backgroundColor: Colors[colorScheme ?? "light"].background },
+          { backgroundColor: Colors[theme].background },
         ]}
       >
-        <Text
-          style={[
-            styles.errorText,
-            { color: Colors[colorScheme ?? "light"].text },
-          ]}
-        >
+        <Text style={[styles.errorText, { color: Colors[theme].text }]}>
           {error?.data?.message}
         </Text>
         <TouchableOpacity
           style={[
             styles.retryButton,
-            { backgroundColor: Colors[colorScheme ?? "light"].primary },
+            { backgroundColor: Colors[theme].primary },
           ]}
           onPress={() => refetch()}
         >
@@ -151,10 +139,7 @@ export default function EditDebtor() {
     >
       <ScrollView style={styles.container}>
         <View
-          style={[
-            styles.header,
-            { backgroundColor: Colors[colorScheme ?? "light"].primary },
-          ]}
+          style={[styles.header, { backgroundColor: Colors[theme].primary }]}
         >
           <TouchableOpacity
             style={styles.backButton}
@@ -169,52 +154,42 @@ export default function EditDebtor() {
         <View
           style={[
             styles.formContainer,
-            { backgroundColor: Colors[colorScheme ?? "light"].card },
+            { backgroundColor: Colors[theme].card },
           ]}
         >
           <View style={styles.inputContainer}>
-            <Text
-              style={[
-                styles.label,
-                { color: Colors[colorScheme ?? "light"].text },
-              ]}
-            >
+            <Text style={[styles.label, { color: Colors[theme].text }]}>
               Name *
             </Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  borderColor: Colors[colorScheme ?? "light"].border,
-                  color: Colors[colorScheme ?? "light"].text,
+                  borderColor: Colors[theme].border,
+                  color: Colors[theme].text,
                 },
               ]}
               placeholder="Enter debtor name"
-              placeholderTextColor={Colors[colorScheme ?? "light"].icon}
+              placeholderTextColor={Colors[theme].icon}
               value={name}
               onChangeText={setName}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text
-              style={[
-                styles.label,
-                { color: Colors[colorScheme ?? "light"].text },
-              ]}
-            >
+            <Text style={[styles.label, { color: Colors[theme].text }]}>
               Phone Number (Optional)
             </Text>
             <TextInput
               style={[
                 styles.input,
                 {
-                  borderColor: Colors[colorScheme ?? "light"].border,
-                  color: Colors[colorScheme ?? "light"].text,
+                  borderColor: Colors[theme].border,
+                  color: Colors[theme].text,
                 },
               ]}
               placeholder="Enter phone number"
-              placeholderTextColor={Colors[colorScheme ?? "light"].icon}
+              placeholderTextColor={Colors[theme].icon}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
@@ -222,12 +197,7 @@ export default function EditDebtor() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text
-              style={[
-                styles.label,
-                { color: Colors[colorScheme ?? "light"].text },
-              ]}
-            >
+            <Text style={[styles.label, { color: Colors[theme].text }]}>
               Description (Optional)
             </Text>
             <TextInput
@@ -235,12 +205,12 @@ export default function EditDebtor() {
                 styles.input,
                 styles.textArea,
                 {
-                  borderColor: Colors[colorScheme ?? "light"].border,
-                  color: Colors[colorScheme ?? "light"].text,
+                  borderColor: Colors[theme].border,
+                  color: Colors[theme].text,
                 },
               ]}
               placeholder="Enter description"
-              placeholderTextColor={Colors[colorScheme ?? "light"].icon}
+              placeholderTextColor={Colors[theme].icon}
               multiline
               numberOfLines={3}
               value={description}
@@ -252,16 +222,13 @@ export default function EditDebtor() {
             style={[
               styles.amountInfo,
               {
-                backgroundColor: Colors[colorScheme ?? "light"].background,
-                borderLeftColor: Colors[colorScheme ?? "light"].primary,
+                backgroundColor: Colors[theme].background,
+                borderLeftColor: Colors[theme].primary,
               },
             ]}
           >
             <Text
-              style={[
-                styles.amountInfoText,
-                { color: Colors[colorScheme ?? "light"].text },
-              ]}
+              style={[styles.amountInfoText, { color: Colors[theme].text }]}
             >
               Note: To update the amount owed, please record a payment or add
               debt from the debtor details screen.
@@ -271,7 +238,7 @@ export default function EditDebtor() {
           <TouchableOpacity
             style={[
               styles.saveButton,
-              { backgroundColor: Colors[colorScheme ?? "light"].primary },
+              { backgroundColor: Colors[theme].primary },
             ]}
             onPress={handleUpdateDebtor}
             disabled={isSaving}
