@@ -59,8 +59,6 @@ export default function DebtorDetail() {
   const [addPayment] = useAddPaymentMutation();
   const [deleteDebtor] = useDeleteDebtorMutation();
 
-  console.log("history", history);
-
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
@@ -184,7 +182,7 @@ export default function DebtorDetail() {
           { backgroundColor: Colors[theme].background },
         ]}
       >
-        <Text style={styles.errorText}>{error?.data?.message}</Text>
+        <Text style={styles.errorText}>{(error as any)?.data?.message}</Text>
         <TouchableOpacity
           style={[
             styles.retryButton,
@@ -259,14 +257,17 @@ export default function DebtorDetail() {
             <Text
               style={[
                 styles.amountValue,
-                debtor.amount_owed > 0
-                  ? styles.positiveAmount
-                  : styles.zeroAmount,
+                {
+                  color:
+                    debtor.amount_owed > 0
+                      ? Colors[theme].accent
+                      : Colors[theme].primary,
+                },
               ]}
             >
               ${Math.abs(debtor.amount_owed).toFixed(2)}
             </Text>
-            <Text style={styles.amountStatus}>
+            <Text style={[styles.amountStatus, { color: Colors[theme].text }]}>
               {debtor.amount_owed > 0 ? "Outstanding" : "Settled"}
             </Text>
           </View>
@@ -381,9 +382,12 @@ export default function DebtorDetail() {
                 <Text
                   style={[
                     styles.historyAmount,
-                    item.action === "add"
-                      ? styles.positiveAmount
-                      : styles.negativeAmount,
+                    {
+                      color:
+                        item.action === "add"
+                          ? Colors[theme].accent
+                          : Colors[theme].primary,
+                    },
                   ]}
                 >
                   {item.action === "add" ? "+" : "-"}$
@@ -528,15 +532,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginVertical: 5,
   },
-  positiveAmount: {
-    color: Colors[theme].accent,
-  },
-  negativeAmount: {
-    color: Colors[theme].primary,
-  },
-  zeroAmount: {
-    color: Colors[theme].primary,
-  },
   amountStatus: {
     fontSize: 14,
     color: "#7f8c8d",
@@ -575,14 +570,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 5,
     flex: 1,
-  },
-  paymentButton: {
-    backgroundColor: Colors[theme].primary,
-    marginRight: 5,
-  },
-  debtButton: {
-    backgroundColor: Colors[theme].accent,
-    marginLeft: 5,
   },
   actionButtonText: {
     color: "#fff",
