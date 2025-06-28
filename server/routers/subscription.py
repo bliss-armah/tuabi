@@ -9,7 +9,7 @@ from database import get_db
 from models import models
 from schemas import subscription as subscription_schemas
 from paystack_service import paystack_service, DEFAULT_PLANS
-from JWTtoken import create_access_token
+from oauth2 import get_current_user
 
 
 router = APIRouter(
@@ -37,7 +37,7 @@ def get_subscription_plans():
 @router.post("/initialize", response_model=subscription_schemas.PaystackInitializeResponse)
 def initialize_subscription_payment(
     request: subscription_schemas.PaystackInitializeRequest,
-    current_user: models.User = Depends(create_access_token),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -107,7 +107,7 @@ def initialize_subscription_payment(
 @router.post("/verify", response_model=subscription_schemas.PaystackVerifyResponse)
 def verify_subscription_payment(
     request: subscription_schemas.PaystackVerifyRequest,
-    current_user: models.User = Depends(create_access_token),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -195,7 +195,7 @@ def verify_subscription_payment(
 
 @router.get("/status", response_model=subscription_schemas.UserSubscriptionStatus)
 def get_user_subscription_status(
-    current_user: models.User = Depends(create_access_token),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -223,7 +223,7 @@ def get_user_subscription_status(
 
 @router.get("/transactions", response_model=List[subscription_schemas.TransactionResponse])
 def get_user_transactions(
-    current_user: models.User = Depends(create_access_token),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -237,7 +237,7 @@ def get_user_transactions(
 
 @router.get("/subscriptions", response_model=List[subscription_schemas.SubscriptionResponse])
 def get_user_subscriptions(
-    current_user: models.User = Depends(create_access_token),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """

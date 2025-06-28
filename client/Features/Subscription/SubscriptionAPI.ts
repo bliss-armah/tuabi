@@ -81,7 +81,6 @@ export const subscriptionApi = createApi({
   reducerPath: "subscriptionApi",
   baseQuery,
   endpoints: (builder) => ({
-    // Get subscription plans
     getSubscriptionPlans: builder.query<SubscriptionPlan[], void>({
       query: () => ({
         url: "/subscription/plans",
@@ -89,7 +88,6 @@ export const subscriptionApi = createApi({
       }),
     }),
 
-    // Initialize subscription payment
     initializeSubscriptionPayment: builder.mutation<
       PaystackInitializeResponse,
       PaystackInitializeRequest
@@ -101,7 +99,6 @@ export const subscriptionApi = createApi({
       }),
     }),
 
-    // Verify subscription payment
     verifySubscriptionPayment: builder.mutation<
       PaystackVerifyResponse,
       PaystackVerifyRequest
@@ -113,7 +110,6 @@ export const subscriptionApi = createApi({
       }),
     }),
 
-    // Get user subscription status
     getUserSubscriptionStatus: builder.query<UserSubscriptionStatus, void>({
       query: () => ({
         url: "/subscription/status",
@@ -121,7 +117,6 @@ export const subscriptionApi = createApi({
       }),
     }),
 
-    // Get user transactions
     getUserTransactions: builder.query<Transaction[], void>({
       query: () => ({
         url: "/subscription/transactions",

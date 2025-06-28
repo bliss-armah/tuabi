@@ -6,9 +6,12 @@ import { router } from "expo-router";
 const index = () => {
   const { user } = useAuth();
 
-  if (user) {
-    router.replace("/(tabs)");
-  }
+  useEffect(() => {
+    if (user) {
+      router.replace("/(tabs)");
+    }
+  }, [user]);
+
   return <LandingScreen />;
 };
 
