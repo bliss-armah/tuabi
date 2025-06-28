@@ -78,6 +78,19 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="subscription"
+        options={{
+          title: "Subscription",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons
+              name={focused ? "card" : "card-outline"}
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

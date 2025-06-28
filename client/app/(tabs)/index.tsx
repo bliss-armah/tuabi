@@ -13,6 +13,7 @@ import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDashboardSummaryQuery } from "@/Features/Debtors/DebtorsApi";
 import { useAuth } from "@/Shared/Hooks/useAuth";
+import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -56,7 +57,15 @@ export default function Home() {
           { backgroundColor: Colors[colorScheme ?? "light"].background },
         ]}
       >
-        <Text style={styles.errorText}>{error?.data?.message}</Text>
+        <Text style={styles.errorText}>
+          {error &&
+          "data" in error &&
+          typeof error.data === "object" &&
+          error.data &&
+          "message" in error.data
+            ? (error.data as any).message
+            : "An error occurred"}
+        </Text>
         <TouchableOpacity
           style={[
             styles.retryButton,
@@ -88,6 +97,9 @@ export default function Home() {
           Overview of your store's debt records
         </Text>
       </View>
+
+      {/* Subscription Status */}
+      <SubscriptionStatus showUpgradeButton={true} compact={false} />
 
       <View style={styles.statsContainer}>
         <View

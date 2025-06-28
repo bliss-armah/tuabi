@@ -12,6 +12,7 @@ import {
 } from "redux-persist";
 import { authApi } from "@/Features/Authentication/AuthAPI";
 import { debtorApi } from "@/Features/Debtors/DebtorsApi";
+import { subscriptionApi } from "@/Features/Subscription/SubscriptionAPI";
 // import authSlice from "../features/auth/authSlice";
 
 const persistConfig = {
@@ -26,6 +27,7 @@ const reducer = combineReducers({
   //   auth: authSlice,
   [authApi.reducerPath]: authApi.reducer,
   [debtorApi.reducerPath]: debtorApi.reducer,
+  [subscriptionApi.reducerPath]: subscriptionApi.reducer,
 });
 const persistedReducer = persistReducer(persistConfig, reducer);
 
@@ -36,7 +38,11 @@ const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(authApi.middleware, debtorApi.middleware),
+    }).concat(
+      authApi.middleware,
+      debtorApi.middleware,
+      subscriptionApi.middleware
+    ),
 });
 
 setupListeners(store.dispatch);
