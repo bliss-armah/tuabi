@@ -91,7 +91,12 @@ export default function SubscriptionPlansScreen() {
     return (
       <View style={styles.container}>
         <StatusBar style={theme === "dark" ? "light" : "dark"} />
-        <View style={styles.webViewHeader}>
+        <View
+          style={[
+            styles.webViewHeader,
+            { backgroundColor: Colors[theme].card },
+          ]}
+        >
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setShowWebView(false)}
@@ -151,7 +156,7 @@ export default function SubscriptionPlansScreen() {
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
-            <Text style={[styles.errorText, { color: Colors[theme].error }]}>
+            <Text style={[styles.errorText, { color: Colors[theme].accent }]}>
               Failed to load subscription plans
             </Text>
           </View>
@@ -179,7 +184,12 @@ export default function SubscriptionPlansScreen() {
                     {plan.name}
                   </Text>
                   {plan.id === "yearly" && (
-                    <View style={styles.savingsBadge}>
+                    <View
+                      style={[
+                        styles.savingsBadge,
+                        { backgroundColor: Colors[theme].primary },
+                      ]}
+                    >
                       <Text style={styles.savingsText}>Save 20%</Text>
                     </View>
                   )}
@@ -320,7 +330,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   savingsBadge: {
-    backgroundColor: "#27ae60",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -368,7 +377,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 20,
     paddingTop: 60,
-    backgroundColor: "#fff",
   },
   closeButton: {
     marginRight: 15,

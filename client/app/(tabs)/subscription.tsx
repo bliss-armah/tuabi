@@ -43,13 +43,13 @@ export default function SubscriptionScreen() {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "success":
-        return "#27ae60";
+        return Colors[theme].primary;
       case "pending":
-        return "#f39c12";
+        return Colors[theme].accent;
       case "failed":
-        return "#e74c3c";
+        return Colors[theme].accent;
       default:
-        return "#95a5a6";
+        return Colors[theme].icon;
     }
   };
 
@@ -113,7 +113,13 @@ export default function SubscriptionScreen() {
           ) : transactions && transactions.length > 0 ? (
             <View style={styles.transactionsList}>
               {transactions.slice(0, 3).map((transaction) => (
-                <View key={transaction.id} style={styles.transactionItem}>
+                <View
+                  key={transaction.id}
+                  style={[
+                    styles.transactionItem,
+                    { borderBottomColor: Colors[theme].border },
+                  ]}
+                >
                   <View style={styles.transactionInfo}>
                     <Text
                       style={[
@@ -193,7 +199,13 @@ export default function SubscriptionScreen() {
           ) : subscriptions && subscriptions.length > 0 ? (
             <View style={styles.subscriptionsList}>
               {subscriptions.slice(0, 3).map((subscription) => (
-                <View key={subscription.id} style={styles.subscriptionItem}>
+                <View
+                  key={subscription.id}
+                  style={[
+                    styles.subscriptionItem,
+                    { borderBottomColor: Colors[theme].border },
+                  ]}
+                >
                   <View style={styles.subscriptionInfo}>
                     <Text
                       style={[
@@ -230,8 +242,8 @@ export default function SubscriptionScreen() {
                         {
                           backgroundColor:
                             subscription.status === "active"
-                              ? "#27ae60"
-                              : "#e74c3c",
+                              ? Colors[theme].primary
+                              : Colors[theme].accent,
                         },
                       ]}
                     />
@@ -241,8 +253,8 @@ export default function SubscriptionScreen() {
                         {
                           color:
                             subscription.status === "active"
-                              ? "#27ae60"
-                              : "#e74c3c",
+                              ? Colors[theme].primary
+                              : Colors[theme].accent,
                         },
                       ]}
                     >
@@ -361,7 +373,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
   },
   transactionInfo: {
     flex: 1,
@@ -402,7 +413,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
   },
   subscriptionInfo: {
     flex: 1,

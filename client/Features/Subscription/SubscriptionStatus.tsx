@@ -60,7 +60,7 @@ export default function SubscriptionStatus({
   if (error || !subscriptionStatus) {
     return (
       <View style={[styles.container, { backgroundColor: Colors[theme].card }]}>
-        <Text style={[styles.errorText, { color: Colors[theme].error }]}>
+        <Text style={[styles.errorText, { color: Colors[theme].accent }]}>
           Failed to load subscription status
         </Text>
       </View>
@@ -82,14 +82,24 @@ export default function SubscriptionStatus({
       >
         {isSubscribed && !hasExpired ? (
           <View style={styles.compactActive}>
-            <View style={[styles.statusDot, { backgroundColor: "#27ae60" }]} />
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: Colors[theme].primary },
+              ]}
+            />
             <Text style={[styles.compactText, { color: Colors[theme].text }]}>
               Active
             </Text>
           </View>
         ) : (
           <View style={styles.compactInactive}>
-            <View style={[styles.statusDot, { backgroundColor: "#e74c3c" }]} />
+            <View
+              style={[
+                styles.statusDot,
+                { backgroundColor: Colors[theme].accent },
+              ]}
+            />
             <Text style={[styles.compactText, { color: Colors[theme].text }]}>
               {hasExpired ? "Expired" : "No Subscription"}
             </Text>
@@ -106,7 +116,12 @@ export default function SubscriptionStatus({
           Subscription Status
         </Text>
         {isSubscribed && !hasExpired && (
-          <View style={[styles.statusBadge, { backgroundColor: "#27ae60" }]}>
+          <View
+            style={[
+              styles.statusBadge,
+              { backgroundColor: Colors[theme].primary },
+            ]}
+          >
             <Text style={styles.statusBadgeText}>Active</Text>
           </View>
         )}
@@ -161,7 +176,7 @@ export default function SubscriptionStatus({
           </Text>
 
           {hasExpired && subscriptionStatus.subscription_expires_at && (
-            <Text style={[styles.expiredDate, { color: Colors[theme].error }]}>
+            <Text style={[styles.expiredDate, { color: Colors[theme].accent }]}>
               Expired on{" "}
               {formatDate(subscriptionStatus.subscription_expires_at)}
             </Text>
@@ -188,7 +203,12 @@ export default function SubscriptionStatus({
       )}
 
       {subscriptionStatus.active_transactions.length > 0 && (
-        <View style={styles.transactionsSection}>
+        <View
+          style={[
+            styles.transactionsSection,
+            { borderTopColor: Colors[theme].border },
+          ]}
+        >
           <Text
             style={[styles.transactionsTitle, { color: Colors[theme].text }]}
           >
@@ -212,8 +232,8 @@ export default function SubscriptionStatus({
                     {
                       color:
                         transaction.status === "success"
-                          ? "#27ae60"
-                          : "#f39c12",
+                          ? Colors[theme].primary
+                          : Colors[theme].accent,
                     },
                   ]}
                 >
@@ -325,7 +345,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingTop: 20,
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
   },
   transactionsTitle: {
     fontSize: 16,

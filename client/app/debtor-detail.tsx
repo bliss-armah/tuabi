@@ -53,7 +53,9 @@ export default function DebtorDetail() {
     error,
     refetch,
   } = useGetDebtorQuery(Number(id));
-  const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(Number(id));
+  const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(
+    Number(id)
+  );
   const [addPayment] = useAddPaymentMutation();
   const [deleteDebtor] = useDeleteDebtorMutation();
 
@@ -357,7 +359,11 @@ export default function DebtorDetail() {
                         item.action === "add" ? "add-circle" : "remove-circle"
                       }
                       size={20}
-                      color={item.action === "add" ? "#e74c3c" : "#2ecc71"}
+                      color={
+                        item.action === "add"
+                          ? Colors[theme].accent
+                          : Colors[theme].primary
+                      }
                     />
                     <Text style={styles.historyAction}>
                       {item.action === "add"
@@ -393,7 +399,10 @@ export default function DebtorDetail() {
         </View>
 
         <TouchableOpacity
-          style={[styles.deleteButton, { backgroundColor: "#e74c3c" }]}
+          style={[
+            styles.deleteButton,
+            { backgroundColor: Colors[theme].accent },
+          ]}
           onPress={handleDeleteDebtor}
         >
           <Ionicons name="trash" size={20} color="#fff" />
@@ -520,13 +529,13 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   positiveAmount: {
-    color: "#e74c3c",
+    color: Colors[theme].accent,
   },
   negativeAmount: {
-    color: "#2ecc71",
+    color: Colors[theme].primary,
   },
   zeroAmount: {
-    color: "#2ecc71",
+    color: Colors[theme].primary,
   },
   amountStatus: {
     fontSize: 14,
@@ -568,11 +577,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   paymentButton: {
-    backgroundColor: "#2ecc71",
+    backgroundColor: Colors[theme].primary,
     marginRight: 5,
   },
   debtButton: {
-    backgroundColor: "#e74c3c",
+    backgroundColor: Colors[theme].accent,
     marginLeft: 5,
   },
   actionButtonText: {
@@ -646,7 +655,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e74c3c",
     margin: 15,
     padding: 15,
     borderRadius: 10,

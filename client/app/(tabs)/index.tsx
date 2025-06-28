@@ -57,7 +57,12 @@ export default function Home() {
           { backgroundColor: Colors[colorScheme ?? "light"].background },
         ]}
       >
-        <Text style={styles.errorText}>
+        <Text
+          style={[
+            styles.errorText,
+            { color: Colors[colorScheme ?? "light"].accent },
+          ]}
+        >
           {error &&
           "data" in error &&
           typeof error.data === "object" &&
@@ -338,7 +343,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   errorText: {
-    color: "#e74c3c",
     fontSize: 16,
     marginBottom: 20,
     textAlign: "center",

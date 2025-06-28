@@ -37,10 +37,7 @@ export default function LoginScreen() {
         password,
       }).unwrap();
       if (response.token) {
-        await AsyncStorage.setItem(
-          "token",
-          JSON.stringify(response.token)
-        );
+        await AsyncStorage.setItem("token", JSON.stringify(response.token));
         await AsyncStorage.setItem("user", JSON.stringify(response.user));
       }
       router.replace("/(tabs)");
@@ -123,7 +120,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
     padding: 20,
   },
   logoContainer: {
@@ -134,15 +130,12 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "#3498db",
   },
   tagline: {
     fontSize: 16,
-    color: "#7f8c8d",
     marginTop: 10,
   },
   formContainer: {
-    backgroundColor: "#fff",
     borderRadius: 10,
     padding: 20,
     shadowColor: "#000",
@@ -154,14 +147,12 @@ const styles = StyleSheet.create({
   input: {
     height: 50,
     borderWidth: 1,
-    borderColor: "#ddd",
     borderRadius: 8,
     marginBottom: 15,
     paddingHorizontal: 15,
     fontSize: 16,
   },
   loginButton: {
-    backgroundColor: "#3498db",
     height: 50,
     borderRadius: 8,
     justifyContent: "center",
@@ -178,7 +169,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   registerText: {
-    color: "#3498db",
     fontSize: 14,
   },
 });

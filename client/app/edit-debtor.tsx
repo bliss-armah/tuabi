@@ -93,18 +93,51 @@ export default function EditDebtor() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3498db" />
-        <Text style={styles.loadingText}>Loading debtor details...</Text>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: Colors[colorScheme ?? "light"].background },
+        ]}
+      >
+        <ActivityIndicator
+          size="large"
+          color={Colors[colorScheme ?? "light"].primary}
+        />
+        <Text
+          style={[
+            styles.loadingText,
+            { color: Colors[colorScheme ?? "light"].text },
+          ]}
+        >
+          Loading debtor details...
+        </Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error?.data?.message}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
+      <View
+        style={[
+          styles.errorContainer,
+          { backgroundColor: Colors[colorScheme ?? "light"].background },
+        ]}
+      >
+        <Text
+          style={[
+            styles.errorText,
+            { color: Colors[colorScheme ?? "light"].text },
+          ]}
+        >
+          {error?.data?.message}
+        </Text>
+        <TouchableOpacity
+          style={[
+            styles.retryButton,
+            { backgroundColor: Colors[colorScheme ?? "light"].primary },
+          ]}
+          onPress={() => refetch()}
+        >
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -117,9 +150,12 @@ export default function EditDebtor() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView style={styles.container}>
-        <View style={[styles.header,
-          {backgroundColor: Colors[colorScheme ?? "light"].primary}
-        ]}>
+        <View
+          style={[
+            styles.header,
+            { backgroundColor: Colors[colorScheme ?? "light"].primary },
+          ]}
+        >
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => router.back()}
@@ -130,22 +166,55 @@ export default function EditDebtor() {
           <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.formContainer}>
+        <View
+          style={[
+            styles.formContainer,
+            { backgroundColor: Colors[colorScheme ?? "light"].card },
+          ]}
+        >
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name *</Text>
+            <Text
+              style={[
+                styles.label,
+                { color: Colors[colorScheme ?? "light"].text },
+              ]}
+            >
+              Name *
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  borderColor: Colors[colorScheme ?? "light"].border,
+                  color: Colors[colorScheme ?? "light"].text,
+                },
+              ]}
               placeholder="Enter debtor name"
+              placeholderTextColor={Colors[colorScheme ?? "light"].icon}
               value={name}
               onChangeText={setName}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Phone Number (Optional)</Text>
+            <Text
+              style={[
+                styles.label,
+                { color: Colors[colorScheme ?? "light"].text },
+              ]}
+            >
+              Phone Number (Optional)
+            </Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  borderColor: Colors[colorScheme ?? "light"].border,
+                  color: Colors[colorScheme ?? "light"].text,
+                },
+              ]}
               placeholder="Enter phone number"
+              placeholderTextColor={Colors[colorScheme ?? "light"].icon}
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
@@ -153,10 +222,25 @@ export default function EditDebtor() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Description (Optional)</Text>
+            <Text
+              style={[
+                styles.label,
+                { color: Colors[colorScheme ?? "light"].text },
+              ]}
+            >
+              Description (Optional)
+            </Text>
             <TextInput
-              style={[styles.input, styles.textArea]}
+              style={[
+                styles.input,
+                styles.textArea,
+                {
+                  borderColor: Colors[colorScheme ?? "light"].border,
+                  color: Colors[colorScheme ?? "light"].text,
+                },
+              ]}
               placeholder="Enter description"
+              placeholderTextColor={Colors[colorScheme ?? "light"].icon}
               multiline
               numberOfLines={3}
               value={description}
@@ -164,16 +248,30 @@ export default function EditDebtor() {
             />
           </View>
 
-          <View style={styles.amountInfo}>
-            <Text style={styles.amountInfoText}>
+          <View
+            style={[
+              styles.amountInfo,
+              {
+                backgroundColor: Colors[colorScheme ?? "light"].background,
+                borderLeftColor: Colors[colorScheme ?? "light"].primary,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.amountInfoText,
+                { color: Colors[colorScheme ?? "light"].text },
+              ]}
+            >
               Note: To update the amount owed, please record a payment or add
               debt from the debtor details screen.
             </Text>
           </View>
 
           <TouchableOpacity
-            style={[styles.saveButton,
-               {backgroundColor: Colors[colorScheme ?? "light"].primary}
+            style={[
+              styles.saveButton,
+              { backgroundColor: Colors[colorScheme ?? "light"].primary },
             ]}
             onPress={handleUpdateDebtor}
             disabled={isSaving}
@@ -196,7 +294,6 @@ export default function EditDebtor() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   header: {
     flexDirection: "row",
@@ -219,7 +316,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   formContainer: {
-    backgroundColor: "#fff",
     borderRadius: 10,
     margin: 15,
     padding: 20,
@@ -234,12 +330,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "#2c3e50",
     marginBottom: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
     borderRadius: 5,
     padding: 12,
     fontSize: 16,
@@ -249,19 +343,15 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   amountInfo: {
-    backgroundColor: "#f8f9fa",
     borderRadius: 5,
     padding: 15,
     marginBottom: 20,
     borderLeftWidth: 4,
-    borderLeftColor: "#3498db",
   },
   amountInfoText: {
-    color: "#34495e",
     fontSize: 14,
   },
   saveButton: {
-    backgroundColor: "#3498db",
     borderRadius: 5,
     padding: 15,
     flexDirection: "row",
@@ -279,28 +369,23 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
   },
   loadingText: {
     marginTop: 10,
-    color: "#7f8c8d",
     fontSize: 16,
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
     padding: 20,
   },
   errorText: {
-    color: "#e74c3c",
     fontSize: 16,
     marginBottom: 20,
     textAlign: "center",
   },
   retryButton: {
-    backgroundColor: "#3498db",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,

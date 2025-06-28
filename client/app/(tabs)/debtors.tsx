@@ -100,7 +100,7 @@ export default function Debtors() {
   if (debtorsLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3498db" />
+        <ActivityIndicator size="large" color={color.primary} />
         <Text style={styles.loadingText}>Loading debtors...</Text>
       </View>
     );
@@ -126,18 +126,19 @@ export default function Debtors() {
         <Ionicons
           name="search"
           size={20}
-          color="#7f8c8d"
+          color={color.icon}
           style={styles.searchIcon}
         />
         <TextInput
           style={styles.searchInput}
           placeholder="Search debtors..."
+          placeholderTextColor={color.icon}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons name="close-circle" size={20} color="#7f8c8d" />
+            <Ionicons name="close-circle" size={20} color={color.icon} />
           </TouchableOpacity>
         )}
       </View>
@@ -151,7 +152,7 @@ export default function Debtors() {
         </View>
       ) : filteredDebtors.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="people" size={50} color="#bdc3c7" />
+          <Ionicons name="people" size={50} color={color.icon} />
           <Text style={styles.emptyText}>
             {searchQuery.length > 0
               ? "No debtors match your search"
@@ -261,7 +262,7 @@ const createStyles = (color: ColorType) =>
     },
     debtorDescription: {
       fontSize: 14,
-      color: "#7f8c8d",
+      color: color.icon,
       marginTop: 5,
     },
     debtorAmount: {
@@ -273,14 +274,14 @@ const createStyles = (color: ColorType) =>
       fontWeight: "bold",
     },
     positiveAmount: {
-      color: "#e74c3c",
+      color: color.accent,
     },
     zeroAmount: {
-      color: "#2ecc71",
+      color: color.primary,
     },
     statusText: {
       fontSize: 12,
-      color: "#7f8c8d",
+      color: color.icon,
       marginTop: 5,
     },
     loadingContainer: {
@@ -290,7 +291,7 @@ const createStyles = (color: ColorType) =>
     },
     loadingText: {
       marginTop: 10,
-      color: "#7f8c8d",
+      color: color.icon,
       fontSize: 16,
     },
     errorContainer: {
@@ -300,13 +301,13 @@ const createStyles = (color: ColorType) =>
       padding: 20,
     },
     errorText: {
-      color: "#e74c3c",
+      color: color.accent,
       fontSize: 16,
       marginBottom: 20,
       textAlign: "center",
     },
     retryButton: {
-      backgroundColor: "#3498db",
+      backgroundColor: color.primary,
       paddingVertical: 10,
       paddingHorizontal: 20,
       borderRadius: 5,
@@ -323,13 +324,13 @@ const createStyles = (color: ColorType) =>
     },
     emptyText: {
       fontSize: 16,
-      color: "#7f8c8d",
+      color: color.icon,
       textAlign: "center",
       marginTop: 15,
       marginBottom: 20,
     },
     addFirstButton: {
-      backgroundColor: "#3498db",
+      backgroundColor: color.primary,
       paddingVertical: 10,
       paddingHorizontal: 20,
       borderRadius: 5,
