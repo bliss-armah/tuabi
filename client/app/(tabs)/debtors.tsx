@@ -145,7 +145,9 @@ export default function Debtors() {
 
       {debtorsError ? (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{debtorsError?.data?.message}</Text>
+          <Text style={styles.errorText}>
+            {(debtorsError as any)?.data?.message}
+          </Text>
           <TouchableOpacity style={styles.retryButton} onPress={refetch}>
             <Text style={styles.retryButtonText}>Retry</Text>
           </TouchableOpacity>
