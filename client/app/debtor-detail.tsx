@@ -265,7 +265,7 @@ export default function DebtorDetail() {
                 },
               ]}
             >
-              ${Math.abs(debtor.amount_owed).toFixed(2)}
+              GHS {Math.abs(debtor.amount_owed).toFixed(2)}
             </Text>
             <Text style={[styles.amountStatus, { color: Colors[theme].text }]}>
               {debtor.amount_owed > 0 ? "Outstanding" : "Settled"}
@@ -390,7 +390,7 @@ export default function DebtorDetail() {
                     },
                   ]}
                 >
-                  {item.action === "add" ? "+" : "-"}$
+                  {item.action === "add" ? "+" : "-"}GHS{" "}
                   {Math.abs(item.amount_changed).toFixed(2)}
                 </Text>
 

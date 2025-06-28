@@ -88,7 +88,7 @@ export default function Debtors() {
             item.amount_owed > 0 ? styles.positiveAmount : styles.zeroAmount,
           ]}
         >
-          ${Math.abs(item.amount_owed).toFixed(2)}
+          GHS{Math.abs(item.amount_owed).toFixed(2)}
         </Text>
         <Text style={styles.statusText}>
           {item.amount_owed > 0 ? "Owes" : "Settled"}
