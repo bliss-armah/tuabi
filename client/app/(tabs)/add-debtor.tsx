@@ -12,7 +12,6 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   useCreateDebtorMutation,
-  useAddPaymentMutation,
 } from "@/Features/Debtors/DebtorsApi";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
@@ -26,7 +25,6 @@ export default function AddDebtor() {
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [createDebtor] = useCreateDebtorMutation();
-  const [addPayment] = useAddPaymentMutation();
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
@@ -58,7 +56,6 @@ export default function AddDebtor() {
       const response = await createDebtor(debtorData).unwrap();
       const debtorId = response.id;
 
-      // Add initial debt/payment
       const paymentData = {
         debtor_id: debtorId,
         amount: parseFloat(amount),
@@ -66,7 +63,7 @@ export default function AddDebtor() {
         payment_type: parseFloat(amount) > 0 ? "debt" : "payment",
       };
 
-      await addPayment(paymentData).unwrap();
+      await createDebtor(paymentData).unwrap();
 
       Alert.alert("Success", "Debtor added successfully!", [
         {

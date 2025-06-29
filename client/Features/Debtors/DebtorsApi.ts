@@ -1,5 +1,3 @@
-// src/features/debtors/debtorApi.ts
-
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "@/Shared/Api/config";
 
@@ -9,7 +7,7 @@ export const debtorApi = createApi({
   tagTypes: ["Debtor"],
   endpoints: (builder) => ({
     getDebtors: builder.query<any[], void>({
-      query: () => "/debtors/",
+      query: () => "/debtors",
       providesTags: ["Debtor"],
     }),
 

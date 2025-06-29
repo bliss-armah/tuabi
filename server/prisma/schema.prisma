@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int       @id @default(autoincrement())
+  name                  String
+  email                 String    @unique
+  password              String
+  isSubscribed          Boolean   @default(false)
+  subscriptionExpiresAt DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  debtors       Debtor[]
+  subscriptions Subscription[]
+  transactions  Transaction[]
+  debtHistory   DebtHistory[]
+
+  @@map("users")
+}
+
+model Debtor {
+  id          Int      @id @default(autoincrement())
+  name        String
+  amountOwed  Float    @default(0)
+  description String?
+  phoneNumber String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId  Int
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  history DebtHistory[]
+
+  @@map("debtors")
+}
+
+model DebtHistory {
+  id            Int      @id @default(autoincrement())
+  debtorId      Int
+  amountChanged Float
+  note          String?
+  timestamp     DateTime @default(now())
+  action        String
+  performedById Int
+
+  // Relations
+  debtor Debtor @relation(fields: [debtorId], references: [id])
+  user   User   @relation(fields: [performedById], references: [id])
+
+  @@map("debt_history")
+}
+
+model Subscription {
+  id                     Int      @id @default(autoincrement())
+  userId                 Int
+  planType               String
+  amount                 Float
+  currency               String   @default("NGN")
+  status                 String   @default("active")
+  startDate              DateTime @default(now())
+  endDate                DateTime
+  paystackSubscriptionId String?
+  paystackCustomerId     String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id                    Int      @id @default(autoincrement())
+  userId                Int
+  subscriptionId        Int?
+  paystackTransactionId String   @unique
+  paystackReference     String   @unique
+  amount                Float
+  currency              String   @default("NGN")
+  status                String
+  paymentMethod         String?
+  description           String?
+  transactionMetadata   String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+}

@@ -10,8 +10,6 @@ import {
   Platform,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { debtorService } from "../Shared/Api/api";
 import {
   useGetDebtorQuery,
   useUpdateDebtorMutation,
@@ -19,14 +17,6 @@ import {
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Colors } from "@/Shared/Constants/Colors";
 import { Input, Button } from "@/Shared/Components/UIKitten";
-
-type Debtor = {
-  id: number;
-  name: string;
-  amount_owed: number;
-  description: string | null;
-  phone_number: string | null;
-};
 
 export default function EditDebtor() {
   const { id } = useLocalSearchParams();
@@ -64,9 +54,11 @@ export default function EditDebtor() {
     try {
       await updateDebtor({
         id: Number(id),
-        name: name.trim(),
-        description: description.trim() || null,
-        phone_number: phoneNumber.trim() || null,
+        data: {
+          name: name,
+          description: description || null,
+          phone_number: phoneNumber || null,
+        },
       }).unwrap();
 
       Alert.alert("Success", "Debtor updated successfully", [
@@ -114,7 +106,7 @@ export default function EditDebtor() {
         ]}
       >
         <Text style={[styles.errorText, { color: Colors[theme].text }]}>
-          {error?.data?.message}
+          {(error as any)?.data?.message}
         </Text>
         <Button
           title="Retry"
