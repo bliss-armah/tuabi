@@ -6,6 +6,7 @@ export const getAllDebtors = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
+  
   try {
     const debtors = await prisma.debtor.findMany({
       where: { userId: req.user!.id },

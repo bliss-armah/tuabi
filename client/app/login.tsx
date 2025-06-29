@@ -29,9 +29,12 @@ export default function LoginScreen() {
         username: email,
         password,
       }).unwrap();
-      if (response.token) {
-        await AsyncStorage.setItem("token", JSON.stringify(response.token));
-        await AsyncStorage.setItem("user", JSON.stringify(response.user));
+      if (response.data) {
+        await AsyncStorage.setItem(
+          "token",
+          JSON.stringify(response.data.token)
+        );
+        await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
       }
       router.replace("/(tabs)");
     } catch (error) {

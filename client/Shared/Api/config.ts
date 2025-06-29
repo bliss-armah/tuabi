@@ -5,8 +5,7 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl: "http://192.168.0.163:3000/api",
   prepareHeaders: async (headers) => {
     const tokenString = await AsyncStorage.getItem("token");
-    const tokenObj = tokenString ? JSON.parse(tokenString) : null;
-    const token = tokenObj?.access_token;
+    const token = tokenString ? JSON.parse(tokenString) : null;
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);

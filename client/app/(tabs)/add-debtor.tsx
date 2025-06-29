@@ -50,20 +50,21 @@ export default function AddDebtor() {
       const debtorData = {
         name: name.trim(),
         description: description.trim() || null,
-        phone_number: phoneNumber.trim() || null,
+        amountOwed:parseFloat(amount),
+        phoneNumber: phoneNumber.trim() || null,
       };
 
-      const response = await createDebtor(debtorData).unwrap();
-      const debtorId = response.id;
+      await createDebtor(debtorData).unwrap();
+      // const debtorId = response.id;
 
-      const paymentData = {
-        debtor_id: debtorId,
-        amount: parseFloat(amount),
-        note: note.trim() || null,
-        payment_type: parseFloat(amount) > 0 ? "debt" : "payment",
-      };
+      // const paymentData = {
+      //   debtor_id: debtorId,
+      //   amount: parseFloat(amount),
+      //   note: note.trim() || null,
+      //   payment_type: parseFloat(amount) > 0 ? "debt" : "payment",
+      // };
 
-      await createDebtor(paymentData).unwrap();
+      // await createDebtor(paymentData).unwrap();
 
       Alert.alert("Success", "Debtor added successfully!", [
         {

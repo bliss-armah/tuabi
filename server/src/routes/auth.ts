@@ -6,7 +6,7 @@ import { validateRequest } from '../middleware/validation';
 const router = Router();
 
 router.post('/login', [
-  body('email').isEmail().withMessage('Please provide a valid email'),
+  body('username').isEmail().withMessage('Please provide a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
   validateRequest
 ], login);

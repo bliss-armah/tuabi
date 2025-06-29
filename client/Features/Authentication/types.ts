@@ -5,6 +5,10 @@ export interface LoginFormData {
 }
 
 export interface LoginResponse {
+  data: LoginResponseData
+}
+
+interface LoginResponseData{
   token: tokenData;
   user: userData;
 }

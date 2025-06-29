@@ -5,8 +5,7 @@ import { hashPassword, verifyPassword } from "../utils/hash";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
-
+    const { username: email, password } = req.body;
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
