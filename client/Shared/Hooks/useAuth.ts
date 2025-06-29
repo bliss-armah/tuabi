@@ -6,7 +6,7 @@ export const useAuth = () => {
   const [user, setUser] = useState<any | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [tokenExpiry, setTokenExpiry] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true); // ✅ loading state
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadAuthData = async () => {
@@ -34,7 +34,6 @@ export const useAuth = () => {
   }, []);
 
 
-  // auto logout if token is expired
   useEffect(() => {
     if (!tokenExpiry) return;
 
@@ -42,7 +41,7 @@ export const useAuth = () => {
     const delay = tokenExpiry * 1000 - now;
 
     if (delay <= 0) {
-      logout(); // already expired
+      logout(); 
     } else {
       const timeout = setTimeout(logout, delay);
       return () => clearTimeout(timeout);

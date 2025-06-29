@@ -1,49 +1,51 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Input, Button } from "@/Shared/Components/UIKitten";
+import { useRegisterMutation } from "@/Features/Authentication/AuthAPI";
 
 export default function Register() {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
+  const [registerMutation] = useRegisterMutation();
 
   const handleRegister = async () => {
-    if (
-      !name.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim()
-    ) {
-      alert("Please fill in all fields");
+    if (!name || !email || !password) {
+      Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      alert("Password must be at least 6 characters long");
+      Alert.alert("Error", "Passwords do not match");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.replace("/(tabs)");
-    } catch (error) {
+      await registerMutation({ name, email, password });
+      Alert.alert(
+        "Registration Successful",
+        "You can now login with your credentials",
+        [{ text: "OK", onPress: () => router.push("/login") }]
+      );
+    } catch (error: any) {
       console.error("Registration error:", error);
-      alert("Registration failed. Please try again.");
+      let errorMessage = "Registration Failed";
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
     }

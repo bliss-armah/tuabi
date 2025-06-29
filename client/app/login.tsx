@@ -1,34 +1,41 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Input, Button } from "@/Shared/Components/UIKitten";
+import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
+  const [loginMutation] = useLoginMutation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleLogin = async () => {
-    if (!email.trim() || !password.trim()) {
-      alert("Please enter both email and password");
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password");
       return;
     }
 
     setIsLoading(true);
     try {
-      // Add your login logic here
-      console.log("Login attempt:", { email, password });
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await loginMutation({
+        username: email,
+        password,
+      }).unwrap();
+      if (response.token) {
+        await AsyncStorage.setItem("token", JSON.stringify(response.token));
+        await AsyncStorage.setItem("user", JSON.stringify(response.user));
+      }
       router.replace("/(tabs)");
     } catch (error) {
-      console.error("Login error:", error);
-      alert("Login failed. Please try again.");
+      Alert.alert("Login Failed", "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
