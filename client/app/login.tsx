@@ -1,48 +1,34 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
-import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Input, Button } from "@/Shared/Components/UIKitten";
 
 export default function LoginScreen() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
-
-  const [loginMutation] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
+    if (!email.trim() || !password.trim()) {
+      alert("Please enter both email and password");
       return;
     }
 
     setIsLoading(true);
     try {
-      const response = await loginMutation({
-        username: email,
-        password,
-      }).unwrap();
-      if (response.token) {
-        await AsyncStorage.setItem("token", JSON.stringify(response.token));
-        await AsyncStorage.setItem("user", JSON.stringify(response.user));
-      }
+      // Add your login logic here
+      console.log("Login attempt:", { email, password });
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       router.replace("/(tabs)");
     } catch (error) {
-      Alert.alert("Login Failed", "Invalid email or password");
+      console.error("Login error:", error);
+      alert("Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -65,53 +51,39 @@ export default function LoginScreen() {
       <View
         style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}
       >
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+        <Input
           placeholder="Email"
-          placeholderTextColor={Colors[theme].icon}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          status="basic"
         />
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+
+        <Input
           placeholder="Password"
-          placeholderTextColor={Colors[theme].icon}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          status="basic"
         />
 
-        <TouchableOpacity
-          style={[
-            styles.loginButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
+        <Button
+          title="Login"
           onPress={handleLogin}
+          loading={isLoading}
           disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
-          )}
-        </TouchableOpacity>
+          status="primary"
+          size="large"
+        />
 
-        <TouchableOpacity
-          style={styles.registerLink}
+        <Button
+          title="Don't have an account? Register"
           onPress={() => router.push("/register")}
-        >
-          <Text style={[styles.registerText, { color: Colors[theme].primary }]}>
-            Don't have an account? Register
-          </Text>
-        </TouchableOpacity>
+          appearance="ghost"
+          status="primary"
+          size="medium"
+        />
       </View>
     </View>
   );
@@ -143,32 +115,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  loginButton: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  loginButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  registerLink: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  registerText: {
-    fontSize: 14,
   },
 });

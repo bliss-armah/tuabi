@@ -22,6 +22,7 @@ import {
   useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
 } from "@/Features/Debtors/DebtorsApi";
+import { Input, Button } from "@/Shared/Components/UIKitten";
 
 type DebtHistory = {
   id: number;
@@ -426,42 +427,42 @@ export default function DebtorDetail() {
               {isAddingDebt ? "Add Debt" : "Record Payment"}
             </Text>
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Amount ($)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="0.00"
-                keyboardType="decimal-pad"
-                value={paymentAmount}
-                onChangeText={setPaymentAmount}
-              />
-            </View>
+            <Input
+              label="Amount ($)"
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              value={paymentAmount}
+              onChangeText={setPaymentAmount}
+              status="basic"
+            />
 
-            <View style={styles.inputContainer}>
-              <Text style={styles.inputLabel}>Note (Optional)</Text>
-              <TextInput
-                style={[styles.input, styles.noteInput]}
-                placeholder="Add a note..."
-                multiline
-                value={paymentNote}
-                onChangeText={setPaymentNote}
-              />
-            </View>
+            <Input
+              label="Note (Optional)"
+              placeholder="Add a note..."
+              multiline
+              numberOfLines={3}
+              value={paymentNote}
+              onChangeText={setPaymentNote}
+              status="basic"
+            />
 
             <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+              <Button
+                title="Cancel"
                 onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
+                appearance="outline"
+                status="basic"
+                size="medium"
+                style={styles.cancelButton}
+              />
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.saveButton]}
+              <Button
+                title="Save"
                 onPress={handleAddPayment}
-              >
-                <Text style={styles.saveButtonText}>Save</Text>
-              </TouchableOpacity>
+                status="primary"
+                size="medium"
+                style={styles.saveButton}
+              />
             </View>
           </View>
         </View>
@@ -677,53 +678,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  inputLabel: {
-    fontSize: 16,
-    color: "#2c3e50",
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    padding: 10,
-    fontSize: 16,
-  },
-  noteInput: {
-    height: 100,
-    textAlignVertical: "top",
-  },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 20,
-  },
-  modalButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    flex: 1,
-    alignItems: "center",
+    gap: 10,
   },
   cancelButton: {
-    backgroundColor: "#ecf0f1",
-    marginRight: 10,
-  },
-  cancelButtonText: {
-    color: "#7f8c8d",
-    fontSize: 16,
+    flex: 1,
   },
   saveButton: {
-    backgroundColor: "#3498db",
-    marginLeft: 10,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,

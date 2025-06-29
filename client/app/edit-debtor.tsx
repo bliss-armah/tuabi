@@ -3,8 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  TouchableOpacity,
   ScrollView,
   Alert,
   ActivityIndicator,
@@ -20,6 +18,7 @@ import {
 } from "@/Features/Debtors/DebtorsApi";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Colors } from "@/Shared/Constants/Colors";
+import { Input, Button } from "@/Shared/Components/UIKitten";
 
 type Debtor = {
   id: number;
@@ -35,15 +34,17 @@ export default function EditDebtor() {
   const [description, setDescription] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
+
   const {
     data: debtor,
     isLoading,
     error,
     refetch,
   } = useGetDebtorQuery(Number(id));
+
   const [updateDebtor] = useUpdateDebtorMutation();
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
 
   useEffect(() => {
     if (debtor) {
@@ -53,40 +54,36 @@ export default function EditDebtor() {
     }
   }, [debtor]);
 
-  const validateForm = () => {
+  const handleUpdateDebtor = async () => {
     if (!name.trim()) {
       Alert.alert("Error", "Please enter the debtor name");
-      return false;
+      return;
     }
-    return true;
-  };
-
-  const handleUpdateDebtor = async () => {
-    if (!validateForm()) return;
 
     setIsSaving(true);
     try {
-      const updatedData = {
+      await updateDebtor({
+        id: Number(id),
         name: name.trim(),
         description: description.trim() || null,
         phone_number: phoneNumber.trim() || null,
-      };
-
-      await updateDebtor({ id: Number(id), data: updatedData });
+      }).unwrap();
 
       Alert.alert("Success", "Debtor updated successfully", [
         {
           text: "OK",
-          onPress: () =>
-            router.push({
-              pathname: "/debtor-detail",
-              params: { id },
-            }),
+          onPress: () => router.back(),
         },
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating debtor:", error);
-      Alert.alert("Error", "Failed to update debtor");
+      let errorMessage = "Failed to update debtor";
+      if (error.data?.detail) {
+        errorMessage = error.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -119,15 +116,12 @@ export default function EditDebtor() {
         <Text style={[styles.errorText, { color: Colors[theme].text }]}>
           {error?.data?.message}
         </Text>
-        <TouchableOpacity
-          style={[
-            styles.retryButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
+        <Button
+          title="Retry"
           onPress={() => refetch()}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
+          status="primary"
+          size="medium"
+        />
       </View>
     );
   }
@@ -141,12 +135,14 @@ export default function EditDebtor() {
         <View
           style={[styles.header, { backgroundColor: Colors[theme].primary }]}
         >
-          <TouchableOpacity
-            style={styles.backButton}
+          <Button
+            title=""
             onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
+            appearance="ghost"
+            status="basic"
+            size="small"
+            style={styles.backButton}
+          />
           <Text style={styles.headerTitle}>Edit Debtor</Text>
           <View style={{ width: 40 }} />
         </View>
@@ -157,66 +153,32 @@ export default function EditDebtor() {
             { backgroundColor: Colors[theme].card },
           ]}
         >
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: Colors[theme].text }]}>
-              Name *
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor: Colors[theme].border,
-                  color: Colors[theme].text,
-                },
-              ]}
-              placeholder="Enter debtor name"
-              placeholderTextColor={Colors[theme].icon}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+          <Input
+            label="Name *"
+            placeholder="Enter debtor name"
+            value={name}
+            onChangeText={setName}
+            status="basic"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: Colors[theme].text }]}>
-              Phone Number (Optional)
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor: Colors[theme].border,
-                  color: Colors[theme].text,
-                },
-              ]}
-              placeholder="Enter phone number"
-              placeholderTextColor={Colors[theme].icon}
-              keyboardType="phone-pad"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-            />
-          </View>
+          <Input
+            label="Phone Number (Optional)"
+            placeholder="Enter phone number"
+            keyboardType="phone-pad"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            status="basic"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { color: Colors[theme].text }]}>
-              Description (Optional)
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                styles.textArea,
-                {
-                  borderColor: Colors[theme].border,
-                  color: Colors[theme].text,
-                },
-              ]}
-              placeholder="Enter description"
-              placeholderTextColor={Colors[theme].icon}
-              multiline
-              numberOfLines={3}
-              value={description}
-              onChangeText={setDescription}
-            />
-          </View>
+          <Input
+            label="Description (Optional)"
+            placeholder="Enter description"
+            multiline
+            numberOfLines={3}
+            value={description}
+            onChangeText={setDescription}
+            status="basic"
+          />
 
           <View
             style={[
@@ -235,23 +197,15 @@ export default function EditDebtor() {
             </Text>
           </View>
 
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              { backgroundColor: Colors[theme].primary },
-            ]}
+          <Button
+            title="Save Changes"
             onPress={handleUpdateDebtor}
+            loading={isSaving}
             disabled={isSaving}
-          >
-            {isSaving ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="save" size={20} color="#fff" />
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </>
-            )}
-          </TouchableOpacity>
+            status="primary"
+            size="large"
+            style={styles.saveButton}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -273,8 +227,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   headerTitle: {
     fontSize: 20,
@@ -292,23 +244,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 12,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
   amountInfo: {
     borderRadius: 5,
     padding: 15,
@@ -319,18 +254,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   saveButton: {
-    borderRadius: 5,
-    padding: 15,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
     marginTop: 10,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
   },
   loadingContainer: {
     flex: 1,
@@ -351,14 +275,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     textAlign: "center",
-  },
-  retryButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  retryButtonText: {
-    color: "#fff",
-    fontSize: 16,
   },
 });
