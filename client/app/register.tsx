@@ -38,8 +38,6 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      // Add your registration logic here
-      console.log("Register attempt:", { name, email, password });
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
       router.replace("/(tabs)");
