@@ -1,10 +1,7 @@
 import { light as lightTheme, dark as darkTheme } from "@eva-design/eva";
 
-// Purple color scheme matching your existing colors
 const primaryPurple = "#8A2BE2";
 const lightPurple = "#9370DB";
-const darkPurple = "#4B0082";
-const deepPurple = "#301934";
 
 export const customLightTheme = {
   ...lightTheme,

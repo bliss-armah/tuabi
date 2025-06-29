@@ -34,7 +34,6 @@ export const Input: React.FC<CustomInputProps> = ({
   style,
   ...props
 }) => {
-  const colorScheme = useColorScheme();
 
   return (
     <UIKittenInput
