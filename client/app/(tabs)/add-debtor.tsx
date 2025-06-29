@@ -3,11 +3,8 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -15,10 +12,10 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import {
   useCreateDebtorMutation,
-  useAddPaymentMutation,
 } from "@/Features/Debtors/DebtorsApi";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Input, Button } from "@/Shared/Components/UIKitten";
 
 export default function AddDebtor() {
   const [name, setName] = useState("");
@@ -28,7 +25,6 @@ export default function AddDebtor() {
   const [note, setNote] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [createDebtor] = useCreateDebtorMutation();
-  const [addPayment] = useAddPaymentMutation();
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
@@ -51,41 +47,39 @@ export default function AddDebtor() {
 
     setIsLoading(true);
     try {
-      // First create the debtor
       const debtorData = {
         name: name.trim(),
-        amount_owed: 0, // Start with zero, we'll add the debt in the next step
         description: description.trim() || null,
         phone_number: phoneNumber.trim() || null,
       };
 
       const response = await createDebtor(debtorData).unwrap();
-      const newDebtorId = response.id;
+      const debtorId = response.id;
 
-      // Then add the initial debt with the note
-      if (parseFloat(amount) > 0) {
-        await addPayment({
-          id: newDebtorId,
-          data: {
-            amount_changed: parseFloat(amount),
-            note: note.trim() || "Initial debt",
-          },
-        });
-      }
+      const paymentData = {
+        debtor_id: debtorId,
+        amount: parseFloat(amount),
+        note: note.trim() || null,
+        payment_type: parseFloat(amount) > 0 ? "debt" : "payment",
+      };
 
-      Alert.alert("Success", "Debtor added successfully", [
+      await createDebtor(paymentData).unwrap();
+
+      Alert.alert("Success", "Debtor added successfully!", [
         {
           text: "OK",
-          onPress: () =>
-            router.push({
-              pathname: "/debtor-detail",
-              params: { id: newDebtorId },
-            }),
+          onPress: () => router.back(),
         },
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding debtor:", error);
-      Alert.alert("Error", "Failed to add debtor");
+      let errorMessage = "Failed to add debtor";
+      if (error.data?.detail) {
+        errorMessage = error.data.detail;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      Alert.alert("Error", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -100,90 +94,74 @@ export default function AddDebtor() {
         <View
           style={[styles.header, { backgroundColor: Colors[theme].primary }]}
         >
-          <TouchableOpacity
-            style={styles.backButton}
+          <Button
+            title=""
             onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
+            appearance="ghost"
+            status="basic"
+            size="small"
+            style={styles.backButton}
+          />
           <Text style={styles.headerTitle}>Add New Debtor</Text>
           <View style={{ width: 40 }} />
         </View>
 
         <View style={styles.formContainer}>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter debtor name"
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
+          <Input
+            label="Name *"
+            placeholder="Enter debtor name"
+            value={name}
+            onChangeText={setName}
+            status="basic"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Initial Amount Owed *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-              value={amount}
-              onChangeText={setAmount}
-            />
-          </View>
+          <Input
+            label="Initial Amount Owed *"
+            placeholder="0.00"
+            keyboardType="decimal-pad"
+            value={amount}
+            onChangeText={setAmount}
+            status="basic"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Phone Number (Optional)</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter phone number"
-              keyboardType="phone-pad"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-            />
-          </View>
+          <Input
+            label="Phone Number (Optional)"
+            placeholder="Enter phone number"
+            keyboardType="phone-pad"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            status="basic"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Description (Optional)</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Enter description"
-              multiline
-              numberOfLines={3}
-              value={description}
-              onChangeText={setDescription}
-            />
-          </View>
+          <Input
+            label="Description (Optional)"
+            placeholder="Enter description"
+            multiline
+            numberOfLines={3}
+            value={description}
+            onChangeText={setDescription}
+            status="basic"
+          />
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Note for Initial Debt (Optional)</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Add a note for this initial debt"
-              multiline
-              numberOfLines={3}
-              value={note}
-              onChangeText={setNote}
-            />
-          </View>
+          <Input
+            label="Note for Initial Debt (Optional)"
+            placeholder="Add a note for this initial debt"
+            multiline
+            numberOfLines={3}
+            value={note}
+            onChangeText={setNote}
+            status="basic"
+          />
 
-          <TouchableOpacity
-            style={[
-              styles.addButton,
-              { backgroundColor: Colors[theme].primary },
-            ]}
+          <Button
+            title="Add Debtor"
             onPress={handleAddDebtor}
+            loading={isLoading}
             disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Ionicons name="add-circle" size={20} color="#fff" />
-                <Text style={styles.addButtonText}>Add Debtor</Text>
-              </>
-            )}
-          </TouchableOpacity>
+            status="primary"
+            size="large"
+            style={styles.addButton}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -205,8 +183,6 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   headerTitle: {
     fontSize: 20,
@@ -225,37 +201,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    color: "#2c3e50",
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 5,
-    padding: 12,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
   addButton: {
-    borderRadius: 5,
-    padding: 15,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
     marginTop: 10,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
   },
 });

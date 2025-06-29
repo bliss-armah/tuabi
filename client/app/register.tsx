@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Input, Button } from "@/Shared/Components/UIKitten";
 import { useRegisterMutation } from "@/Features/Authentication/AuthAPI";
 
 export default function Register() {
@@ -75,74 +68,54 @@ export default function Register() {
       <View
         style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}
       >
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+        <Input
           placeholder="Full Name"
-          placeholderTextColor={Colors[theme].icon}
           value={name}
           onChangeText={setName}
+          status="basic"
         />
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+
+        <Input
           placeholder="Email"
-          placeholderTextColor={Colors[theme].icon}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          status="basic"
         />
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+
+        <Input
           placeholder="Password"
-          placeholderTextColor={Colors[theme].icon}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          status="basic"
         />
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+
+        <Input
           placeholder="Confirm Password"
-          placeholderTextColor={Colors[theme].icon}
           value={confirmPassword}
           onChangeText={setConfirmPassword}
           secureTextEntry
+          status="basic"
         />
 
-        <TouchableOpacity
-          style={[
-            styles.registerButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
+        <Button
+          title="Register"
           onPress={handleRegister}
+          loading={isLoading}
           disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.registerButtonText}>Register</Text>
-          )}
-        </TouchableOpacity>
+          status="primary"
+          size="large"
+        />
 
-        <TouchableOpacity
-          style={styles.loginLink}
+        <Button
+          title="Already have an account? Login"
           onPress={() => router.push("/login")}
-        >
-          <Text style={[styles.loginText, { color: Colors[theme].primary }]}>
-            Already have an account? Login
-          </Text>
-        </TouchableOpacity>
+          appearance="ghost"
+          status="primary"
+          size="medium"
+        />
       </View>
     </View>
   );
@@ -174,32 +147,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  registerButton: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  registerButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  loginLink: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  loginText: {
-    fontSize: 14,
   },
 });

@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Input, Button } from "@/Shared/Components/UIKitten";
 import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -65,53 +58,39 @@ export default function LoginScreen() {
       <View
         style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}
       >
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+        <Input
           placeholder="Email"
-          placeholderTextColor={Colors[theme].icon}
           value={email}
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
+          status="basic"
         />
-        <TextInput
-          style={[
-            styles.input,
-            { borderColor: Colors[theme].border, color: Colors[theme].text },
-          ]}
+
+        <Input
           placeholder="Password"
-          placeholderTextColor={Colors[theme].icon}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          status="basic"
         />
 
-        <TouchableOpacity
-          style={[
-            styles.loginButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
+        <Button
+          title="Login"
           onPress={handleLogin}
+          loading={isLoading}
           disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.loginButtonText}>Login</Text>
-          )}
-        </TouchableOpacity>
+          status="primary"
+          size="large"
+        />
 
-        <TouchableOpacity
-          style={styles.registerLink}
+        <Button
+          title="Don't have an account? Register"
           onPress={() => router.push("/register")}
-        >
-          <Text style={[styles.registerText, { color: Colors[theme].primary }]}>
-            Don't have an account? Register
-          </Text>
-        </TouchableOpacity>
+          appearance="ghost"
+          status="primary"
+          size="medium"
+        />
       </View>
     </View>
   );
@@ -143,32 +122,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderRadius: 8,
-    marginBottom: 15,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  loginButton: {
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 10,
-  },
-  loginButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  registerLink: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  registerText: {
-    fontSize: 14,
   },
 });

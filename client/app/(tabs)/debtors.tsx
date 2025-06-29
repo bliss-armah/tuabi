@@ -4,9 +4,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
-  TextInput,
   RefreshControl,
 } from "react-native";
 import { router } from "expo-router";
@@ -14,18 +12,27 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
+import { Button, SearchInput, Card } from "@/Shared/Components/UIKitten";
 
 type ColorScheme = "light" | "dark";
-type ColorType = (typeof Colors)[ColorScheme];
+
+type ColorType = {
+  text: string;
+  background: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+  icon: string;
+  border: string;
+  card: string;
+};
 
 type Debtor = {
   id: number;
   name: string;
   amount_owed: number;
-  description: string;
+  description: string | null;
   phone_number: string | null;
-  created_at: string;
-  updated_at: string | null;
 };
 
 export default function Debtors() {
@@ -66,14 +73,14 @@ export default function Debtors() {
   const styles = createStyles(color);
 
   const renderDebtorItem = ({ item }: { item: Debtor }) => (
-    <TouchableOpacity
-      style={styles.debtorCard}
+    <Card
       onPress={() =>
         router.push({
           pathname: "/debtor-detail",
           params: { id: item.id },
         })
       }
+      style={styles.debtorCard}
     >
       <View style={styles.debtorInfo}>
         <Text style={styles.debtorName}>{item.name}</Text>
@@ -94,7 +101,7 @@ export default function Debtors() {
           {item.amount_owed > 0 ? "Owes" : "Settled"}
         </Text>
       </View>
-    </TouchableOpacity>
+    </Card>
   );
 
   if (debtorsLoading) {
@@ -110,37 +117,28 @@ export default function Debtors() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Debtors</Text>
-        <TouchableOpacity
-          style={styles.addButton}
+        <Button
+          title=""
           onPress={() =>
             router.push({
               pathname: "/(tabs)/add-debtor",
             })
           }
-        >
-          <Ionicons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
+          appearance="filled"
+          status="primary"
+          size="small"
+          style={styles.addButton}
+        />
       </View>
 
       <View style={styles.searchContainer}>
-        <Ionicons
-          name="search"
-          size={20}
-          color={color.icon}
-          style={styles.searchIcon}
-        />
-        <TextInput
-          style={styles.searchInput}
+        <SearchInput
           placeholder="Search debtors..."
-          placeholderTextColor={color.icon}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery("")}
+          style={styles.searchInput}
         />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons name="close-circle" size={20} color={color.icon} />
-          </TouchableOpacity>
-        )}
       </View>
 
       {debtorsError ? (
@@ -148,9 +146,12 @@ export default function Debtors() {
           <Text style={styles.errorText}>
             {(debtorsError as any)?.data?.message}
           </Text>
-          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
+          <Button
+            title="Retry"
+            onPress={refetch}
+            status="primary"
+            size="medium"
+          />
         </View>
       ) : filteredDebtors.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -161,16 +162,16 @@ export default function Debtors() {
               : "No debtors yet. Add your first one!"}
           </Text>
           {searchQuery.length === 0 && (
-            <TouchableOpacity
-              style={styles.addFirstButton}
+            <Button
+              title="Add Debtor"
               onPress={() =>
                 router.push({
                   pathname: "/(tabs)/add-debtor",
                 })
               }
-            >
-              <Text style={styles.addFirstButtonText}>Add Debtor</Text>
-            </TouchableOpacity>
+              status="primary"
+              size="medium"
+            />
           )}
         </View>
       ) : (
@@ -210,42 +211,24 @@ const createStyles = (color: ColorType) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: color.background,
-      justifyContent: "center",
-      alignItems: "center",
     },
     searchContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: color.card,
-      borderRadius: 8,
       marginHorizontal: 15,
       marginTop: -15,
       marginBottom: 10,
-      paddingHorizontal: 15,
-      height: 50,
+    },
+    searchInput: {
       shadowColor: color.background,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 2,
     },
-    searchIcon: {
-      marginRight: 10,
-    },
-    searchInput: {
-      flex: 1,
-      height: 50,
-      fontSize: 16,
-      color: color.text,
-    },
     listContainer: {
       padding: 15,
     },
     debtorCard: {
       flexDirection: "row",
-      backgroundColor: color.card,
-      borderRadius: 10,
       padding: 15,
       marginBottom: 10,
       shadowColor: color.background,
@@ -308,16 +291,6 @@ const createStyles = (color: ColorType) =>
       marginBottom: 20,
       textAlign: "center",
     },
-    retryButton: {
-      backgroundColor: color.primary,
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 5,
-    },
-    retryButtonText: {
-      color: "#fff",
-      fontSize: 16,
-    },
     emptyContainer: {
       flex: 1,
       justifyContent: "center",
@@ -330,15 +303,5 @@ const createStyles = (color: ColorType) =>
       textAlign: "center",
       marginTop: 15,
       marginBottom: 20,
-    },
-    addFirstButton: {
-      backgroundColor: color.primary,
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 5,
-    },
-    addFirstButtonText: {
-      color: "#fff",
-      fontSize: 16,
     },
   });
