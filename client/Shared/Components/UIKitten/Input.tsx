@@ -1,6 +1,5 @@
 import React from "react";
 import { Input as UIKittenInput, InputProps } from "@ui-kitten/components";
-import { useColorScheme } from "../../Hooks/useColorScheme";
 
 interface CustomInputProps extends InputProps {
   label?: string;
