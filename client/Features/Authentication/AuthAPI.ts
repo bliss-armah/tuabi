@@ -13,7 +13,7 @@ export const authApi = createApi({
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginFormData>({
       query: ({ username, password }) => ({
-        url: "/login",
+        url: "/auth/login",
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -25,7 +25,7 @@ export const authApi = createApi({
     // Register
     register: builder.mutation<any, any>({
       query: (data) => ({
-        url: "/user/",
+        url: "/auth/register",
         method: "POST",
         body: data,
       }),

@@ -31,7 +31,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await registerMutation({ name, email, password });
+      await registerMutation({ name, email, password }).unwrap()
       Alert.alert(
         "Registration Successful",
         "You can now login with your credentials",
