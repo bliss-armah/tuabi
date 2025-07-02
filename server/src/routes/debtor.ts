@@ -8,6 +8,7 @@ import {
   deleteDebtor,
   incrementDebtorAmount,
   decrementDebtorAmount,
+  getDashboardData,
 } from "../controllers/debtorController";
 import { authenticateToken } from "../middleware/auth";
 import { validateRequest } from "../middleware/validation";
@@ -19,6 +20,7 @@ router.use(authenticateToken);
 
 // Existing routes
 router.get("/", getAllDebtors);
+router.get("/dashboard", getDashboardData);
 router.get("/:id", getDebtorById);
 
 router.post(
@@ -54,7 +56,7 @@ router.put(
   updateDebtor
 );
 
-// New increment/decrement routes
+
 router.patch(
   "/:id/increment",
   [

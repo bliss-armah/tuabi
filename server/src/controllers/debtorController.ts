@@ -349,3 +349,177 @@ export const deleteDebtor = async (
     return;
   }
 };
+
+export const getDashboardData = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const userId = req.user!.id;
+
+    // Get all debtors for the user
+    const debtors = await prisma.debtor.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        name: true,
+        amountOwed: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    // Calculate total statistics
+    const totalDebtors = debtors.length;
+    const totalAmountOwed = debtors.reduce((sum, debtor) => sum + debtor.amountOwed, 0);
+    
+    // Count active debtors (those who owe more than 0)
+    const activeDebtors = debtors.filter(debtor => debtor.amountOwed > 0);
+    const totalActiveDebtors = activeDebtors.length;
+    
+    // Count settled debtors (those who owe 0)
+    const settledDebtors = debtors.filter(debtor => debtor.amountOwed === 0);
+    const totalSettledDebtors = settledDebtors.length;
+
+    // Get recent activities (last 10 history entries)
+    const recentActivities = await prisma.debtHistory.findMany({
+      where: {
+        debtor: {
+          userId: userId,
+        },
+      },
+      include: {
+        debtor: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        timestamp: "desc",
+      },
+      take: 10,
+    });
+
+    // Get top debtors (highest amounts owed)
+    const topDebtors = activeDebtors
+      .sort((a, b) => b.amountOwed - a.amountOwed)
+      .slice(0, 5)
+      .map(debtor => ({
+        id: debtor.id,
+        name: debtor.name,
+        amountOwed: debtor.amountOwed,
+      }));
+
+    // Calculate recent activity statistics (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentStats = await prisma.debtHistory.aggregate({
+      where: {
+        debtor: {
+          userId: userId,
+        },
+        timestamp: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    // Get recent payments and additions separately
+    const recentPayments = await prisma.debtHistory.aggregate({
+      where: {
+        debtor: {
+          userId: userId,
+        },
+        action: "reduce",
+        timestamp: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      _sum: {
+        amountChanged: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    const recentAdditions = await prisma.debtHistory.aggregate({
+      where: {
+        debtor: {
+          userId: userId,
+        },
+        action: "add",
+        timestamp: {
+          gte: thirtyDaysAgo,
+        },
+      },
+      _sum: {
+        amountChanged: true,
+      },
+      _count: {
+        id: true,
+      },
+    });
+
+    // Get newly added debtors (last 30 days)
+    const newDebtors = await prisma.debtor.count({
+      where: {
+        userId: userId,
+        createdAt: {
+          gte: thirtyDaysAgo,
+        },
+      },
+    });
+
+    // Format response
+    const dashboardData = {
+      summary: {
+        totalDebtors,
+        totalActiveDebtors,
+        totalSettledDebtors,
+        totalAmountOwed: Math.round(totalAmountOwed * 100) / 100, // Round to 2 decimal places
+      },
+      topDebtors,
+      recentActivities: recentActivities.map(activity => ({
+        id: activity.id,
+        debtorName: activity.debtor.name,
+        action: activity.action,
+        amountChanged: activity.amountChanged,
+        note: activity.note || null,
+        timestamp: activity.timestamp,
+      })),
+      monthlyStats: {
+        totalActivities: recentStats._count.id,
+        totalPaymentsReceived: Math.round((recentPayments._sum.amountChanged || 0) * 100) / 100,
+        totalPaymentTransactions: recentPayments._count.id,
+        totalDebtAdded: Math.round((recentAdditions._sum.amountChanged || 0) * 100) / 100,
+        totalAdditionTransactions: recentAdditions._count.id,
+        newDebtorsAdded: newDebtors,
+      },
+      trends: {
+        averageDebtPerDebtor: totalActiveDebtors > 0 
+          ? Math.round((totalAmountOwed / totalActiveDebtors) * 100) / 100 
+          : 0,
+        settlementRate: totalDebtors > 0 
+          ? Math.round((totalSettledDebtors / totalDebtors) * 100 * 100) / 100 
+          : 0, // Percentage
+      },
+    };
+
+    res.status(200).json({
+      success: true,
+      data: dashboardData,
+    });
+  } catch (error) {
+    console.error("Get dashboard data error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
