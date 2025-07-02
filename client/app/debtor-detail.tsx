@@ -21,27 +21,9 @@ import {
   useAddPaymentMutation,
   useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
+  DebtHistory,
 } from "@/Features/Debtors/DebtorsApi";
 import { Input, Button } from "@/Shared/Components/UIKitten";
-
-type DebtHistory = {
-  id: number;
-  amount_changed: number;
-  note: string | null;
-  timestamp: string;
-  action: string;
-};
-
-type Debtor = {
-  id: number;
-  name: string;
-  amount_owed: number;
-  description: string;
-  phone_number: string | null;
-  created_at: string;
-  updated_at: string | null;
-  history: DebtHistory[];
-};
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
@@ -79,7 +61,7 @@ export default function DebtorDetail() {
       await addPayment({
         id: Number(id),
         data: {
-          amount_changed: finalAmount,
+          amountChanged: finalAmount,
           note: paymentNote || null,
         },
       });
@@ -101,12 +83,12 @@ export default function DebtorDetail() {
   };
 
   const handleCallDebtor = () => {
-    if (!debtor?.phone_number) {
+    if (!debtor?.data?.phoneNumber) {
       Alert.alert("Error", "No phone number available");
       return;
     }
 
-    const phoneNumber = debtor.phone_number.replace(/\D/g, "");
+    const phoneNumber = debtor?.data?.phoneNumber.replace(/\D/g, "");
     const url =
       Platform.OS === "android"
         ? `tel:${phoneNumber}`
@@ -128,7 +110,7 @@ export default function DebtorDetail() {
   const handleDeleteDebtor = () => {
     Alert.alert(
       "Confirm Delete",
-      `Are you sure you want to delete ${debtor?.name}? This action cannot be undone.`,
+      `Are you sure you want to delete ${debtor?.data?.name}? This action cannot be undone.`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -225,13 +207,15 @@ export default function DebtorDetail() {
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{debtor.name}</Text>
+          <Text style={styles.headerTitle}>{debtor.data.name}</Text>
           <TouchableOpacity
             style={[
               styles.editButton,
               { backgroundColor: Colors[theme].secondary },
             ]}
-            onPress={() => router.push(`/edit-debtor?id=${debtor.id}` as any)}
+            onPress={() =>
+              router.push(`/edit-debtor?id=${debtor.data.id}` as any)
+            }
           >
             <Ionicons name="create" size={24} color="#fff" />
           </TouchableOpacity>
@@ -260,30 +244,30 @@ export default function DebtorDetail() {
                 styles.amountValue,
                 {
                   color:
-                    debtor.amount_owed > 0
+                    debtor.data.amountOwed > 0
                       ? Colors[theme].accent
                       : Colors[theme].primary,
                 },
               ]}
             >
-              GHS {Math.abs(debtor.amount_owed).toFixed(2)}
+              GHS {Math.abs(debtor.data.amountOwed).toFixed(2)}
             </Text>
             <Text style={[styles.amountStatus, { color: Colors[theme].text }]}>
-              {debtor.amount_owed > 0 ? "Outstanding" : "Settled"}
+              {debtor.data.amountOwed > 0 ? "Outstanding" : "Settled"}
             </Text>
           </View>
 
-          {debtor.description && (
+          {debtor.data.description && (
             <View style={styles.infoRow}>
               <Ionicons name="information-circle" size={20} color="#3498db" />
-              <Text style={styles.infoText}>{debtor.description}</Text>
+              <Text style={styles.infoText}>{debtor.data.description}</Text>
             </View>
           )}
 
-          {debtor.phone_number && (
+          {debtor.data.phoneNumber && (
             <View style={styles.infoRow}>
               <Ionicons name="call" size={20} color="#3498db" />
-              <Text style={styles.infoText}>{debtor.phone_number}</Text>
+              <Text style={styles.infoText}>{debtor.data.phoneNumber}</Text>
               <TouchableOpacity
                 style={[
                   styles.callButton,
@@ -299,7 +283,7 @@ export default function DebtorDetail() {
           <View style={styles.infoRow}>
             <Ionicons name="calendar" size={20} color="#3498db" />
             <Text style={styles.infoText}>
-              Created on {formatDate(debtor.created_at)}
+              Created on {formatDate(debtor.data.createdAt)}
             </Text>
           </View>
 
@@ -392,7 +376,7 @@ export default function DebtorDetail() {
                   ]}
                 >
                   {item.action === "add" ? "+" : "-"}GHS{" "}
-                  {Math.abs(item.amount_changed).toFixed(2)}
+                  {Math.abs(item.amountChanged).toFixed(2)}
                 </Text>
 
                 {item.note && (

@@ -9,10 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import {
-  useCreateDebtorMutation,
-} from "@/Features/Debtors/DebtorsApi";
+import { useCreateDebtorMutation } from "@/Features/Debtors/DebtorsApi";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Input, Button } from "@/Shared/Components/UIKitten";
@@ -55,17 +52,6 @@ export default function AddDebtor() {
       };
 
       await createDebtor(debtorData).unwrap();
-      // const debtorId = response.id;
-
-      // const paymentData = {
-      //   debtor_id: debtorId,
-      //   amount: parseFloat(amount),
-      //   note: note.trim() || null,
-      //   payment_type: parseFloat(amount) > 0 ? "debt" : "payment",
-      // };
-
-      // await createDebtor(paymentData).unwrap();
-
       Alert.alert("Success", "Debtor added successfully!", [
         {
           text: "OK",

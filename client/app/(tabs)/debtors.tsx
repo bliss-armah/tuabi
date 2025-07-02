@@ -14,8 +14,6 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
 import { Button, SearchInput, Card } from "@/Shared/Components/UIKitten";
 
-type ColorScheme = "light" | "dark";
-
 type ColorType = {
   text: string;
   background: string;
@@ -30,7 +28,7 @@ type ColorType = {
 type Debtor = {
   id: number;
   name: string;
-  amount_owed: number;
+  amountOwed: number;
   description: string | null;
   phone_number: string | null;
 };
@@ -49,9 +47,9 @@ export default function Debtors() {
   } = useGetDebtorsQuery();
 
   useEffect(() => {
-    if (data) {
-      setDebtors(data);
-      setFilteredDebtors(data);
+    if (data?.data) {
+      setDebtors(data.data);
+      setFilteredDebtors(data.data);
     }
   }, [data]);
 
@@ -92,13 +90,13 @@ export default function Debtors() {
         <Text
           style={[
             styles.amountText,
-            item.amount_owed > 0 ? styles.positiveAmount : styles.zeroAmount,
+            item.amountOwed > 0 ? styles.positiveAmount : styles.zeroAmount,
           ]}
         >
-          GHS{Math.abs(item.amount_owed).toFixed(2)}
+          GHS{Math.abs(item.amountOwed).toFixed(2)}
         </Text>
         <Text style={styles.statusText}>
-          {item.amount_owed > 0 ? "Owes" : "Settled"}
+          {item.amountOwed > 0 ? "Owes" : "Settled"}
         </Text>
       </View>
     </Card>

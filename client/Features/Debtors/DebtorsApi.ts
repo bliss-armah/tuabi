@@ -1,17 +1,40 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "@/Shared/Api/config";
 
+export interface DebtHistory {
+  id: number;
+  amountChanged: number;
+  note: string | null;
+  timestamp: string;
+  action: string;
+}
+
+export interface Debtor {
+  id: number;
+  name: string;
+  amountOwed: number;
+  description: string;
+  phoneNumber: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  history: DebtHistory[];
+}
+
+export interface DebtorResponse {
+  data: Debtor;
+}
+
 export const debtorApi = createApi({
   reducerPath: "debtorApi",
   baseQuery,
   tagTypes: ["Debtor"],
   endpoints: (builder) => ({
-    getDebtors: builder.query<any[], void>({
+    getDebtors: builder.query<any, void>({
       query: () => "/debtors/",
       providesTags: ["Debtor"],
     }),
 
-    getDebtor: builder.query<any, number>({
+    getDebtor: builder.query<DebtorResponse, number>({
       query: (id) => `/debtors/${id}`,
       providesTags: ["Debtor"],
     }),
@@ -57,7 +80,7 @@ export const debtorApi = createApi({
     }),
 
     getDashboardSummary: builder.query<any, void>({
-      query: () => "/debtors/dashboard"
+      query: () => "/debtors/dashboard",
     }),
   }),
 });

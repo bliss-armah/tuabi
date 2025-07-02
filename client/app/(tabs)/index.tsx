@@ -20,8 +20,6 @@ export default function Home() {
   const theme = colorScheme ?? "light";
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
 
-  console.log(data);
-
   const { user, loading } = useAuth();
 
   if (loading || isLoading) {
@@ -149,7 +147,7 @@ export default function Home() {
           </Text>
           <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Recent Activities
-          </Text> 
+          </Text>
         </View>
       </View>
 
