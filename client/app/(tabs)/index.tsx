@@ -20,6 +20,8 @@ export default function Home() {
   const theme = colorScheme ?? "light";
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
 
+  console.log(data);
+
   const { user, loading } = useAuth();
 
   if (loading || isLoading) {
@@ -101,7 +103,7 @@ export default function Home() {
             <Ionicons name="people" size={24} color={Colors[theme].primary} />
           </View>
           <Text style={[styles.statValue, { color: Colors[theme].text }]}>
-            {data?.totalDebtors || 0}
+            {data?.data?.summary?.totalDebtors || 0}
           </Text>
           <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Total Debtors
@@ -122,7 +124,7 @@ export default function Home() {
             <Ionicons name="cash" size={24} color={Colors[theme].secondary} />
           </View>
           <Text style={[styles.statValue, { color: Colors[theme].text }]}>
-            ${(data?.totalDebt || 0).toFixed(2)}
+            ${(data?.data?.summary?.totalAmountOwed || 0).toFixed(2)}
           </Text>
           <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Total Amount Owed
@@ -143,11 +145,11 @@ export default function Home() {
             <Ionicons name="time" size={24} color={Colors[theme].accent} />
           </View>
           <Text style={[styles.statValue, { color: Colors[theme].text }]}>
-            {data?.recentActivities || 0}
+            {data?.data?.recentActivities?.length || 0}
           </Text>
           <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
             Recent Activities
-          </Text>
+          </Text> 
         </View>
       </View>
 

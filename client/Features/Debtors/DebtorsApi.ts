@@ -57,30 +57,8 @@ export const debtorApi = createApi({
     }),
 
     getDashboardSummary: builder.query<any, void>({
-      async queryFn(_arg, _queryApi, _extraOptions, baseQuery) {
-        const response = await baseQuery("/debtors/");
-        if ("error" in response) return { error: response.error };
-    
-        const debtors = Array.isArray(response.data) ? response.data : [];
-        const totalDebtors = debtors.length;
-        const totalDebt = debtors.reduce(
-          (sum, d) => sum + (d.amount_owed || 0),
-          0
-        );
-    
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    
-        const recentActivities = debtors.filter(
-          (d) => new Date(d.updated_at) >= sevenDaysAgo
-        ).length;
-    
-        return {
-          data: { totalDebtors, totalDebt, recentActivities },
-        };
-      },
+      query: () => "/debtors/dashboard"
     }),
-    
   }),
 });
 
