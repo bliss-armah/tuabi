@@ -6,13 +6,11 @@ export const getAllDebtors = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
-  
   try {
     const debtors = await prisma.debtor.findMany({
       where: { userId: req.user!.id },
       orderBy: { createdAt: "desc" },
     });
-
     res.status(200).json({
       success: true,
       data: debtors,
@@ -33,15 +31,13 @@ export const getDebtorById = async (
   try {
     const { id } = req.params;
     const debtorId = parseInt(id);
-
     if (isNaN(debtorId)) {
-       res.status(400).json({
+      res.status(400).json({
         success: false,
         message: "Invalid debtor ID",
       });
-      return
+      return;
     }
-
     const debtor = await prisma.debtor.findFirst({
       where: {
         id: debtorId,
@@ -53,15 +49,13 @@ export const getDebtorById = async (
         },
       },
     });
-
     if (!debtor) {
-       res.status(404).json({
+      res.status(404).json({
         success: false,
         message: "Debtor not found",
       });
-      return
+      return;
     }
-
     res.status(200).json({
       success: true,
       data: debtor,
@@ -81,7 +75,6 @@ export const createDebtor = async (
 ) => {
   try {
     const { name, amountOwed, description, phoneNumber } = req.body;
-
     const debtor = await prisma.debtor.create({
       data: {
         name,
@@ -91,7 +84,6 @@ export const createDebtor = async (
         userId: req.user!.id,
       },
     });
-
     res.status(201).json({
       success: true,
       message: "Debtor created successfully",
@@ -114,7 +106,6 @@ export const updateDebtor = async (
     const { id } = req.params;
     const { name, amountOwed, description, phoneNumber } = req.body;
     const debtorId = parseInt(id);
-
     if (isNaN(debtorId)) {
       res.status(400).json({
         success: false,
@@ -122,7 +113,6 @@ export const updateDebtor = async (
       });
       return;
     }
-
     // Check if debtor exists and belongs to user
     const existingDebtor = await prisma.debtor.findFirst({
       where: {
@@ -130,7 +120,6 @@ export const updateDebtor = async (
         userId: req.user!.id,
       },
     });
-
     if (!existingDebtor) {
       res.status(404).json({
         success: false,
@@ -138,7 +127,6 @@ export const updateDebtor = async (
       });
       return;
     }
-
     const updatedDebtor = await prisma.debtor.update({
       where: { id: debtorId },
       data: {
@@ -148,7 +136,6 @@ export const updateDebtor = async (
         ...(phoneNumber !== undefined && { phoneNumber }),
       },
     });
-
     res.status(200).json({
       success: true,
       message: "Debtor updated successfully",
@@ -160,16 +147,17 @@ export const updateDebtor = async (
       success: false,
       message: "Internal server error",
     });
-    return
+    return;
   }
 };
 
-export const deleteDebtor = async (
+export const incrementDebtorAmount = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
     const { id } = req.params;
+    const { amount, note } = req.body;
     const debtorId = parseInt(id);
 
     if (isNaN(debtorId)) {
@@ -196,10 +184,158 @@ export const deleteDebtor = async (
       return;
     }
 
+    const incrementAmount = parseFloat(amount);
+    const newAmount = existingDebtor.amountOwed + incrementAmount;
+
+    // Use transaction to update debtor amount and create history record
+    const result = await prisma.$transaction([
+      prisma.debtor.update({
+        where: { id: debtorId },
+        data: { amountOwed: newAmount },
+      }),
+      prisma.debtHistory.create({
+        data: {
+          debtorId: debtorId,
+          amountChanged: incrementAmount,
+          action: "add",
+          note: note || `Amount increased by ${incrementAmount}`,
+          performedById: req.user!.id,
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Debtor amount incremented successfully",
+      data: {
+        debtor: result[0],
+        history: result[1],
+        previousAmount: existingDebtor.amountOwed,
+        newAmount: newAmount,
+        amountAdded: incrementAmount,
+      },
+    });
+  } catch (error) {
+    console.error("Increment debtor amount error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const decrementDebtorAmount = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+    const { amount, note } = req.body;
+    const debtorId = parseInt(id);
+
+    if (isNaN(debtorId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid debtor ID",
+      });
+      return;
+    }
+
+    // Check if debtor exists and belongs to user
+    const existingDebtor = await prisma.debtor.findFirst({
+      where: {
+        id: debtorId,
+        userId: req.user!.id,
+      },
+    });
+
+    if (!existingDebtor) {
+      res.status(404).json({
+        success: false,
+        message: "Debtor not found",
+      });
+      return;
+    }
+
+    const decrementAmount = parseFloat(amount);
+    let newAmount = existingDebtor.amountOwed - decrementAmount;
+
+    // Ensure amount doesn't go negative
+    if (newAmount < 0) {
+      newAmount = 0;
+    }
+
+    const actualAmountReduced = existingDebtor.amountOwed - newAmount;
+
+    // Use transaction to update debtor amount and create history record
+    const result = await prisma.$transaction([
+      prisma.debtor.update({
+        where: { id: debtorId },
+        data: { amountOwed: newAmount },
+      }),
+      prisma.debtHistory.create({
+        data: {
+          debtorId: debtorId,
+          amountChanged: actualAmountReduced,
+          action: "reduce",
+          note: note || `Payment received: ${actualAmountReduced}`,
+          performedById: req.user!.id,
+        },
+      }),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      message: "Debtor amount decremented successfully",
+      data: {
+        debtor: result[0],
+        history: result[1],
+        previousAmount: existingDebtor.amountOwed,
+        newAmount: newAmount,
+        amountPaid: actualAmountReduced,
+        requestedDeduction: decrementAmount,
+      },
+    });
+  } catch (error) {
+    console.error("Decrement debtor amount error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const deleteDebtor = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { id } = req.params;
+    const debtorId = parseInt(id);
+    if (isNaN(debtorId)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid debtor ID",
+      });
+      return;
+    }
+    // Check if debtor exists and belongs to user
+    const existingDebtor = await prisma.debtor.findFirst({
+      where: {
+        id: debtorId,
+        userId: req.user!.id,
+      },
+    });
+    if (!existingDebtor) {
+      res.status(404).json({
+        success: false,
+        message: "Debtor not found",
+      });
+      return;
+    }
     await prisma.debtor.delete({
       where: { id: debtorId },
     });
-
     res.status(200).json({
       success: true,
       message: "Debtor deleted successfully",
