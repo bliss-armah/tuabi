@@ -115,18 +115,6 @@ export default function Debtors() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Debtors</Text>
-        <Button
-          title=""
-          onPress={() =>
-            router.push({
-              pathname: "/(tabs)/add-debtor",
-            })
-          }
-          appearance="filled"
-          status="primary"
-          size="small"
-          style={styles.addButton}
-        />
       </View>
 
       <View style={styles.searchContainer}>
@@ -177,7 +165,6 @@ export default function Debtors() {
           data={filteredDebtors}
           renderItem={renderDebtorItem}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContainer}
           refreshControl={
             <RefreshControl refreshing={debtorsLoading} onRefresh={onRefresh} />
           }
@@ -205,11 +192,6 @@ const createStyles = (color: ColorType) =>
       fontWeight: "bold",
       color: color.background,
     },
-    addButton: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-    },
     searchContainer: {
       marginHorizontal: 15,
       marginTop: -15,
@@ -222,18 +204,9 @@ const createStyles = (color: ColorType) =>
       shadowRadius: 4,
       elevation: 2,
     },
-    listContainer: {
-      padding: 15,
-    },
     debtorCard: {
       flexDirection: "row",
-      padding: 15,
-      marginBottom: 10,
       shadowColor: color.background,
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      elevation: 1,
     },
     debtorInfo: {
       flex: 1,
