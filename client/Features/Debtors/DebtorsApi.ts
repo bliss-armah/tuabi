@@ -84,6 +84,7 @@ export const debtorApi = createApi({
     }),
     getDashboardSummary: builder.query<any, void>({
       query: () => "/debtors/dashboard",
+      providesTags:["Debtors"]
     }),
   }),
 });
