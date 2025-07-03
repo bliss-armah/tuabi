@@ -36,7 +36,6 @@ export const debtorApi = createApi({
 
     getDebtor: builder.query<DebtorResponse, number>({
       query: (id) => `/debtors/${id}`,
-      providesTags: ["Debtor"],
     }),
 
     createDebtor: builder.mutation<any, any>({
@@ -44,15 +43,6 @@ export const debtorApi = createApi({
         url: "/debtors/",
         method: "POST",
         body: debtor,
-      }),
-      invalidatesTags: ["Debtor"],
-    }),
-
-    updateDebtor: builder.mutation<any, { id: number; data: any }>({
-      query: ({ id, data }) => ({
-        url: `/debtors/${id}`,
-        method: "PUT",
-        body: data,
       }),
       invalidatesTags: ["Debtor"],
     }),
@@ -66,19 +56,30 @@ export const debtorApi = createApi({
     }),
 
     getDebtorHistory: builder.query<any, number>({
-      query: (id) => `/debt-history/${id}`,
-      providesTags: ["Debtor"],
+      query: (id) => `/debt-history/debtor/${id}`,
     }),
 
-    addPayment: builder.mutation<any, { id: number; data: any }>({
+    addPayment: builder.mutation<
+      any,
+      {
+        id: number;
+        data: {
+          amount: number;
+          note?: string;
+          action: "add" | "reduce" | "settled";
+        };
+      }
+    >({
       query: ({ id, data }) => ({
-        url: `/debt-history/${id}`,
-        method: "POST",
-        body: data,
+        url:
+          data.action === "add"
+            ? `/debtors/${id}/increment`
+            : `/debtors/${id}/decrement`,
+        method: "PATCH",
+        body: { amount: Math.abs(data.amount), note: data.note },
       }),
       invalidatesTags: ["Debtor"],
     }),
-
     getDashboardSummary: builder.query<any, void>({
       query: () => "/debtors/dashboard",
     }),
@@ -89,7 +90,6 @@ export const {
   useGetDebtorsQuery,
   useGetDebtorQuery,
   useCreateDebtorMutation,
-  useUpdateDebtorMutation,
   useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
   useAddPaymentMutation,

@@ -33,17 +33,15 @@ export const useAuth = () => {
     loadAuthData();
   }, []);
 
-
   useEffect(() => {
     if (!tokenExpiry) return;
-    
-    const now = Date.now();
-    const delay = tokenExpiry * 1000 - now;
-    
+
+    const delay = tokenExpiry * 1000;
+    const timeout = setTimeout(logout, delay);
+
     if (delay <= 0) {
+      logout();
     } else {
-      logout(); 
-      const timeout = setTimeout(logout, delay);
       return () => clearTimeout(timeout);
     }
   }, [tokenExpiry]);

@@ -39,6 +39,7 @@ export default function DebtorDetail() {
   const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(
     Number(id)
   );
+  console.log(history);
   const [addPayment] = useAddPaymentMutation();
   const [deleteDebtor] = useDeleteDebtorMutation();
 
@@ -61,8 +62,9 @@ export default function DebtorDetail() {
       await addPayment({
         id: Number(id),
         data: {
-          amountChanged: finalAmount,
-          note: paymentNote || null,
+          amount: finalAmount,
+          note: paymentNote || undefined,
+          action: isAddingDebt ? "add" : "reduce",
         },
       });
 
@@ -328,7 +330,7 @@ export default function DebtorDetail() {
             Payment History
           </Text>
 
-          {history?.length === 0 ? (
+          {history?.data?.length === 0 ? (
             <View style={styles.emptyHistory}>
               <Ionicons name="time" size={40} color="#bdc3c7" />
               <Text style={styles.emptyHistoryText}>
@@ -336,7 +338,7 @@ export default function DebtorDetail() {
               </Text>
             </View>
           ) : (
-            history?.map((item: DebtHistory) => (
+            history?.data?.map((item: DebtHistory) => (
               <View key={item.id} style={styles.historyItem}>
                 <View style={styles.historyHeader}>
                   <View style={styles.historyLeft}>

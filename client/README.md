@@ -48,3 +48,17 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## API Base URL Configuration
+
+The frontend uses an environment variable `EXPO_PUBLIC_API_URL` to determine the backend API base URL. To set it:
+
+- For local development, create a `.env` file in the `client` directory with:
+
+```
+EXPO_PUBLIC_API_URL=http://localhost:3000/api
+```
+
+- For production, set the environment variable in your deployment environment accordingly.
+
+If not set, it defaults to `http://192.168.0.163:3000/api`.

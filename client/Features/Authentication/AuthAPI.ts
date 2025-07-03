@@ -2,10 +2,7 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "@/Shared/Api/config";
-import {
-  LoginFormData,
-  LoginResponse,
-} from "./types";
+import { LoginFormData, LoginResponse } from "./types";
 
 export const authApi = createApi({
   reducerPath: "authApi",
@@ -34,7 +31,7 @@ export const authApi = createApi({
     // Get current user
     getCurrentUser: builder.query<any, void>({
       query: () => ({
-        url: "/users/profiles",
+        url: "/users/profile",
         method: "GET",
       }),
     }),

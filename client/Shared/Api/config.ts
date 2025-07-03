@@ -2,7 +2,7 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://192.168.0.163:3000/api",
+  baseUrl: "http://192.168.0.164:3000/api",
   prepareHeaders: async (headers) => {
     const tokenString = await AsyncStorage.getItem("token");
     const token = tokenString ? JSON.parse(tokenString) : null;

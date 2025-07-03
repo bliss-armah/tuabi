@@ -13,7 +13,7 @@ import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDashboardSummaryQuery } from "@/Features/Debtors/DebtorsApi";
 import { useAuth } from "@/Shared/Hooks/useAuth";
-import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
+// import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
   const colorScheme = useColorScheme();
@@ -84,7 +84,7 @@ export default function Home() {
       </View>
 
       {/* Subscription Status */}
-      <SubscriptionStatus showUpgradeButton={true} compact={false} />
+      {/* <SubscriptionStatus showUpgradeButton={true} compact={false} /> */}
 
       <View style={styles.statsContainer}>
         <View
