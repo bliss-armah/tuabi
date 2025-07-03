@@ -39,7 +39,6 @@ export default function DebtorDetail() {
   const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(
     Number(id)
   );
-  console.log(history);
   const [addPayment] = useAddPaymentMutation();
   const [deleteDebtor] = useDeleteDebtorMutation();
 

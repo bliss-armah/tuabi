@@ -27,15 +27,16 @@ export interface DebtorResponse {
 export const debtorApi = createApi({
   reducerPath: "debtorApi",
   baseQuery,
-  tagTypes: ["Debtor"],
+  tagTypes: ["Debtor", "Debtors"],
   endpoints: (builder) => ({
     getDebtors: builder.query<any, void>({
       query: () => "/debtors/",
-      providesTags: ["Debtor"],
+      providesTags: ["Debtors"],
     }),
 
     getDebtor: builder.query<DebtorResponse, number>({
       query: (id) => `/debtors/${id}`,
+      providesTags: ["Debtor"],
     }),
 
     createDebtor: builder.mutation<any, any>({
@@ -44,7 +45,7 @@ export const debtorApi = createApi({
         method: "POST",
         body: debtor,
       }),
-      invalidatesTags: ["Debtor"],
+      invalidatesTags: ["Debtors"],
     }),
 
     deleteDebtor: builder.mutation<any, number>({
@@ -52,11 +53,12 @@ export const debtorApi = createApi({
         url: `/debtors/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Debtor"],
+      invalidatesTags: ["Debtors"],
     }),
 
     getDebtorHistory: builder.query<any, number>({
       query: (id) => `/debt-history/debtor/${id}`,
+      providesTags:["Debtor"]
     }),
 
     addPayment: builder.mutation<
@@ -78,7 +80,7 @@ export const debtorApi = createApi({
         method: "PATCH",
         body: { amount: Math.abs(data.amount), note: data.note },
       }),
-      invalidatesTags: ["Debtor"],
+      invalidatesTags: ["Debtors", "Debtor"],
     }),
     getDashboardSummary: builder.query<any, void>({
       query: () => "/debtors/dashboard",
