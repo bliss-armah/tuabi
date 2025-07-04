@@ -13,7 +13,7 @@ import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
 import { Button, SearchInput, Card } from "@/Shared/Components/UIKitten";
-import AddDebtorModal from "@/Features/Debtors/AddDebtorModal";
+import AddDebtorModal from "@/Features/Debtors/DebtorModal";
 
 type ColorType = {
   text: string;

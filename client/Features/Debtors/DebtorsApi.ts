@@ -60,7 +60,18 @@ export const debtorApi = createApi({
       query: (id) => `/debt-history/debtor/${id}`,
       providesTags:["Debtor"]
     }),
-
+    updateDebtor: builder.mutation<
+    any,
+    { id: number; data: Partial<Debtor> }
+  >({
+    query: ({ id, data }) => ({
+      url: `/debtors/${id}`,
+      method: "PUT",
+      body: data,
+    }),
+    invalidatesTags: ["Debtors", "Debtor"],
+  }),
+  
     addPayment: builder.mutation<
       any,
       {
@@ -96,5 +107,6 @@ export const {
   useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
   useAddPaymentMutation,
+  useUpdateDebtorMutation,
   useGetDashboardSummaryQuery,
 } = debtorApi;

@@ -24,6 +24,7 @@ import {
   DebtHistory,
 } from "@/Features/Debtors/DebtorsApi";
 import { Input, Button } from "@/Shared/Components/UIKitten";
+import DebtorModal from "@/Features/Debtors/DebtorModal";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
@@ -452,6 +453,14 @@ export default function DebtorDetail() {
           </View>
         </View>
       </Modal>
+      <DebtorModal
+  visible={showModal}
+  mode={editMode}
+  debtor={selectedDebtor ?? undefined}
+  onClose={() => setShowModal(false)}
+  onSuccess={refetch}
+/>
+
     </View>
   );
 }
