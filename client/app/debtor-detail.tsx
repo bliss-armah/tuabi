@@ -25,11 +25,21 @@ import {
 } from "@/Features/Debtors/DebtorsApi";
 import { Input, Button } from "@/Shared/Components/UIKitten";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
+import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
+
+  const {
+    isVisible,
+    mode,
+    debtor: hookDebtor,
+    openAddDebtor,
+    openEditDebtor,
+    closeModal,
+  } = useDebtorModal();
 
   const {
     data: debtor,
@@ -215,9 +225,7 @@ export default function DebtorDetail() {
               styles.editButton,
               { backgroundColor: Colors[theme].secondary },
             ]}
-            onPress={() =>
-              router.push(`/edit-debtor?id=${debtor.data.id}` as any)
-            }
+            onPress={() => openEditDebtor(debtor?.data)}
           >
             <Ionicons name="create" size={24} color="#fff" />
           </TouchableOpacity>
@@ -454,13 +462,12 @@ export default function DebtorDetail() {
         </View>
       </Modal>
       <DebtorModal
-  visible={showModal}
-  mode={editMode}
-  debtor={selectedDebtor ?? undefined}
-  onClose={() => setShowModal(false)}
-  onSuccess={refetch}
-/>
-
+        visible={isVisible}
+        mode={mode}
+        debtor={hookDebtor}
+        onClose={closeModal}
+        onSuccess={refetch}
+      />
     </View>
   );
 }

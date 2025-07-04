@@ -14,6 +14,8 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
 import { Button, SearchInput, Card } from "@/Shared/Components/UIKitten";
 import AddDebtorModal from "@/Features/Debtors/DebtorModal";
+import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
+import DebtorModal from "@/Features/Debtors/DebtorModal";
 
 type ColorType = {
   text: string;
@@ -37,7 +39,8 @@ type Debtor = {
 export default function Debtors() {
   const colorScheme = useColorScheme();
   const color: ColorType = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const [showAddModal, setShowAddModal] = useState(false);
+  const { isVisible, mode, openAddDebtor, openEditDebtor, closeModal } =
+    useDebtorModal();
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -120,11 +123,10 @@ export default function Debtors() {
         {!searchQuery.length && (
           <Button
             title="➕ Add"
-            onPress={() => setShowAddModal(true)}
+            onPress={openAddDebtor}
             appearance="filled"
             status="primary"
             size="small"
-            style={styles.addButton}
           />
         )}
       </View>
@@ -162,7 +164,7 @@ export default function Debtors() {
           {searchQuery.length === 0 && (
             <Button
               title="Add Debtor"
-              onPress={() => setShowAddModal(true)}
+              onPress={openAddDebtor}
               status="primary"
               size="medium"
             />
@@ -179,9 +181,11 @@ export default function Debtors() {
         />
       )}
 
-      <AddDebtorModal
-        visible={showAddModal}
-        onClose={() => setShowAddModal(false)}
+      <DebtorModal
+        visible={isVisible}
+        mode={mode}
+        onClose={closeModal}
+        onSuccess={refetch}
       />
     </View>
   );

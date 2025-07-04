@@ -27,7 +27,7 @@ type Props = {
     id: number;
     name: string;
     description: string | null;
-    phone_number: string | null;
+    phoneNumber: string | null;
   };
   onSuccess?: () => void;
 };
@@ -42,7 +42,7 @@ export default function DebtorModal({
   const colorScheme = useColorScheme();
   const color = Colors[colorScheme ?? "light"];
   const [name, setName] = useState("");
-  const [amount, setAmount] = useState(""); // Only used for "add"
+  const [amount, setAmount] = useState(""); 
   const [description, setDescription] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [note, setNote] = useState("");
@@ -55,7 +55,7 @@ export default function DebtorModal({
     if (mode === "edit" && debtor) {
       setName(debtor.name);
       setDescription(debtor.description || "");
-      setPhoneNumber(debtor.phone_number || "");
+      setPhoneNumber(debtor.phoneNumber || "");
     } else {
       // Reset all on open for "add"
       setName("");
