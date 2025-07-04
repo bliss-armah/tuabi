@@ -4,13 +4,13 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 
-interface DebtorHeaderProps {
+interface DebtorDetailHeaderProps {
   theme: keyof typeof Colors;
   debtorName: string;
   onEdit: () => void;
 }
 
-export const DebtorHeader: React.FC<DebtorHeaderProps> = ({
+export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
   theme,
   debtorName,
   onEdit,

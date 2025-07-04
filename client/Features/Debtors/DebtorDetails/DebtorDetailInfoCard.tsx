@@ -11,14 +11,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 
-interface DebtorInfoCardProps {
+interface DebtorDetailInfoCardProps {
   theme: keyof typeof Colors;
   debtor: any;
   onAddPayment: () => void;
   onAddDebt: () => void;
 }
 
-export const DebtorInfoCard: React.FC<DebtorInfoCardProps> = ({
+export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
   theme,
   debtor,
   onAddPayment,

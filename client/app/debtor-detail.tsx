@@ -13,11 +13,11 @@ import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
-import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
-import { DebtorInfoCard } from "@/Features/Debtors/DebtorInfoCard";
-import { PaymentHistory } from "@/Features/Debtors/PaymentHistory";
-import { DeleteDebtorButton } from "@/Features/Debtors/DeleteDebtorButton";
-import { PaymentModal } from "@/Features/Debtors/PaymentModal";
+import { DebtorDetailHeader } from "@/Features/Debtors/DebtorDetails/DebtorDetailHeader";
+import { DebtorDetailInfoCard } from "@/Features/Debtors/DebtorDetails/DebtorDetailInfoCard";
+import { PaymentHistory } from "@/Features/Debtors/DebtorDetails/PaymentHistory";
+import { DeleteDebtorButton } from "@/Features/Debtors/DebtorDetails/DeleteDebtorButton";
+import { PaymentModal } from "@/Features/Debtors/DebtorDetails/PaymentModal";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
@@ -124,13 +124,13 @@ export default function DebtorDetail() {
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
     >
       <ScrollView>
-        <DebtorHeader
+        <DebtorDetailHeader
           theme={theme}
           debtorName={debtor.data.name}
           onEdit={() => openEditDebtor(debtor?.data)}
         />
 
-        <DebtorInfoCard
+        <DebtorDetailInfoCard
           theme={theme}
           debtor={debtor.data}
           onAddPayment={() => openPaymentModal(false)}
