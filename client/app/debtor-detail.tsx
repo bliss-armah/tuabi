@@ -1,19 +1,6 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  Modal,
-  TextInput,
-  Linking,
-  Platform,
-} from "react-native";
-import { useLocalSearchParams, router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { View, ScrollView, StyleSheet, Alert } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import {
@@ -21,11 +8,16 @@ import {
   useAddPaymentMutation,
   useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
-  DebtHistory,
 } from "@/Features/Debtors/DebtorsApi";
-import { Input, Button } from "@/Shared/Components/UIKitten";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
+import { LoadingView } from "@/Shared/Components/LoadingView";
+import { ErrorView } from "@/Shared/Components/ErrorView";
+import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
+import { DebtorInfoCard } from "@/Features/Debtors/DebtorInfoCard";
+import { PaymentHistory } from "@/Features/Debtors/PaymentHistory";
+import { DeleteDebtorButton } from "@/Features/Debtors/DeleteDebtorButton";
+import { PaymentModal } from "@/Features/Debtors/PaymentModal";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
@@ -36,7 +28,6 @@ export default function DebtorDetail() {
     isVisible,
     mode,
     debtor: hookDebtor,
-    openAddDebtor,
     openEditDebtor,
     closeModal,
   } = useDebtorModal();
@@ -47,12 +38,13 @@ export default function DebtorDetail() {
     error,
     refetch,
   } = useGetDebtorQuery(Number(id));
+
   const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(
     Number(id)
   );
+
   const [addPayment] = useAddPaymentMutation();
   const [deleteDebtor] = useDeleteDebtorMutation();
-
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
@@ -66,7 +58,6 @@ export default function DebtorDetail() {
 
     try {
       const amount = parseFloat(paymentAmount);
-      // If adding debt, amount is positive; if recording payment, amount is negative
       const finalAmount = isAddingDebt ? Math.abs(amount) : -Math.abs(amount);
 
       await addPayment({
@@ -81,7 +72,6 @@ export default function DebtorDetail() {
       setPaymentAmount("");
       setPaymentNote("");
       setModalVisible(false);
-
       Alert.alert(
         "Success",
         isAddingDebt
@@ -94,114 +84,38 @@ export default function DebtorDetail() {
     }
   };
 
-  const handleCallDebtor = () => {
-    if (!debtor?.data?.phoneNumber) {
-      Alert.alert("Error", "No phone number available");
-      return;
+  const handleDeleteDebtor = async () => {
+    try {
+      await deleteDebtor(Number(id)).unwrap();
+      Alert.alert("Success", "Debtor deleted successfully", [
+        { text: "OK", onPress: () => router.back() },
+      ]);
+    } catch (err) {
+      console.error("Error deleting debtor:", err);
+      Alert.alert("Error", "Failed to delete debtor");
     }
-
-    const phoneNumber = debtor?.data?.phoneNumber.replace(/\D/g, "");
-    const url =
-      Platform.OS === "android"
-        ? `tel:${phoneNumber}`
-        : `telprompt:${phoneNumber}`;
-
-    Linking.canOpenURL(url)
-      .then((supported) => {
-        if (supported) {
-          return Linking.openURL(url);
-        }
-        Alert.alert("Error", "Phone call not supported on this device");
-      })
-      .catch((err) => {
-        console.error("Error making phone call:", err);
-        Alert.alert("Error", "Could not make phone call");
-      });
   };
 
-  const handleDeleteDebtor = () => {
-    Alert.alert(
-      "Confirm Delete",
-      `Are you sure you want to delete ${debtor?.data?.name}? This action cannot be undone.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteDebtor(Number(id)).unwrap();
-              Alert.alert("Success", "Debtor deleted successfully", [
-                { text: "OK", onPress: () => router.back() },
-              ]);
-            } catch (err) {
-              console.error("Error deleting debtor:", err);
-              Alert.alert("Error", "Failed to delete debtor");
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return (
-      date.toLocaleDateString() +
-      " " +
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-    );
+  const openPaymentModal = (isDebt: boolean) => {
+    setIsAddingDebt(isDebt);
+    setModalVisible(true);
   };
 
   if (isLoading || historyLoading) {
-    return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: Colors[theme].background },
-        ]}
-      >
-        <ActivityIndicator size="large" color={Colors[theme].primary} />
-        <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
-          Loading debtor details...
-        </Text>
-      </View>
-    );
+    return <LoadingView theme={theme} />;
   }
 
   if (error) {
-    return (
-      <View
-        style={[
-          styles.errorContainer,
-          { backgroundColor: Colors[theme].background },
-        ]}
-      >
-        <Text style={styles.errorText}>{(error as any)?.data?.message}</Text>
-        <TouchableOpacity
-          style={[
-            styles.retryButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
-          onPress={() => refetch()}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
-    );
+    return <ErrorView theme={theme} error={error} onRetry={refetch} />;
   }
 
   if (!debtor) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Debtor not found</Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={() => router.back()}
-        >
-          <Text style={styles.retryButtonText}>Go Back</Text>
-        </TouchableOpacity>
-      </View>
+      <ErrorView
+        theme={theme}
+        error="Debtor not found"
+        onRetry={() => router.back()}
+      />
     );
   }
 
@@ -210,257 +124,39 @@ export default function DebtorDetail() {
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
     >
       <ScrollView>
-        <View
-          style={[styles.header, { backgroundColor: Colors[theme].primary }]}
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{debtor.data.name}</Text>
-          <TouchableOpacity
-            style={[
-              styles.editButton,
-              { backgroundColor: Colors[theme].secondary },
-            ]}
-            onPress={() => openEditDebtor(debtor?.data)}
-          >
-            <Ionicons name="create" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <DebtorHeader
+          theme={theme}
+          debtorName={debtor.data.name}
+          onEdit={() => openEditDebtor(debtor?.data)}
+        />
 
-        <View
-          style={[
-            styles.debtorInfoCard,
-            {
-              backgroundColor: Colors[theme].card,
-              borderColor: Colors[theme].border,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.amountContainer,
-              { borderBottomColor: Colors[theme].border },
-            ]}
-          >
-            <Text style={[styles.amountLabel, { color: Colors[theme].text }]}>
-              Total Amount Owed
-            </Text>
-            <Text
-              style={[
-                styles.amountValue,
-                {
-                  color:
-                    debtor.data.amountOwed > 0
-                      ? Colors[theme].accent
-                      : Colors[theme].primary,
-                },
-              ]}
-            >
-              GHS {Math.abs(debtor.data.amountOwed).toFixed(2)}
-            </Text>
-            <Text style={[styles.amountStatus, { color: Colors[theme].text }]}>
-              {debtor.data.amountOwed > 0 ? "Outstanding" : "Settled"}
-            </Text>
-          </View>
+        <DebtorInfoCard
+          theme={theme}
+          debtor={debtor.data}
+          onAddPayment={() => openPaymentModal(false)}
+          onAddDebt={() => openPaymentModal(true)}
+        />
 
-          {debtor.data.description && (
-            <View style={styles.infoRow}>
-              <Ionicons name="information-circle" size={20} color="#3498db" />
-              <Text style={styles.infoText}>{debtor.data.description}</Text>
-            </View>
-          )}
+        <PaymentHistory theme={theme} history={history?.data} />
 
-          {debtor.data.phoneNumber && (
-            <View style={styles.infoRow}>
-              <Ionicons name="call" size={20} color="#3498db" />
-              <Text style={styles.infoText}>{debtor.data.phoneNumber}</Text>
-              <TouchableOpacity
-                style={[
-                  styles.callButton,
-                  { backgroundColor: Colors[theme].primary },
-                ]}
-                onPress={handleCallDebtor}
-              >
-                <Text style={styles.callButtonText}>Call</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <View style={styles.infoRow}>
-            <Ionicons name="calendar" size={20} color="#3498db" />
-            <Text style={styles.infoText}>
-              Created on {formatDate(debtor.data.createdAt)}
-            </Text>
-          </View>
-
-          <View style={styles.actionButtons}>
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                { backgroundColor: Colors[theme].secondary },
-              ]}
-              onPress={() => {
-                setIsAddingDebt(false);
-                setModalVisible(true);
-              }}
-            >
-              <Ionicons name="arrow-down" size={18} color="#fff" />
-              <Text style={styles.actionButtonText}>Record Payment</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                { backgroundColor: Colors[theme].accent },
-              ]}
-              onPress={() => {
-                setIsAddingDebt(true);
-                setModalVisible(true);
-              }}
-            >
-              <Ionicons name="arrow-up" size={18} color="#fff" />
-              <Text style={styles.actionButtonText}>Add Debt</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View
-          style={[
-            styles.historyContainer,
-            { backgroundColor: Colors[theme].card },
-          ]}
-        >
-          <Text style={[styles.historyTitle, { color: Colors[theme].text }]}>
-            Payment History
-          </Text>
-
-          {history?.data?.length === 0 ? (
-            <View style={styles.emptyHistory}>
-              <Ionicons name="time" size={40} color="#bdc3c7" />
-              <Text style={styles.emptyHistoryText}>
-                No payment history yet
-              </Text>
-            </View>
-          ) : (
-            history?.data?.map((item: DebtHistory) => (
-              <View key={item.id} style={styles.historyItem}>
-                <View style={styles.historyHeader}>
-                  <View style={styles.historyLeft}>
-                    <Ionicons
-                      name={
-                        item.action === "add" ? "add-circle" : "remove-circle"
-                      }
-                      size={20}
-                      color={
-                        item.action === "add"
-                          ? Colors[theme].accent
-                          : Colors[theme].primary
-                      }
-                    />
-                    <Text style={styles.historyAction}>
-                      {item.action === "add"
-                        ? "Debt Added"
-                        : item.action === "reduce"
-                        ? "Payment Received"
-                        : "Settled"}
-                    </Text>
-                  </View>
-                  <Text style={styles.historyDate}>
-                    {formatDate(item.timestamp)}
-                  </Text>
-                </View>
-
-                <Text
-                  style={[
-                    styles.historyAmount,
-                    {
-                      color:
-                        item.action === "add"
-                          ? Colors[theme].accent
-                          : Colors[theme].primary,
-                    },
-                  ]}
-                >
-                  {item.action === "add" ? "+" : "-"}GHS{" "}
-                  {Math.abs(item.amountChanged).toFixed(2)}
-                </Text>
-
-                {item.note && (
-                  <Text style={styles.historyNote}>{item.note}</Text>
-                )}
-              </View>
-            ))
-          )}
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.deleteButton,
-            { backgroundColor: Colors[theme].accent },
-          ]}
-          onPress={handleDeleteDebtor}
-        >
-          <Ionicons name="trash" size={20} color="#fff" />
-          <Text style={styles.deleteButtonText}>Delete Debtor</Text>
-        </TouchableOpacity>
+        <DeleteDebtorButton
+          theme={theme}
+          debtorName={debtor.data.name}
+          onDelete={handleDeleteDebtor}
+        />
       </ScrollView>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
+      <PaymentModal
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
-              {isAddingDebt ? "Add Debt" : "Record Payment"}
-            </Text>
+        isAddingDebt={isAddingDebt}
+        paymentAmount={paymentAmount}
+        paymentNote={paymentNote}
+        onAmountChange={setPaymentAmount}
+        onNoteChange={setPaymentNote}
+        onSave={handleAddPayment}
+        onCancel={() => setModalVisible(false)}
+      />
 
-            <Input
-              label="Amount ($)"
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-              value={paymentAmount}
-              onChangeText={setPaymentAmount}
-              status="basic"
-            />
-
-            <Input
-              label="Note (Optional)"
-              placeholder="Add a note..."
-              multiline
-              numberOfLines={3}
-              value={paymentNote}
-              onChangeText={setPaymentNote}
-              status="basic"
-            />
-
-            <View style={styles.modalButtons}>
-              <Button
-                title="Cancel"
-                onPress={() => setModalVisible(false)}
-                appearance="outline"
-                status="basic"
-                size="medium"
-                style={styles.cancelButton}
-              />
-
-              <Button
-                title="Save"
-                onPress={handleAddPayment}
-                status="primary"
-                size="medium"
-                style={styles.saveButton}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
       <DebtorModal
         visible={isVisible}
         mode={mode}
@@ -476,251 +172,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: "#3498db",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    flex: 1,
-    textAlign: "center",
-  },
-  editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  debtorInfoCard: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    margin: 15,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  amountContainer: {
-    alignItems: "center",
-    marginBottom: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-  },
-  amountLabel: {
-    fontSize: 14,
-    color: "#7f8c8d",
-  },
-  amountValue: {
-    fontSize: 32,
-    fontWeight: "bold",
-    marginVertical: 5,
-  },
-  amountStatus: {
-    fontSize: 14,
-    color: "#7f8c8d",
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  infoText: {
-    fontSize: 16,
-    color: "#34495e",
-    marginLeft: 10,
-    flex: 1,
-  },
-  callButton: {
-    backgroundColor: "#3498db",
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-  },
-  callButtonText: {
-    color: "#fff",
-    fontSize: 14,
-  },
-  actionButtons: {
-    flexDirection: "row",
-    gap: 15,
-    marginTop: 10,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    flex: 1,
-  },
-  actionButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    marginLeft: 5,
-  },
-  historyContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    margin: 15,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  historyTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 15,
-  },
-  emptyHistory: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  emptyHistoryText: {
-    fontSize: 16,
-    color: "#7f8c8d",
-    marginTop: 10,
-  },
-  historyItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    paddingVertical: 15,
-  },
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 5,
-  },
-  historyLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  historyAction: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginLeft: 10,
-  },
-  historyDate: {
-    fontSize: 12,
-    color: "#7f8c8d",
-  },
-  historyAmount: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginVertical: 5,
-  },
-  historyNote: {
-    fontSize: 14,
-    color: "#7f8c8d",
-    marginTop: 5,
-  },
-  deleteButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: 15,
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 30,
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    width: "90%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#2c3e50",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-    gap: 10,
-  },
-  cancelButton: {
-    flex: 1,
-  },
-  saveButton: {
-    flex: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 10,
-    color: "#7f8c8d",
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  errorText: {
-    color: "#e74c3c",
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  retryButton: {
-    backgroundColor: "#3498db",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  retryButtonText: {
-    color: "#fff",
-    fontSize: 16,
   },
 });

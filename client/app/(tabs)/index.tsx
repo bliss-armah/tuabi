@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -76,12 +76,7 @@ export default function Home() {
     <ScrollView
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
     >
-      <View style={[styles.header, { backgroundColor: Colors[theme].primary }]}>
-        <Text style={styles.headerTitle}>Dashboard</Text>
-        <Text style={styles.headerSubtitle}>
-          Overview of your store's debt records
-        </Text>
-      </View>
+      <Text style={styles.headerSubtitle}>Debt Overview 📊</Text>
 
       {/* Subscription Status */}
       {/* <SubscriptionStatus showUpgradeButton={true} compact={false} /> */}
@@ -261,15 +256,17 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   headerSubtitle: {
-    fontSize: 15,
-    color: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: 20,
+    fontSize: 17,
+    fontWeight: "bold",
+    color: "#0a0a0a",
     marginTop: 5,
   },
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 15,
-    marginTop: 15,
+    marginTop: 5,
   },
   statCard: {
     borderRadius: 16,
