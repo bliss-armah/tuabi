@@ -4,9 +4,10 @@ import { Colors } from "@/Shared/Constants/Colors";
 
 interface LoadingViewProps {
   theme: keyof typeof Colors;
+  text: string;
 }
 
-export const LoadingView: React.FC<LoadingViewProps> = ({ theme }) => {
+export const LoadingView: React.FC<LoadingViewProps> = ({ theme, text }) => {
   return (
     <View
       style={[
@@ -16,7 +17,7 @@ export const LoadingView: React.FC<LoadingViewProps> = ({ theme }) => {
     >
       <ActivityIndicator size="large" color={Colors[theme].primary} />
       <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
-        Loading debtor details...
+        {text}
       </Text>
     </View>
   );

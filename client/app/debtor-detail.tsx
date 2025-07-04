@@ -102,7 +102,7 @@ export default function DebtorDetail() {
   };
 
   if (isLoading || historyLoading) {
-    return <LoadingView theme={theme} />;
+    return <LoadingView theme={theme} text="Loading debtor details..." />;
   }
 
   if (error) {

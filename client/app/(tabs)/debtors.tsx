@@ -2,54 +2,39 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
-  ActivityIndicator,
+  StyleSheet,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Colors } from "@/Shared/Constants/Colors";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
-import { Button, SearchInput, Card } from "@/Shared/Components/UIKitten";
-import AddDebtorModal from "@/Features/Debtors/DebtorModal";
 import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
-
-type ColorType = {
-  text: string;
-  background: string;
-  primary: string;
-  secondary: string;
-  accent: string;
-  icon: string;
-  border: string;
-  card: string;
-};
+import { SearchInput } from "@/Shared/Components/UIKitten";
+import { ErrorView } from "@/Shared/Components/ErrorView";
+import { LoadingView } from "@/Shared/Components/LoadingView";
+import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
 
 type Debtor = {
   id: number;
   name: string;
   amountOwed: number;
-  description: string | null;
-  phone_number: string | null;
 };
 
 export default function Debtors() {
   const colorScheme = useColorScheme();
-  const color: ColorType = colorScheme === "dark" ? Colors.dark : Colors.light;
-  const { isVisible, mode, openAddDebtor, openEditDebtor, closeModal } =
-    useDebtorModal();
+  const theme = colorScheme ?? "light";
+  const { isVisible, mode, openAddDebtor, closeModal } = useDebtorModal();
+
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const {
-    data,
-    isLoading: debtorsLoading,
-    error: debtorsError,
-    refetch,
-  } = useGetDebtorsQuery();
+
+  const { data, isLoading, error, refetch } = useGetDebtorsQuery();
 
   useEffect(() => {
     if (data?.data) {
@@ -62,10 +47,11 @@ export default function Debtors() {
     if (searchQuery.trim() === "") {
       setFilteredDebtors(debtors);
     } else {
-      const filtered = debtors.filter((debtor) =>
-        debtor.name.toLowerCase().includes(searchQuery.toLowerCase())
+      setFilteredDebtors(
+        debtors.filter((debtor) =>
+          debtor.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
       );
-      setFilteredDebtors(filtered);
     }
   }, [searchQuery, debtors]);
 
@@ -73,113 +59,88 @@ export default function Debtors() {
     refetch();
   };
 
-  const styles = createStyles(color);
-
-  const renderDebtorItem = ({ item }: { item: Debtor }) => (
-    <Card
+  const renderItem = ({ item }: { item: Debtor }) => (
+    <TouchableOpacity
+      style={styles.row}
       onPress={() =>
-        router.push({
-          pathname: "/debtor-detail",
-          params: { id: item.id },
-        })
+        router.push({ pathname: "/debtor-detail", params: { id: item.id } })
       }
-      style={styles.debtorCard}
     >
-      <View style={styles.debtorInfo}>
-        <Text style={styles.debtorName}>{item.name}</Text>
-        <Text style={styles.debtorDescription} numberOfLines={1}>
-          {item.description || "No description"}
-        </Text>
+      <View style={styles.avatar}>
+        <Text style={styles.avatarText}>{item.name[0]?.toUpperCase()}</Text>
       </View>
-      <View style={styles.debtorAmount}>
-        <Text
-          style={[
-            styles.amountText,
-            item.amountOwed > 0 ? styles.positiveAmount : styles.zeroAmount,
-          ]}
-        >
-          GHS{Math.abs(item.amountOwed).toFixed(2)}
-        </Text>
-        <Text style={styles.statusText}>
+      <View style={styles.details}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.status}>
           {item.amountOwed > 0 ? "Owes" : "Settled"}
         </Text>
       </View>
-    </Card>
+      <View>
+        <Text
+          style={[
+            styles.amount,
+            {
+              color:
+                item.amountOwed > 0
+                  ? Colors[theme].accent
+                  : Colors[theme].primary,
+            },
+          ]}
+        >
+          GHS {Math.abs(item.amountOwed).toFixed(2)}
+        </Text>
+      </View>
+    </TouchableOpacity>
   );
 
-  if (debtorsLoading) {
+  if (isLoading) {
+    return <LoadingView theme={theme} text="Loading debtors..." />;
+  }
+
+  if (error) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={color.primary} />
-        <Text style={styles.loadingText}>Loading debtors...</Text>
-      </View>
+      <ErrorView
+        theme={theme}
+        error={(error as any)?.data?.message || "Something went wrong"}
+        onRetry={refetch}
+      />
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Debtors</Text>
-        {!searchQuery.length && (
-          <Button
-            title="➕ Add"
-            onPress={openAddDebtor}
-            appearance="filled"
-            status="primary"
-            size="small"
+    <View style={{flex:1, backgroundColor: Colors[theme].background }}>
+      <DebtorHeader
+        title="Debtors"
+        theme={theme}
+        actionButton={
+          <Ionicons
+            name="add-circle-outline"
+            size={28}
+            color={"#ffffff"}
           />
-        )}
-      </View>
-
-      <View style={styles.searchContainer}>
-        <SearchInput
-          placeholder="Search debtors..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onClear={() => setSearchQuery("")}
-          style={styles.searchInput}
-        />
-      </View>
-
-      {debtorsError ? (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            {(debtorsError as any)?.data?.message}
-          </Text>
-          <Button
-            title="Retry"
-            onPress={refetch}
-            status="primary"
-            size="medium"
+        }
+        onTap={openAddDebtor}
+      />
+      <View style={styles.container}>
+        <View style={styles.searchContainer}>
+          <SearchInput
+            placeholder="Search"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery("")}
           />
         </View>
-      ) : filteredDebtors.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="people" size={50} color={color.icon} />
-          <Text style={styles.emptyText}>
-            {searchQuery.length > 0
-              ? "No debtors match your search"
-              : "No debtors yet. Add your first one!"}
-          </Text>
-          {searchQuery.length === 0 && (
-            <Button
-              title="Add Debtor"
-              onPress={openAddDebtor}
-              status="primary"
-              size="medium"
-            />
-          )}
-        </View>
-      ) : (
+
         <FlatList
           data={filteredDebtors}
-          renderItem={renderDebtorItem}
           keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
           refreshControl={
-            <RefreshControl refreshing={debtorsLoading} onRefresh={onRefresh} />
+            <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
           }
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
-      )}
+      </View>
 
       <DebtorModal
         visible={isVisible}
@@ -191,108 +152,58 @@ export default function Debtors() {
   );
 }
 
-const createStyles = (color: ColorType) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: color.background,
-    },
-    header: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      padding: 20,
-      backgroundColor: color.primary,
-    },
-    headerTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: color.background,
-    },
-    addButton: {
-      backgroundColor: color.accent,
-    },
-    searchContainer: {
-      marginHorizontal: 15,
-      marginTop: -15,
-      marginBottom: 10,
-    },
-    searchInput: {
-      shadowColor: color.background,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 2,
-    },
-    debtorCard: {
-      flexDirection: "row",
-      shadowColor: color.background,
-    },
-    debtorInfo: {
-      flex: 1,
-    },
-    debtorName: {
-      fontSize: 16,
-      fontWeight: "bold",
-      color: color.text,
-    },
-    debtorDescription: {
-      fontSize: 14,
-      color: color.icon,
-      marginTop: 5,
-    },
-    debtorAmount: {
-      alignItems: "flex-end",
-      justifyContent: "center",
-    },
-    amountText: {
-      fontSize: 18,
-      fontWeight: "bold",
-    },
-    positiveAmount: {
-      color: color.accent,
-    },
-    zeroAmount: {
-      color: color.primary,
-    },
-    statusText: {
-      fontSize: 12,
-      color: color.icon,
-      marginTop: 5,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    loadingText: {
-      marginTop: 10,
-      color: color.icon,
-      fontSize: 16,
-    },
-    errorContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 20,
-    },
-    errorText: {
-      color: color.accent,
-      fontSize: 16,
-      marginBottom: 20,
-      textAlign: "center",
-    },
-    emptyContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      padding: 20,
-    },
-    emptyText: {
-      fontSize: 16,
-      color: color.icon,
-      textAlign: "center",
-      marginTop: 15,
-      marginBottom: 20,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    paddingBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+  searchContainer: {
+    paddingBottom: 10,
+  },
+  row: {
+    flexDirection: "row",
+    paddingVertical: 15,
+    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  avatar: {
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    backgroundColor: "#dfe6e9",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2d3436",
+  },
+  details: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  name: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  status: {
+    fontSize: 12,
+    color: "#636e72",
+  },
+  amount: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
