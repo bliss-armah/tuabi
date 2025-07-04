@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 import { Platform, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -39,6 +39,9 @@ export default function TabLayout() {
           fontSize: 12,
           fontWeight: "500",
         },
+        tabBarIconStyle: {
+          marginTop: 4,
+        },
       }}
     >
       <Tabs.Screen
@@ -46,7 +49,20 @@ export default function TabLayout() {
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color, focused }) => (
-            <View style={{ position: "relative" }}>
+            <View style={{ alignItems: "center" }}>
+              {focused && (
+                <View
+                  style={{
+                    height: 3,
+                    width: 30,
+                    backgroundColor: Colors[theme].primary,
+                    borderBottomRightRadius: 3,
+                    borderBottomLeftRadius: 3,
+                    position: "absolute",
+                    top: -15,
+                  }}
+                />
+              )}
               <Ionicons
                 name={focused ? "home" : "home-outline"}
                 size={24}
@@ -56,38 +72,87 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="add-debtor"
-        options={{
-          title: "Add",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="add" size={28} color={color} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="debtors"
         options={{
           title: "Debtors",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "people" : "people-outline"}
-              size={24}
-              color={color}
-            />
+            <View style={{ alignItems: "center" }}>
+              {focused && (
+                <View
+                  style={{
+                    height: 3,
+                    width: 30,
+                    backgroundColor: Colors[theme].primary,
+                    borderRadius: 2,
+                    position: "absolute",
+                    top: -15,
+                  }}
+                />
+              )}
+              <Ionicons
+                name={focused ? "people" : "people-outline"}
+                size={24}
+                color={color}
+              />
+            </View>
           ),
         }}
       />
+
       <Tabs.Screen
         name="subscription"
         options={{
           title: "Subscription",
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons
-              name={focused ? "card" : "card-outline"}
-              size={24}
-              color={color}
-            />
+            <View style={{ alignItems: "center" }}>
+              {focused && (
+                <View
+                  style={{
+                    height: 3,
+                    width: 30,
+                    backgroundColor: Colors[theme].primary,
+                    borderRadius: 2,
+                    position: "absolute",
+                    top: -15,
+                  }}
+                />
+              )}
+              <Ionicons
+                name={focused ? "card" : "card-outline"}
+                size={24}
+                color={color}
+              />
+            </View>
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{ alignItems: "center" }}>
+              {focused && (
+                <View
+                  style={{
+                    height: 3,
+                    width: 30,
+                    backgroundColor: Colors[theme].primary,
+                    borderRadius: 2,
+                    position: "absolute",
+                    top: -15,
+                  }}
+                />
+              )}
+              <Ionicons
+                name={focused ? "person" : "person-outline"}
+                size={24}
+                color={color}
+              />
+            </View>
           ),
         }}
       />

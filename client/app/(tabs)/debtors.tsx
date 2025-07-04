@@ -13,6 +13,7 @@ import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
 import { Button, SearchInput, Card } from "@/Shared/Components/UIKitten";
+import AddDebtorModal from "@/Features/Debtors/AddDebtorModal";
 
 type ColorType = {
   text: string;
@@ -36,6 +37,7 @@ type Debtor = {
 export default function Debtors() {
   const colorScheme = useColorScheme();
   const color: ColorType = colorScheme === "dark" ? Colors.dark : Colors.light;
+  const [showAddModal, setShowAddModal] = useState(false);
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -115,6 +117,16 @@ export default function Debtors() {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Debtors</Text>
+        {!searchQuery.length && (
+          <Button
+            title="➕ Add"
+            onPress={() => setShowAddModal(true)}
+            appearance="filled"
+            status="primary"
+            size="small"
+            style={styles.addButton}
+          />
+        )}
       </View>
 
       <View style={styles.searchContainer}>
@@ -150,11 +162,7 @@ export default function Debtors() {
           {searchQuery.length === 0 && (
             <Button
               title="Add Debtor"
-              onPress={() =>
-                router.push({
-                  pathname: "/(tabs)/add-debtor",
-                })
-              }
+              onPress={() => setShowAddModal(true)}
               status="primary"
               size="medium"
             />
@@ -170,6 +178,11 @@ export default function Debtors() {
           }
         />
       )}
+
+      <AddDebtorModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+      />
     </View>
   );
 }
@@ -191,6 +204,9 @@ const createStyles = (color: ColorType) =>
       fontSize: 24,
       fontWeight: "bold",
       color: color.background,
+    },
+    addButton: {
+      backgroundColor: color.accent,
     },
     searchContainer: {
       marginHorizontal: 15,
