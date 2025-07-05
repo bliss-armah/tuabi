@@ -19,6 +19,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { debtorSchema } from "./debtorSchema";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type FormData = {
   name: string;
@@ -111,8 +112,6 @@ export default function DebtorModal({
     }
   };
 
-  const amount = watch("amount");
-
   return (
     <Modal visible={visible} animationType="slide">
       <KeyboardAvoidingView
@@ -120,82 +119,84 @@ export default function DebtorModal({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.scroll}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>
-              {mode === "add" ? "Add Debtor" : "Edit Debtor"}
-            </Text>
-            <Ionicons name="close" size={26} color={Colors.primary} onPress={onClose} />
-          </View>
+          <SafeAreaView>
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>
+                {mode === "add" ? "Add Debtor" : "Edit Debtor"}
+              </Text>
+              <Ionicons
+                name="close"
+                size={26}
+                color={Colors.primary}
+                onPress={onClose}
+              />
+            </View>
 
-          <View style={styles.form}>
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <Input
-                  label="Name *"
-                  value={value}
-                  onChangeText={onChange}
-                  status={error ? "danger" : "basic"}
-                  caption={error?.message}
-                />
-              )}
-            />
-
-            {mode === "add" && (
+            <View style={styles.form}>
               <Controller
                 control={control}
-                name="amount"
-                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                name="name"
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
                   <Input
-                    label="Amount *"
+                    label="Name *"
                     value={value}
                     onChangeText={onChange}
-                    keyboardType="decimal-pad"
                     status={error ? "danger" : "basic"}
                     caption={error?.message}
                   />
                 )}
               />
-            )}
 
-            <Controller
-              control={control}
-              name="phoneNumber"
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <Input
-                  label="Phone Number"
-                  value={value}
-                  onChangeText={onChange}
-                  keyboardType="phone-pad"
-                  status={error ? "danger" : "basic"}
-                  caption={error?.message}
+              {mode === "add" && (
+                <Controller
+                  control={control}
+                  name="amount"
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <Input
+                      label="Amount *"
+                      value={value}
+                      onChangeText={onChange}
+                      keyboardType="decimal-pad"
+                      status={error ? "danger" : "basic"}
+                      caption={error?.message}
+                    />
+                  )}
                 />
               )}
-            />
 
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { onChange, value }, fieldState: { error } }) => (
-                <Input
-                  label="Description"
-                  value={value}
-                  onChangeText={onChange}
-                  multiline
-                  status={error ? "danger" : "basic"}
-                  caption={error?.message}
-                />
-              )}
-            />
-
-            {mode === "add" && (
               <Controller
                 control={control}
-                name="note"
-                render={({ field: { onChange, value }, fieldState: { error } }) => (
+                name="phoneNumber"
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
                   <Input
-                    label="Note"
+                    label="Phone Number"
+                    value={value}
+                    onChangeText={onChange}
+                    keyboardType="phone-pad"
+                    status={error ? "danger" : "basic"}
+                    caption={error?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="description"
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <Input
+                    label="Description"
                     value={value}
                     onChangeText={onChange}
                     multiline
@@ -204,33 +205,53 @@ export default function DebtorModal({
                   />
                 )}
               />
-            )}
 
-            {mode === "edit" && (
-              <View
-                style={[
-                  styles.amountInfo,
-                  {
-                    backgroundColor: Colors.background,
-                    borderLeftColor: Colors.primary,
-                  },
-                ]}
-              >
-                <Text style={[styles.amountInfoText, { color: Colors.text }]}>
-                  To update the amount owed, please record a payment or add debt from the
-                  debtor details screen.
-                </Text>
-              </View>
-            )}
+              {mode === "add" && (
+                <Controller
+                  control={control}
+                  name="note"
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }) => (
+                    <Input
+                      label="Note"
+                      value={value}
+                      onChangeText={onChange}
+                      multiline
+                      status={error ? "danger" : "basic"}
+                      caption={error?.message}
+                    />
+                  )}
+                />
+              )}
 
-            <Button
-              title={mode === "add" ? "Add" : "Save Changes"}
-              disabled={!isValid || isSubmitting}
-              onPress={handleSubmit(onSubmit)}
-              loading={isSubmitting}
-              style={{ marginTop: 12 }}
-            />
-          </View>
+              {mode === "edit" && (
+                <View
+                  style={[
+                    styles.amountInfo,
+                    {
+                      backgroundColor: Colors.background,
+                      borderLeftColor: Colors.primary,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.amountInfoText, { color: Colors.text }]}>
+                    To update the amount owed, please record a payment or add
+                    debt from the debtor details screen.
+                  </Text>
+                </View>
+              )}
+
+              <Button
+                title={mode === "add" ? "Add" : "Save Changes"}
+                disabled={!isValid || isSubmitting}
+                onPress={handleSubmit(onSubmit)}
+                loading={isSubmitting}
+                style={{ marginTop: 12 }}
+              />
+            </View>
+          </SafeAreaView>
         </ScrollView>
       </KeyboardAvoidingView>
     </Modal>
@@ -238,7 +259,7 @@ export default function DebtorModal({
 }
 
 const styles = StyleSheet.create({
-  scroll: { padding: 20 },
+  scroll: { padding: 30 },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -252,7 +273,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   form: {
-    padding: 20,
     borderRadius: 10,
   },
   amountInfo: {
