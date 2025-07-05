@@ -1,4 +1,3 @@
-// components/DebtorModal.tsx
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,7 +8,6 @@ import {
   Platform,
   ScrollView,
   Modal,
-  ActivityIndicator,
 } from "react-native";
 import {
   useCreateDebtorMutation,
@@ -40,9 +38,8 @@ export default function DebtorModal({
   onSuccess,
 }: Props) {
   const colorScheme = useColorScheme();
-  const color = Colors[colorScheme ?? "light"];
   const [name, setName] = useState("");
-  const [amount, setAmount] = useState(""); 
+  const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [note, setNote] = useState("");
@@ -57,7 +54,6 @@ export default function DebtorModal({
       setDescription(debtor.description || "");
       setPhoneNumber(debtor.phoneNumber || "");
     } else {
-      // Reset all on open for "add"
       setName("");
       setAmount("");
       setDescription("");
@@ -121,7 +117,7 @@ export default function DebtorModal({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.scroll}>
-          <View style={[styles.header, { backgroundColor: color.primary }]}>
+          <View style={[styles.header, { backgroundColor: Colors.primary }]}>
             <Text style={styles.headerTitle}>
               {mode === "add" ? "Add Debtor" : "Edit Debtor"}
             </Text>
@@ -167,13 +163,14 @@ export default function DebtorModal({
                 style={[
                   styles.amountInfo,
                   {
-                    backgroundColor: color.background,
-                    borderLeftColor: color.primary,
+                    backgroundColor: Colors.background,
+                    borderLeftColor: Colors.primary,
                   },
                 ]}
               >
-                <Text style={[styles.amountInfoText, { color: color.text }]}>
-                  To update the amount owed, please record a payment or add debt from the debtor details screen.
+                <Text style={[styles.amountInfoText, { color: Colors.text }]}>
+                  To update the amount owed, please record a payment or add debt
+                  from the debtor details screen.
                 </Text>
               </View>
             )}

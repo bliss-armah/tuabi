@@ -23,10 +23,8 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
   };
 
   return (
-    <View
-      style={[styles.historyContainer, { backgroundColor: Colors[theme].card }]}
-    >
-      <Text style={[styles.historyTitle, { color: Colors[theme].text }]}>
+    <View style={[styles.historyContainer, { backgroundColor: Colors.card }]}>
+      <Text style={[styles.historyTitle, { color: Colors.text }]}>
         Payment History
       </Text>
 
@@ -43,11 +41,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
                 <Ionicons
                   name={item.action === "add" ? "add-circle" : "remove-circle"}
                   size={20}
-                  color={
-                    item.action === "add"
-                      ? Colors[theme].accent
-                      : Colors[theme].primary
-                  }
+                  color={item.action === "add" ? Colors.accent : Colors.primary}
                 />
                 <Text style={styles.historyAction}>
                   {item.action === "add"
@@ -66,10 +60,7 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({
               style={[
                 styles.historyAmount,
                 {
-                  color:
-                    item.action === "add"
-                      ? Colors[theme].accent
-                      : Colors[theme].primary,
+                  color: item.action === "add" ? Colors.accent : Colors.primary,
                 },
               ]}
             >

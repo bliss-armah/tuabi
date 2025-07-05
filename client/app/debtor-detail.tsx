@@ -105,9 +105,7 @@ export default function DebtorDetail() {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: Colors[theme].background }]}
-    >
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <ScrollView>
         <DebtorDetailHeader
           theme={theme}

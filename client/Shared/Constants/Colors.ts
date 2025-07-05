@@ -12,33 +12,53 @@ const deepPurple = "#301934"; // Very dark purple
 const tintColorLight = primaryPurple;
 const tintColorDark = lightPurple;
 
+// will be used later
+
+// export const Colors = {
+//   light: {
+//     text: "#11181C",
+//     background: "#fff",
+//     backgroundGray:"#FAFAFA",
+//     offwhite: "#EDEBFF",
+//     tint: tintColorLight,
+//     icon: darkPurple,
+//     tabIconDefault: "#687076",
+//     tabIconSelected: tintColorLight,
+//     primary: primaryPurple,
+//     secondary: lightPurple,
+//     accent: darkPurple,
+//     border: "#E6E8EB",
+//     card: "#F8F9FA",
+//   },
+//   dark: {
+//     text: "#ECEDEE",
+//     background: "#151718",
+//     backgroundGray:"#0a0a0a",
+//     offwhite: "#151718",
+//     tint: tintColorDark,
+//     icon: lightPurple,
+//     tabIconDefault: "#9BA1A6",
+//     tabIconSelected: tintColorDark,
+//     primary: lightPurple,
+//     secondary: primaryPurple,
+//     accent: "#E0B0FF", // Mauve/light purple
+//     border: "#2E2E3A",
+//     card: "#1E1E2A",
+//   },
+// };
+
 export const Colors = {
-  light: {
-    text: "#11181C",
-    background: "#fff",
-    offwhite: "#EDEBFF",
-    tint: tintColorLight,
-    icon: darkPurple,
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-    primary: primaryPurple,
-    secondary: lightPurple,
-    accent: darkPurple,
-    border: "#E6E8EB",
-    card: "#F8F9FA",
-  },
-  dark: {
-    text: "#ECEDEE",
-    background: "#151718",
-    offwhite: "#151718",
-    tint: tintColorDark,
-    icon: lightPurple,
-    tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-    primary: lightPurple,
-    secondary: primaryPurple,
-    accent: "#E0B0FF", // Mauve/light purple
-    border: "#2E2E3A",
-    card: "#1E1E2A",
-  },
+  text: "#11181C",
+  background: "#fff",
+  backgroundGray: "#FAFAFA",
+  offwhite: "#EDEBFF",
+  tint: tintColorLight,
+  icon: darkPurple,
+  tabIconDefault: "#687076",
+  tabIconSelected: tintColorLight,
+  primary: primaryPurple,
+  secondary: lightPurple,
+  accent: darkPurple,
+  border: "#E6E8EB",
+  card: "#F8F9FA",
 };

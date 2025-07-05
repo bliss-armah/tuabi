@@ -63,34 +63,28 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
       style={[
         styles.debtorInfoCard,
         {
-          backgroundColor: Colors[theme].card,
-          borderColor: Colors[theme].border,
+          backgroundColor: Colors.card,
+          borderColor: Colors.border,
         },
       ]}
     >
       <View
-        style={[
-          styles.amountContainer,
-          { borderBottomColor: Colors[theme].border },
-        ]}
+        style={[styles.amountContainer, { borderBottomColor: Colors.border }]}
       >
-        <Text style={[styles.amountLabel, { color: Colors[theme].text }]}>
+        <Text style={[styles.amountLabel, { color: Colors.text }]}>
           Total Amount Owed
         </Text>
         <Text
           style={[
             styles.amountValue,
             {
-              color:
-                debtor.amountOwed > 0
-                  ? Colors[theme].accent
-                  : Colors[theme].primary,
+              color: debtor.amountOwed > 0 ? Colors.accent : Colors.primary,
             },
           ]}
         >
           GHS {Math.abs(debtor.amountOwed).toFixed(2)}
         </Text>
-        <Text style={[styles.amountStatus, { color: Colors[theme].text }]}>
+        <Text style={[styles.amountStatus, { color: Colors.text }]}>
           {debtor.amountOwed > 0 ? "Outstanding" : "Settled"}
         </Text>
       </View>
@@ -107,10 +101,7 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
           <Ionicons name="call" size={20} color="#3498db" />
           <Text style={styles.infoText}>{debtor.phoneNumber}</Text>
           <TouchableOpacity
-            style={[
-              styles.callButton,
-              { backgroundColor: Colors[theme].primary },
-            ]}
+            style={[styles.callButton, { backgroundColor: Colors.primary }]}
             onPress={handleCallDebtor}
           >
             <Text style={styles.callButtonText}>Call</Text>
@@ -127,10 +118,7 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
 
       <View style={styles.actionButtons}>
         <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors[theme].secondary },
-          ]}
+          style={[styles.actionButton, { backgroundColor: Colors.secondary }]}
           onPress={onAddPayment}
         >
           <Ionicons name="arrow-down" size={18} color="#fff" />
@@ -138,10 +126,7 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors[theme].accent },
-          ]}
+          style={[styles.actionButton, { backgroundColor: Colors.accent }]}
           onPress={onAddDebt}
         >
           <Ionicons name="arrow-up" size={18} color="#fff" />

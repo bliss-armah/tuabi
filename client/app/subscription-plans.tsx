@@ -91,23 +91,16 @@ export default function SubscriptionPlansScreen() {
     return (
       <View style={styles.container}>
         <StatusBar style={theme === "dark" ? "light" : "dark"} />
-        <View
-          style={[
-            styles.webViewHeader,
-            { backgroundColor: Colors[theme].card },
-          ]}
-        >
+        <View style={[styles.webViewHeader, { backgroundColor: Colors.card }]}>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => setShowWebView(false)}
           >
-            <Text
-              style={[styles.closeButtonText, { color: Colors[theme].primary }]}
-            >
+            <Text style={[styles.closeButtonText, { color: Colors.primary }]}>
               Close
             </Text>
           </TouchableOpacity>
-          <Text style={[styles.webViewTitle, { color: Colors[theme].text }]}>
+          <Text style={[styles.webViewTitle, { color: Colors.text }]}>
             Complete Payment
           </Text>
         </View>
@@ -121,9 +114,7 @@ export default function SubscriptionPlansScreen() {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: Colors[theme].background }]}
-    >
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
 
       <View style={styles.header}>
@@ -131,32 +122,30 @@ export default function SubscriptionPlansScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Text
-            style={[styles.backButtonText, { color: Colors[theme].primary }]}
-          >
+          <Text style={[styles.backButtonText, { color: Colors.primary }]}>
             ← Back
           </Text>
         </TouchableOpacity>
-        <Text style={[styles.title, { color: Colors[theme].text }]}>
+        <Text style={[styles.title, { color: Colors.text }]}>
           Choose Your Plan
         </Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.subtitle, { color: Colors[theme].text }]}>
+        <Text style={[styles.subtitle, { color: Colors.text }]}>
           Select a subscription plan to unlock all features
         </Text>
 
         {isLoading ? (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={Colors[theme].primary} />
-            <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+            <Text style={[styles.loadingText, { color: Colors.text }]}>
               Loading plans...
             </Text>
           </View>
         ) : error ? (
           <View style={styles.errorContainer}>
-            <Text style={[styles.errorText, { color: Colors[theme].accent }]}>
+            <Text style={[styles.errorText, { color: Colors.accent }]}>
               Failed to load subscription plans
             </Text>
           </View>
@@ -168,26 +157,24 @@ export default function SubscriptionPlansScreen() {
                 style={[
                   styles.planCard,
                   {
-                    backgroundColor: Colors[theme].card,
+                    backgroundColor: Colors.card,
                     borderColor:
                       selectedPlan?.id === plan.id
-                        ? Colors[theme].primary
-                        : Colors[theme].border,
+                        ? Colors.primary
+                        : Colors.border,
                   },
                 ]}
                 onPress={() => handlePlanSelection(plan)}
               >
                 <View style={styles.planHeader}>
-                  <Text
-                    style={[styles.planName, { color: Colors[theme].text }]}
-                  >
+                  <Text style={[styles.planName, { color: Colors.text }]}>
                     {plan.name}
                   </Text>
                   {plan.id === "yearly" && (
                     <View
                       style={[
                         styles.savingsBadge,
-                        { backgroundColor: Colors[theme].primary },
+                        { backgroundColor: Colors.primary },
                       ]}
                     >
                       <Text style={styles.savingsText}>Save 20%</Text>
@@ -195,39 +182,32 @@ export default function SubscriptionPlansScreen() {
                   )}
                 </View>
 
-                <Text
-                  style={[styles.planPrice, { color: Colors[theme].primary }]}
-                >
+                <Text style={[styles.planPrice, { color: Colors.primary }]}>
                   ₦{plan.amount.toLocaleString()}
                 </Text>
-                <Text
-                  style={[styles.planInterval, { color: Colors[theme].text }]}
-                >
+                <Text style={[styles.planInterval, { color: Colors.text }]}>
                   per {plan.interval}
                 </Text>
 
                 {plan.description && (
                   <Text
-                    style={[
-                      styles.planDescription,
-                      { color: Colors[theme].text },
-                    ]}
+                    style={[styles.planDescription, { color: Colors.text }]}
                   >
                     {plan.description}
                   </Text>
                 )}
 
                 <View style={styles.featuresList}>
-                  <Text style={[styles.feature, { color: Colors[theme].text }]}>
+                  <Text style={[styles.feature, { color: Colors.text }]}>
                     ✓ Unlimited debtors
                   </Text>
-                  <Text style={[styles.feature, { color: Colors[theme].text }]}>
+                  <Text style={[styles.feature, { color: Colors.text }]}>
                     ✓ Detailed analytics
                   </Text>
-                  <Text style={[styles.feature, { color: Colors[theme].text }]}>
+                  <Text style={[styles.feature, { color: Colors.text }]}>
                     ✓ Export reports
                   </Text>
-                  <Text style={[styles.feature, { color: Colors[theme].text }]}>
+                  <Text style={[styles.feature, { color: Colors.text }]}>
                     ✓ Priority support
                   </Text>
                 </View>
@@ -240,7 +220,7 @@ export default function SubscriptionPlansScreen() {
           <TouchableOpacity
             style={[
               styles.subscribeButton,
-              { backgroundColor: Colors[theme].primary },
+              { backgroundColor: Colors.primary },
             ]}
             onPress={handleSubscribe}
             disabled={isInitializing}

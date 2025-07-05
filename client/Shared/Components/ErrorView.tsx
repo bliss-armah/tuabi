@@ -3,13 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Colors } from "@/Shared/Constants/Colors";
 
 interface ErrorViewProps {
-  theme: keyof typeof Colors;
   error: any;
   onRetry: () => void;
 }
 
 export const ErrorView: React.FC<ErrorViewProps> = ({
-  theme,
   error,
   onRetry,
 }) => {
@@ -22,12 +20,12 @@ export const ErrorView: React.FC<ErrorViewProps> = ({
     <View
       style={[
         styles.errorContainer,
-        { backgroundColor: Colors[theme].background },
+        { backgroundColor: Colors.background },
       ]}
     >
       <Text style={styles.errorText}>{errorMessage}</Text>
       <TouchableOpacity
-        style={[styles.retryButton, { backgroundColor: Colors[theme].primary }]}
+        style={[styles.retryButton, { backgroundColor: Colors.primary }]}
         onPress={onRetry}
       >
         <Text style={styles.retryButtonText}>Retry</Text>

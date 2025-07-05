@@ -43,13 +43,13 @@ export default function SubscriptionScreen() {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "success":
-        return Colors[theme].primary;
+        return Colors.primary;
       case "pending":
-        return Colors[theme].accent;
+        return Colors.accent;
       case "failed":
-        return Colors[theme].accent;
+        return Colors.accent;
       default:
-        return Colors[theme].icon;
+        return Colors.icon;
     }
   };
 
@@ -64,24 +64,16 @@ export default function SubscriptionScreen() {
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: Colors[theme].background }]}
-    >
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
 
       <View style={styles.header}>
-        <Text style={[styles.title, { color: Colors[theme].text }]}>
-          Subscription
-        </Text>
+        <Text style={[styles.title, { color: Colors.text }]}>Subscription</Text>
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => router.push("/subscription-plans")}
         >
-          <Ionicons
-            name="settings-outline"
-            size={24}
-            color={Colors[theme].primary}
-          />
+          <Ionicons name="settings-outline" size={24} color={Colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -90,16 +82,14 @@ export default function SubscriptionScreen() {
         <SubscriptionStatus showUpgradeButton={true} />
 
         {/* Recent Transactions */}
-        <View style={[styles.section, { backgroundColor: Colors[theme].card }]}>
+        <View style={[styles.section, { backgroundColor: Colors.card }]}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
               Recent Transactions
             </Text>
             {transactions && transactions.length > 3 && (
               <TouchableOpacity onPress={handleViewAllTransactions}>
-                <Text
-                  style={[styles.viewAllText, { color: Colors[theme].primary }]}
-                >
+                <Text style={[styles.viewAllText, { color: Colors.primary }]}>
                   View All
                 </Text>
               </TouchableOpacity>
@@ -107,7 +97,7 @@ export default function SubscriptionScreen() {
           </View>
 
           {transactionsLoading ? (
-            <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
+            <Text style={[styles.loadingText, { color: Colors.text }]}>
               Loading transactions...
             </Text>
           ) : transactions && transactions.length > 0 ? (
@@ -117,23 +107,17 @@ export default function SubscriptionScreen() {
                   key={transaction.id}
                   style={[
                     styles.transactionItem,
-                    { borderBottomColor: Colors[theme].border },
+                    { borderBottomColor: Colors.border },
                   ]}
                 >
                   <View style={styles.transactionInfo}>
                     <Text
-                      style={[
-                        styles.transactionAmount,
-                        { color: Colors[theme].text },
-                      ]}
+                      style={[styles.transactionAmount, { color: Colors.text }]}
                     >
                       {formatAmount(transaction.amount)}
                     </Text>
                     <Text
-                      style={[
-                        styles.transactionDate,
-                        { color: Colors[theme].text },
-                      ]}
+                      style={[styles.transactionDate, { color: Colors.text }]}
                     >
                       {formatDate(transaction.created_at)}
                     </Text>
@@ -141,7 +125,7 @@ export default function SubscriptionScreen() {
                       <Text
                         style={[
                           styles.transactionDescription,
-                          { color: Colors[theme].text },
+                          { color: Colors.text },
                         ]}
                       >
                         {transaction.description}
@@ -169,23 +153,21 @@ export default function SubscriptionScreen() {
               ))}
             </View>
           ) : (
-            <Text style={[styles.emptyText, { color: Colors[theme].text }]}>
+            <Text style={[styles.emptyText, { color: Colors.text }]}>
               No transactions found
             </Text>
           )}
         </View>
 
         {/* Subscription History */}
-        <View style={[styles.section, { backgroundColor: Colors[theme].card }]}>
+        <View style={[styles.section, { backgroundColor: Colors.card }]}>
           <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
               Subscription History
             </Text>
             {subscriptions && subscriptions.length > 3 && (
               <TouchableOpacity onPress={handleViewAllSubscriptions}>
-                <Text
-                  style={[styles.viewAllText, { color: Colors[theme].primary }]}
-                >
+                <Text style={[styles.viewAllText, { color: Colors.primary }]}>
                   View All
                 </Text>
               </TouchableOpacity>
@@ -193,7 +175,7 @@ export default function SubscriptionScreen() {
           </View>
 
           {subscriptionsLoading ? (
-            <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
+            <Text style={[styles.loadingText, { color: Colors.text }]}>
               Loading subscriptions...
             </Text>
           ) : subscriptions && subscriptions.length > 0 ? (
@@ -203,15 +185,12 @@ export default function SubscriptionScreen() {
                   key={subscription.id}
                   style={[
                     styles.subscriptionItem,
-                    { borderBottomColor: Colors[theme].border },
+                    { borderBottomColor: Colors.border },
                   ]}
                 >
                   <View style={styles.subscriptionInfo}>
                     <Text
-                      style={[
-                        styles.subscriptionPlan,
-                        { color: Colors[theme].text },
-                      ]}
+                      style={[styles.subscriptionPlan, { color: Colors.text }]}
                     >
                       {subscription.plan_type.charAt(0).toUpperCase() +
                         subscription.plan_type.slice(1)}{" "}
@@ -220,16 +199,13 @@ export default function SubscriptionScreen() {
                     <Text
                       style={[
                         styles.subscriptionAmount,
-                        { color: Colors[theme].primary },
+                        { color: Colors.primary },
                       ]}
                     >
                       {formatAmount(subscription.amount)}
                     </Text>
                     <Text
-                      style={[
-                        styles.subscriptionDate,
-                        { color: Colors[theme].text },
-                      ]}
+                      style={[styles.subscriptionDate, { color: Colors.text }]}
                     >
                       {formatDate(subscription.start_date)} -{" "}
                       {formatDate(subscription.end_date)}
@@ -242,8 +218,8 @@ export default function SubscriptionScreen() {
                         {
                           backgroundColor:
                             subscription.status === "active"
-                              ? Colors[theme].primary
-                              : Colors[theme].accent,
+                              ? Colors.primary
+                              : Colors.accent,
                         },
                       ]}
                     />
@@ -253,8 +229,8 @@ export default function SubscriptionScreen() {
                         {
                           color:
                             subscription.status === "active"
-                              ? Colors[theme].primary
-                              : Colors[theme].accent,
+                              ? Colors.primary
+                              : Colors.accent,
                         },
                       ]}
                     >
@@ -266,24 +242,21 @@ export default function SubscriptionScreen() {
               ))}
             </View>
           ) : (
-            <Text style={[styles.emptyText, { color: Colors[theme].text }]}>
+            <Text style={[styles.emptyText, { color: Colors.text }]}>
               No subscription history found
             </Text>
           )}
         </View>
 
         {/* Quick Actions */}
-        <View style={[styles.section, { backgroundColor: Colors[theme].card }]}>
-          <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+        <View style={[styles.section, { backgroundColor: Colors.card }]}>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>
             Quick Actions
           </Text>
 
           <View style={styles.quickActions}>
             <TouchableOpacity
-              style={[
-                styles.actionButton,
-                { backgroundColor: Colors[theme].primary },
-              ]}
+              style={[styles.actionButton, { backgroundColor: Colors.primary }]}
               onPress={() => router.push("/subscription-plans")}
             >
               <Ionicons name="card-outline" size={24} color="#fff" />
@@ -293,7 +266,7 @@ export default function SubscriptionScreen() {
             <TouchableOpacity
               style={[
                 styles.actionButton,
-                { backgroundColor: Colors[theme].secondary },
+                { backgroundColor: Colors.secondary },
               ]}
               onPress={() =>
                 Alert.alert("Support", "Contact support feature coming soon!")

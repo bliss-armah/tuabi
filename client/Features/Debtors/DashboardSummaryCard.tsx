@@ -14,7 +14,6 @@ type Props = {
 
 export default function DashboardSummaryCard({ debtors, amount }: Props) {
   const theme = useColorScheme() ?? "light";
-  const color = Colors[theme];
 
   const handleDebtorsNavigation = () => {
     router.push("/debtors");
@@ -23,33 +22,33 @@ export default function DashboardSummaryCard({ debtors, amount }: Props) {
   return (
     <TouchableOpacity onPress={handleDebtorsNavigation} activeOpacity={0.85}>
       <LinearGradient
-        colors={[color.primary, color.secondary]} // Theme-based gradient
+        colors={[Colors.primary, Colors.secondary]} 
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.summaryCard}
       >
         <View style={styles.row}>
           <View>
-            <Text style={[styles.label, { color: color.offwhite }]}>
+            <Text style={[styles.label, { color: Colors.offwhite }]}>
               Total Debtors
             </Text>
-            <Text style={[styles.value, { color: color.background }]}>
+            <Text style={[styles.value, { color: Colors.background }]}>
               {debtors || 0}
             </Text>
           </View>
           <View style={{ alignItems: "flex-end" }}>
-            <Text style={[styles.label, { color: color.offwhite }]}>
+            <Text style={[styles.label, { color: Colors.offwhite }]}>
               Amount Owed
             </Text>
-            <Text style={[styles.value, { color: color.background }]}>
+            <Text style={[styles.value, { color: Colors.background }]}>
               {formatCurrency(amount || 0)}
             </Text>
           </View>
         </View>
 
         <View style={styles.footer}>
-          <Ionicons name="trending-up" size={16} color={color.background} />
-          <Text style={[styles.footerText, { color: color.offwhite }]}>
+          <Ionicons name="trending-up" size={16} color={Colors.background} />
+          <Text style={[styles.footerText, { color: Colors.offwhite }]}>
             Keep tracking repayments consistently
           </Text>
         </View>
