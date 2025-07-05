@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import prisma from "../config/database";
 
@@ -305,51 +305,6 @@ export const decrementDebtorAmount = async (
   }
 };
 
-export const deleteDebtor = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const { id } = req.params;
-    const debtorId = parseInt(id);
-    if (isNaN(debtorId)) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid debtor ID",
-      });
-      return;
-    }
-    // Check if debtor exists and belongs to user
-    const existingDebtor = await prisma.debtor.findFirst({
-      where: {
-        id: debtorId,
-        userId: req.user!.id,
-      },
-    });
-    if (!existingDebtor) {
-      res.status(404).json({
-        success: false,
-        message: "Debtor not found",
-      });
-      return;
-    }
-    await prisma.debtor.delete({
-      where: { id: debtorId },
-    });
-    res.status(200).json({
-      success: true,
-      message: "Debtor deleted successfully",
-    });
-  } catch (error) {
-    console.error("Delete debtor error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
-    return;
-  }
-};
-
 export const getDashboardData = async (
   req: AuthenticatedRequest,
   res: Response
@@ -371,14 +326,17 @@ export const getDashboardData = async (
 
     // Calculate total statistics
     const totalDebtors = debtors.length;
-    const totalAmountOwed = debtors.reduce((sum, debtor) => sum + debtor.amountOwed, 0);
-    
+    const totalAmountOwed = debtors.reduce(
+      (sum, debtor) => sum + debtor.amountOwed,
+      0
+    );
+
     // Count active debtors (those who owe more than 0)
-    const activeDebtors = debtors.filter(debtor => debtor.amountOwed > 0);
+    const activeDebtors = debtors.filter((debtor) => debtor.amountOwed > 0);
     const totalActiveDebtors = activeDebtors.length;
-    
+
     // Count settled debtors (those who owe 0)
-    const settledDebtors = debtors.filter(debtor => debtor.amountOwed === 0);
+    const settledDebtors = debtors.filter((debtor) => debtor.amountOwed === 0);
     const totalSettledDebtors = settledDebtors.length;
 
     // Get recent activities (last 10 history entries)
@@ -405,7 +363,7 @@ export const getDashboardData = async (
     const topDebtors = activeDebtors
       .sort((a, b) => b.amountOwed - a.amountOwed)
       .slice(0, 5)
-      .map(debtor => ({
+      .map((debtor) => ({
         id: debtor.id,
         name: debtor.name,
         amountOwed: debtor.amountOwed,
@@ -485,7 +443,7 @@ export const getDashboardData = async (
         totalAmountOwed: Math.round(totalAmountOwed * 100) / 100, // Round to 2 decimal places
       },
       topDebtors,
-      recentActivities: recentActivities.map(activity => ({
+      recentActivities: recentActivities.map((activity) => ({
         id: activity.id,
         debtorName: activity.debtor.name,
         action: activity.action,
@@ -495,19 +453,23 @@ export const getDashboardData = async (
       })),
       monthlyStats: {
         totalActivities: recentStats._count.id,
-        totalPaymentsReceived: Math.round((recentPayments._sum.amountChanged || 0) * 100) / 100,
+        totalPaymentsReceived:
+          Math.round((recentPayments._sum.amountChanged || 0) * 100) / 100,
         totalPaymentTransactions: recentPayments._count.id,
-        totalDebtAdded: Math.round((recentAdditions._sum.amountChanged || 0) * 100) / 100,
+        totalDebtAdded:
+          Math.round((recentAdditions._sum.amountChanged || 0) * 100) / 100,
         totalAdditionTransactions: recentAdditions._count.id,
         newDebtorsAdded: newDebtors,
       },
       trends: {
-        averageDebtPerDebtor: totalActiveDebtors > 0 
-          ? Math.round((totalAmountOwed / totalActiveDebtors) * 100) / 100 
-          : 0,
-        settlementRate: totalDebtors > 0 
-          ? Math.round((totalSettledDebtors / totalDebtors) * 100 * 100) / 100 
-          : 0, // Percentage
+        averageDebtPerDebtor:
+          totalActiveDebtors > 0
+            ? Math.round((totalAmountOwed / totalActiveDebtors) * 100) / 100
+            : 0,
+        settlementRate:
+          totalDebtors > 0
+            ? Math.round((totalSettledDebtors / totalDebtors) * 100 * 100) / 100
+            : 0, // Percentage
       },
     };
 

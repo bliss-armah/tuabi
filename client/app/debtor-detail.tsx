@@ -6,7 +6,6 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import {
   useGetDebtorQuery,
   useAddPaymentMutation,
-  useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
 } from "@/Features/Debtors/DebtorsApi";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
@@ -16,7 +15,6 @@ import { ErrorView } from "@/Shared/Components/ErrorView";
 import { DebtorDetailHeader } from "@/Features/Debtors/DebtorDetails/DebtorDetailHeader";
 import { DebtorDetailInfoCard } from "@/Features/Debtors/DebtorDetails/DebtorDetailInfoCard";
 import { PaymentHistory } from "@/Features/Debtors/DebtorDetails/PaymentHistory";
-import { DeleteDebtorButton } from "@/Features/Debtors/DebtorDetails/DeleteDebtorButton";
 import { PaymentModal } from "@/Features/Debtors/DebtorDetails/PaymentModal";
 
 export default function DebtorDetail() {
@@ -44,7 +42,6 @@ export default function DebtorDetail() {
   );
 
   const [addPayment] = useAddPaymentMutation();
-  const [deleteDebtor] = useDeleteDebtorMutation();
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
@@ -81,18 +78,6 @@ export default function DebtorDetail() {
     } catch (err) {
       console.error("Error adding payment:", err);
       Alert.alert("Error", "Failed to record payment");
-    }
-  };
-
-  const handleDeleteDebtor = async () => {
-    try {
-      await deleteDebtor(Number(id)).unwrap();
-      Alert.alert("Success", "Debtor deleted successfully", [
-        { text: "OK", onPress: () => router.back() },
-      ]);
-    } catch (err) {
-      console.error("Error deleting debtor:", err);
-      Alert.alert("Error", "Failed to delete debtor");
     }
   };
 
@@ -138,12 +123,6 @@ export default function DebtorDetail() {
         />
 
         <PaymentHistory theme={theme} history={history?.data} />
-
-        <DeleteDebtorButton
-          theme={theme}
-          debtorName={debtor.data.name}
-          onDelete={handleDeleteDebtor}
-        />
       </ScrollView>
 
       <PaymentModal

@@ -5,7 +5,6 @@ import {
   getDebtorById,
   createDebtor,
   updateDebtor,
-  deleteDebtor,
   incrementDebtorAmount,
   decrementDebtorAmount,
   getDashboardData,
@@ -56,17 +55,13 @@ router.put(
   updateDebtor
 );
 
-
 router.patch(
   "/:id/increment",
   [
     body("amount")
       .isFloat({ min: 0.01 })
       .withMessage("Amount must be a positive number greater than 0"),
-    body("note")
-      .optional()
-      .isString()
-      .withMessage("Note must be a string"),
+    body("note").optional().isString().withMessage("Note must be a string"),
     validateRequest,
   ],
   incrementDebtorAmount
@@ -78,15 +73,10 @@ router.patch(
     body("amount")
       .isFloat({ min: 0.01 })
       .withMessage("Amount must be a positive number greater than 0"),
-    body("note")
-      .optional()
-      .isString()
-      .withMessage("Note must be a string"),
+    body("note").optional().isString().withMessage("Note must be a string"),
     validateRequest,
   ],
   decrementDebtorAmount
 );
-
-router.delete("/:id", deleteDebtor);
 
 export default router;

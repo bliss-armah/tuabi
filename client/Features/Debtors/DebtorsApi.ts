@@ -48,14 +48,6 @@ export const debtorApi = createApi({
       invalidatesTags: ["Debtors"],
     }),
 
-    deleteDebtor: builder.mutation<any, number>({
-      query: (id) => ({
-        url: `/debtors/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Debtors"],
-    }),
-
     getDebtorHistory: builder.query<any, number>({
       query: (id) => `/debt-history/debtor/${id}`,
       providesTags:["Debtor"]
@@ -104,7 +96,6 @@ export const {
   useGetDebtorsQuery,
   useGetDebtorQuery,
   useCreateDebtorMutation,
-  useDeleteDebtorMutation,
   useGetDebtorHistoryQuery,
   useAddPaymentMutation,
   useUpdateDebtorMutation,

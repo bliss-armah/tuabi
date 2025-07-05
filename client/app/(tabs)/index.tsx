@@ -13,12 +13,15 @@ import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDashboardSummaryQuery } from "@/Features/Debtors/DebtorsApi";
 import { useAuth } from "@/Shared/Hooks/useAuth";
+import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
+import DebtorModal from "@/Features/Debtors/DebtorModal";
 // import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
+ const {closeModal,openAddDebtor,mode,isVisible}=  useDebtorModal()
 
   const { user, loading } = useAuth();
 
@@ -163,7 +166,7 @@ export default function Home() {
             styles.actionButton,
             { backgroundColor: Colors[theme].secondary },
           ]}
-          onPress={() => router.push("/add-debtor" as any)}
+          onPress={openAddDebtor}
         >
           <Ionicons name="add-circle" size={24} color="#fff" />
           <Text style={styles.actionButtonText}>Add New Debtor</Text>
@@ -202,6 +205,12 @@ export default function Home() {
           </Text>
         </View>
       </View>
+      <DebtorModal
+        visible={isVisible}
+        mode={mode}
+        onClose={closeModal}
+        onSuccess={refetch}
+      />
     </ScrollView>
   );
 }
