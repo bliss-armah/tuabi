@@ -5,13 +5,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 
 interface DebtorDetailHeaderProps {
-  theme: keyof typeof Colors;
   debtorName: string;
   onEdit: () => void;
 }
 
 export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
-  theme,
   debtorName,
   onEdit,
 }) => {

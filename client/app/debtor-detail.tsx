@@ -87,41 +87,31 @@ export default function DebtorDetail() {
   };
 
   if (isLoading || historyLoading) {
-    return <LoadingView theme={theme} text="Loading debtor details..." />;
+    return <LoadingView text="Loading debtor details..." />;
   }
 
   if (error) {
-    return <ErrorView theme={theme} error={error} onRetry={refetch} />;
+    return <ErrorView error={error} onRetry={refetch} />;
   }
 
   if (!debtor) {
-    return (
-      <ErrorView
-        theme={theme}
-        error="Debtor not found"
-        onRetry={() => router.back()}
-      />
-    );
+    return <ErrorView error="Debtor not found" onRetry={() => router.back()} />;
   }
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
-      <ScrollView>
-        <DebtorDetailHeader
-          theme={theme}
-          debtorName={debtor.data.name}
-          onEdit={() => openEditDebtor(debtor?.data)}
-        />
+      <DebtorDetailHeader
+        debtorName={debtor.data.name}
+        onEdit={() => openEditDebtor(debtor?.data)}
+      />
 
-        <DebtorDetailInfoCard
-          theme={theme}
-          debtor={debtor.data}
-          onAddPayment={() => openPaymentModal(false)}
-          onAddDebt={() => openPaymentModal(true)}
-        />
+      <DebtorDetailInfoCard
+        debtor={debtor.data}
+        onAddPayment={() => openPaymentModal(false)}
+        onAddDebt={() => openPaymentModal(true)}
+      />
 
-        <PaymentHistory theme={theme} history={history?.data} />
-      </ScrollView>
+      <PaymentHistory history={history?.data} />
 
       <PaymentModal
         visible={modalVisible}
