@@ -3,9 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   ScrollView,
-  TouchableOpacity,
 } from "react-native";
 import { Redirect, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,30 +13,21 @@ import { useGetDashboardSummaryQuery } from "@/Features/Debtors/DebtorsApi";
 import { useAuth } from "@/Shared/Hooks/useAuth";
 import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
+import { LoadingView } from "@/Shared/Components/LoadingView";
+import { ErrorView } from "@/Shared/Components/ErrorView";
+import DashboardSummaryCard from "@/Features/Debtors/DashboardSummaryCard";
 // import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
- const {closeModal,openAddDebtor,mode,isVisible}=  useDebtorModal()
+  const { closeModal, openAddDebtor, mode, isVisible } = useDebtorModal();
 
   const { user, loading } = useAuth();
 
   if (loading || isLoading) {
-    return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: Colors[theme].background },
-        ]}
-      >
-        <ActivityIndicator size="large" color={Colors[theme].primary} />
-        <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
-          Loading dashboard...
-        </Text>
-      </View>
-    );
+    return <LoadingView theme={theme} text=" Loading dashboard..." />;
   }
 
   if (!user) {
@@ -47,31 +36,11 @@ export default function Home() {
 
   if (error) {
     return (
-      <View
-        style={[
-          styles.errorContainer,
-          { backgroundColor: Colors[theme].background },
-        ]}
-      >
-        <Text style={[styles.errorText, { color: Colors[theme].accent }]}>
-          {error &&
-          "data" in error &&
-          typeof error.data === "object" &&
-          error.data &&
-          "message" in error.data
-            ? (error.data as any).message
-            : "An error occurred"}
-        </Text>
-        <TouchableOpacity
-          style={[
-            styles.retryButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
-          onPress={refetch}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      </View>
+      <ErrorView
+        theme={theme}
+        error={(error as any)?.data?.message || "Something went wrong"}
+        onRetry={refetch}
+      />
     );
   }
 
@@ -79,77 +48,17 @@ export default function Home() {
     <ScrollView
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
     >
-      <Text style={styles.headerSubtitle}>Debt Overview 📊</Text>
+      <Text style={styles.titleSubtitle}>Debt Overview 📊</Text>
 
       {/* Subscription Status */}
       {/* <SubscriptionStatus showUpgradeButton={true} compact={false} /> */}
 
-      <View style={styles.statsContainer}>
-        <View
-          style={[styles.statCard, { backgroundColor: Colors[theme].card }]}
-        >
-          <View
-            style={[
-              styles.statIconContainer,
-              {
-                backgroundColor: `${Colors[theme].primary}20`,
-              },
-            ]}
-          >
-            <Ionicons name="people" size={24} color={Colors[theme].primary} />
-          </View>
-          <Text style={[styles.statValue, { color: Colors[theme].text }]}>
-            {data?.data?.summary?.totalDebtors || 0}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
-            Total Debtors
-          </Text>
-        </View>
+      <DashboardSummaryCard
+        debtors={data?.data?.summary?.totalDebtors || 0}
+        amount={data?.data?.summary?.totalAmountOwed || 0}
+      />
 
-        <View
-          style={[styles.statCard, { backgroundColor: Colors[theme].card }]}
-        >
-          <View
-            style={[
-              styles.statIconContainer,
-              {
-                backgroundColor: `${Colors[theme].secondary}20`,
-              },
-            ]}
-          >
-            <Ionicons name="cash" size={24} color={Colors[theme].secondary} />
-          </View>
-          <Text style={[styles.statValue, { color: Colors[theme].text }]}>
-            ${(data?.data?.summary?.totalAmountOwed || 0).toFixed(2)}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
-            Total Amount Owed
-          </Text>
-        </View>
-
-        <View
-          style={[styles.statCard, { backgroundColor: Colors[theme].card }]}
-        >
-          <View
-            style={[
-              styles.statIconContainer,
-              {
-                backgroundColor: `${Colors[theme].accent}20`,
-              },
-            ]}
-          >
-            <Ionicons name="time" size={24} color={Colors[theme].accent} />
-          </View>
-          <Text style={[styles.statValue, { color: Colors[theme].text }]}>
-            {data?.data?.recentActivities?.length || 0}
-          </Text>
-          <Text style={[styles.statLabel, { color: Colors[theme].icon }]}>
-            Recent Activities
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.actionsContainer}>
+      {/* <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={[
             styles.actionButton,
@@ -171,7 +80,7 @@ export default function Home() {
           <Ionicons name="add-circle" size={24} color="#fff" />
           <Text style={styles.actionButtonText}>Add New Debtor</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       <View style={styles.tipsContainer}>
         <Text style={[styles.tipsTitle, { color: Colors[theme].text }]}>
@@ -264,69 +173,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
   },
-  headerSubtitle: {
+  titleSubtitle: {
     paddingHorizontal: 20,
-    fontSize: 17,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#0a0a0a",
     marginTop: 5,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 15,
-    marginTop: 5,
-  },
-  statCard: {
-    borderRadius: 16,
-    padding: 15,
-    width: "31%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 5,
-    textAlign: "center",
-  },
-  actionsContainer: {
-    padding: 15,
-    marginTop: 15,
-  },
-  actionButton: {
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  actionButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
   },
   tipsContainer: {
     padding: 15,
