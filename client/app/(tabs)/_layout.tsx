@@ -2,24 +2,19 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
-
   return (
     <Tabs
       initialRouteName="index"
       screenOptions={{
-        tabBarActiveTintColor: Colors[theme].primary,
-        tabBarInactiveTintColor: Colors[theme].icon,
+        tabBarActiveTintColor: Colors.primary,
+        tabBarInactiveTintColor: Colors.icon,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors[theme].card,
-          borderTopColor: Colors[theme].border,
+          backgroundColor: Colors.card,
+          borderTopColor: Colors.border,
           height: 60,
           paddingBottom: 8,
           paddingTop: 8,
@@ -55,7 +50,7 @@ export default function TabLayout() {
                   style={{
                     height: 3,
                     width: 30,
-                    backgroundColor: Colors[theme].primary,
+                    backgroundColor: Colors.primary,
                     borderBottomRightRadius: 3,
                     borderBottomLeftRadius: 3,
                     position: "absolute",
@@ -84,7 +79,7 @@ export default function TabLayout() {
                   style={{
                     height: 3,
                     width: 30,
-                    backgroundColor: Colors[theme].primary,
+                    backgroundColor: Colors.primary,
                     borderRadius: 2,
                     position: "absolute",
                     top: -15,
@@ -112,7 +107,7 @@ export default function TabLayout() {
                   style={{
                     height: 3,
                     width: 30,
-                    backgroundColor: Colors[theme].primary,
+                    backgroundColor: Colors.primary,
                     borderRadius: 2,
                     position: "absolute",
                     top: -15,
@@ -140,7 +135,7 @@ export default function TabLayout() {
                   style={{
                     height: 3,
                     width: 30,
-                    backgroundColor: Colors[theme].primary,
+                    backgroundColor: Colors.primary,
                     borderRadius: 2,
                     position: "absolute",
                     top: -15,

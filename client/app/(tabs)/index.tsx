@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Redirect, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
@@ -16,6 +11,7 @@ import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import DashboardSummaryCard from "@/Features/Debtors/DashboardSummaryCard";
+import { Navbar } from "@/Shared/Components/Navbar";
 // import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
@@ -27,7 +23,7 @@ export default function Home() {
   const { user, loading } = useAuth();
 
   if (loading || isLoading) {
-    return <LoadingView theme={theme} text=" Loading dashboard..." />;
+    return <LoadingView text=" Loading dashboard..." />;
   }
 
   if (!user) {
@@ -37,7 +33,6 @@ export default function Home() {
   if (error) {
     return (
       <ErrorView
-        theme={theme}
         error={(error as any)?.data?.message || "Something went wrong"}
         onRetry={refetch}
       />
@@ -45,82 +40,58 @@ export default function Home() {
   }
 
   return (
-    <ScrollView
-      style={[styles.container, { backgroundColor: Colors[theme].background }]}
-    >
-      <Text style={styles.titleSubtitle}>Debt Overview 📊</Text>
+    <View style={{ flex: 1 }}>
+      <Navbar />
+      <ScrollView
+        style={[styles.container, { backgroundColor: Colors.background }]}
+      >
+        <Text style={styles.headerTitle}>Debt Overview 📊</Text>
 
-      {/* Subscription Status */}
-      {/* <SubscriptionStatus showUpgradeButton={true} compact={false} /> */}
+        {/* Subscription Status */}
+        {/* <SubscriptionStatus showUpgradeButton={true} compact={false} /> */}
 
-      <DashboardSummaryCard
-        debtors={data?.data?.summary?.totalDebtors || 0}
-        amount={data?.data?.summary?.totalAmountOwed || 0}
-      />
+        <DashboardSummaryCard
+          debtors={data?.data?.summary?.totalDebtors || 0}
+          amount={data?.data?.summary?.totalAmountOwed || 0}
+        />
 
-      {/* <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors[theme].primary },
-          ]}
-          onPress={() => router.push("/debtors" as any)}
-        >
-          <Ionicons name="list" size={24} color="#fff" />
-          <Text style={styles.actionButtonText}>View All Debtors</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors[theme].secondary },
-          ]}
-          onPress={openAddDebtor}
-        >
-          <Ionicons name="add-circle" size={24} color="#fff" />
-          <Text style={styles.actionButtonText}>Add New Debtor</Text>
-        </TouchableOpacity>
-      </View> */}
-
-      <View style={styles.tipsContainer}>
-        <Text style={[styles.tipsTitle, { color: Colors[theme].text }]}>
-          Tips for Managing Debtors
-        </Text>
-        <View style={[styles.tipCard, { backgroundColor: Colors[theme].card }]}>
-          <Ionicons
-            name="information-circle"
-            size={20}
-            color={Colors[theme].primary}
-          />
-          <Text style={[styles.tipText, { color: Colors[theme].text }]}>
-            Regularly update payment records to keep track of all transactions.
+        <View style={styles.tipsContainer}>
+          <Text style={[styles.tipsTitle, { color: Colors.text }]}>
+            Tips for Managing Debtors
           </Text>
+          <View style={[styles.tipCard, { backgroundColor: Colors.card }]}>
+            <Ionicons
+              name="information-circle"
+              size={20}
+              color={Colors.primary}
+            />
+            <Text style={[styles.tipText, { color: Colors.text }]}>
+              Regularly update payment records to keep track of all
+              transactions.
+            </Text>
+          </View>
+          <View style={[styles.tipCard, { backgroundColor: Colors.card }]}>
+            <Ionicons name="call" size={20} color={Colors.primary} />
+            <Text style={[styles.tipText, { color: Colors.text }]}>
+              Use the call feature to quickly contact debtors about payments.
+            </Text>
+          </View>
+          <View style={[styles.tipCard, { backgroundColor: Colors.card }]}>
+            <Ionicons name="notifications" size={20} color={Colors.primary} />
+            <Text style={[styles.tipText, { color: Colors.text }]}>
+              Set reminders for follow-ups with customers who have outstanding
+              debts.
+            </Text>
+          </View>
         </View>
-        <View style={[styles.tipCard, { backgroundColor: Colors[theme].card }]}>
-          <Ionicons name="call" size={20} color={Colors[theme].primary} />
-          <Text style={[styles.tipText, { color: Colors[theme].text }]}>
-            Use the call feature to quickly contact debtors about payments.
-          </Text>
-        </View>
-        <View style={[styles.tipCard, { backgroundColor: Colors[theme].card }]}>
-          <Ionicons
-            name="notifications"
-            size={20}
-            color={Colors[theme].primary}
-          />
-          <Text style={[styles.tipText, { color: Colors[theme].text }]}>
-            Set reminders for follow-ups with customers who have outstanding
-            debts.
-          </Text>
-        </View>
-      </View>
+      </ScrollView>
       <DebtorModal
         visible={isVisible}
         mode={mode}
         onClose={closeModal}
         onSuccess={refetch}
       />
-    </ScrollView>
+    </View>
   );
 }
 
@@ -169,13 +140,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  titleSubtitle: {
     paddingHorizontal: 20,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#0a0a0a",
     marginTop: 5,

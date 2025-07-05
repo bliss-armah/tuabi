@@ -9,9 +9,6 @@ import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
-
   const [loginMutation] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,22 +42,16 @@ export default function LoginScreen() {
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: Colors[theme].background }]}
-    >
-      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
+      <StatusBar style={"dark"} />
       <View style={styles.logoContainer}>
-        <Text style={[styles.logoText, { color: Colors[theme].primary }]}>
-          Tuabi
-        </Text>
-        <Text style={[styles.tagline, { color: Colors[theme].text }]}>
+        <Text style={[styles.logoText, { color: Colors.primary }]}>Tuabi</Text>
+        <Text style={[styles.tagline, { color: Colors.text }]}>
           Track customer debts with ease
         </Text>
       </View>
 
-      <View
-        style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}
-      >
+      <View style={[styles.formContainer, { backgroundColor: Colors.card }]}>
         <Input
           placeholder="Email"
           value={email}

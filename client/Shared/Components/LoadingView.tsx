@@ -3,22 +3,16 @@ import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { Colors } from "@/Shared/Constants/Colors";
 
 interface LoadingViewProps {
-  theme: keyof typeof Colors;
   text: string;
 }
 
-export const LoadingView: React.FC<LoadingViewProps> = ({ theme, text }) => {
+export const LoadingView: React.FC<LoadingViewProps> = ({ text }) => {
   return (
     <View
-      style={[
-        styles.loadingContainer,
-        { backgroundColor: Colors[theme].background },
-      ]}
+      style={[styles.loadingContainer, { backgroundColor: Colors.background }]}
     >
-      <ActivityIndicator size="large" color={Colors[theme].primary} />
-      <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
-        {text}
-      </Text>
+      <ActivityIndicator size="large" color={Colors.primary} />
+      <Text style={[styles.loadingText, { color: Colors.text }]}>{text}</Text>
     </View>
   );
 };

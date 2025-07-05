@@ -5,18 +5,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 
 interface DebtorDetailHeaderProps {
-  theme: keyof typeof Colors;
   debtorName: string;
   onEdit: () => void;
 }
 
 export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
-  theme,
   debtorName,
   onEdit,
 }) => {
   return (
-    <View style={[styles.header, { backgroundColor: Colors[theme].primary }]}>
+    <View style={[styles.header, { backgroundColor: Colors.primary }]}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
@@ -24,10 +22,7 @@ export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
       <Text style={styles.headerTitle}>{debtorName}</Text>
 
       <TouchableOpacity
-        style={[
-          styles.editButton,
-          { backgroundColor: Colors[theme].secondary },
-        ]}
+        style={[styles.editButton, { backgroundColor: Colors.secondary }]}
         onPress={onEdit}
       >
         <Ionicons name="create" size={24} color="#fff" />

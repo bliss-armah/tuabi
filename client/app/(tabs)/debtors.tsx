@@ -80,10 +80,7 @@ export default function Debtors() {
           style={[
             styles.amount,
             {
-              color:
-                item.amountOwed > 0
-                  ? Colors[theme].accent
-                  : Colors[theme].primary,
+              color: item.amountOwed > 0 ? Colors.accent : Colors.primary,
             },
           ]}
         >
@@ -94,13 +91,12 @@ export default function Debtors() {
   );
 
   if (isLoading) {
-    return <LoadingView theme={theme} text="Loading debtors..." />;
+    return <LoadingView text="Loading debtors..." />;
   }
 
   if (error) {
     return (
       <ErrorView
-        theme={theme}
         error={(error as any)?.data?.message || "Something went wrong"}
         onRetry={refetch}
       />
@@ -108,16 +104,11 @@ export default function Debtors() {
   }
 
   return (
-    <View style={{flex:1, backgroundColor: Colors[theme].background }}>
+    <View style={{ flex: 1, backgroundColor: Colors.background }}>
       <DebtorHeader
         title="Debtors"
-        theme={theme}
         actionButton={
-          <Ionicons
-            name="add-circle-outline"
-            size={28}
-            color={"#ffffff"}
-          />
+          <Ionicons name="add-circle-outline" size={28} color={"#ffffff"} />
         }
         onTap={openAddDebtor}
       />

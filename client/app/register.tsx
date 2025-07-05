@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
@@ -31,7 +31,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await registerMutation({ name, email, password }).unwrap()
+      await registerMutation({ name, email, password }).unwrap();
       Alert.alert(
         "Registration Successful",
         "You can now login with your credentials",
@@ -52,22 +52,16 @@ export default function Register() {
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: Colors[theme].background }]}
-    >
-      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
+      <StatusBar style={"dark"} />
       <View style={styles.logoContainer}>
-        <Text style={[styles.logoText, { color: Colors[theme].primary }]}>
-          Tuabi
-        </Text>
-        <Text style={[styles.tagline, { color: Colors[theme].text }]}>
+        <Text style={[styles.logoText, { color: Colors.primary }]}>Tuabi</Text>
+        <Text style={[styles.tagline, { color: Colors.text }]}>
           Create your account
         </Text>
       </View>
 
-      <View
-        style={[styles.formContainer, { backgroundColor: Colors[theme].card }]}
-      >
+      <View style={[styles.formContainer, { backgroundColor: Colors.card }]}>
         <Input
           placeholder="Full Name"
           value={name}

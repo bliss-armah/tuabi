@@ -49,8 +49,8 @@
 
 //   if (isLoading) {
 //     return (
-//       <View style={[styles.container, { backgroundColor: Colors[theme].card }]}>
-//         <Text style={[styles.loadingText, { color: Colors[theme].text }]}>
+//       <View style={[styles.container, { backgroundColor: Colors.card }]}>
+//         <Text style={[styles.loadingText, { color: Colors.text }]}>
 //           Loading subscription status...
 //         </Text>
 //       </View>
@@ -59,8 +59,8 @@
 
 //   if (error || !subscriptionStatus) {
 //     return (
-//       <View style={[styles.container, { backgroundColor: Colors[theme].card }]}>
-//         <Text style={[styles.errorText, { color: Colors[theme].accent }]}>
+//       <View style={[styles.container, { backgroundColor: Colors.card }]}>
+//         <Text style={[styles.errorText, { color: Colors.accent }]}>
 //           Failed to load subscription status
 //         </Text>
 //       </View>
@@ -77,7 +77,7 @@
 //       <View
 //         style={[
 //           styles.compactContainer,
-//           { backgroundColor: Colors[theme].card },
+//           { backgroundColor: Colors.card },
 //         ]}
 //       >
 //         {isSubscribed && !hasExpired ? (
@@ -85,10 +85,10 @@
 //             <View
 //               style={[
 //                 styles.statusDot,
-//                 { backgroundColor: Colors[theme].primary },
+//                 { backgroundColor: Colors.primary },
 //               ]}
 //             />
-//             <Text style={[styles.compactText, { color: Colors[theme].text }]}>
+//             <Text style={[styles.compactText, { color: Colors.text }]}>
 //               Active
 //             </Text>
 //           </View>
@@ -97,10 +97,10 @@
 //             <View
 //               style={[
 //                 styles.statusDot,
-//                 { backgroundColor: Colors[theme].accent },
+//                 { backgroundColor: Colors.accent },
 //               ]}
 //             />
-//             <Text style={[styles.compactText, { color: Colors[theme].text }]}>
+//             <Text style={[styles.compactText, { color: Colors.text }]}>
 //               {hasExpired ? "Expired" : "No Subscription"}
 //             </Text>
 //           </View>
@@ -110,16 +110,16 @@
 //   }
 
 //   return (
-//     <View style={[styles.container, { backgroundColor: Colors[theme].card }]}>
+//     <View style={[styles.container, { backgroundColor: Colors.card }]}>
 //       <View style={styles.header}>
-//         <Text style={[styles.title, { color: Colors[theme].text }]}>
+//         <Text style={[styles.title, { color: Colors.text }]}>
 //           Subscription Status
 //         </Text>
 //         {isSubscribed && !hasExpired && (
 //           <View
 //             style={[
 //               styles.statusBadge,
-//               { backgroundColor: Colors[theme].primary },
+//               { backgroundColor: Colors.primary },
 //             ]}
 //           >
 //             <Text style={styles.statusBadgeText}>Active</Text>
@@ -129,13 +129,13 @@
 
 //       {isSubscribed && !hasExpired ? (
 //         <View style={styles.activeSubscription}>
-//           <Text style={[styles.statusText, { color: Colors[theme].text }]}>
+//           <Text style={[styles.statusText, { color: Colors.text }]}>
 //             Your subscription is active
 //           </Text>
 
 //           {subscriptionStatus.current_plan && (
 //             <View style={styles.planInfo}>
-//               <Text style={[styles.planName, { color: Colors[theme].text }]}>
+//               <Text style={[styles.planName, { color: Colors.text }]}>
 //                 {subscriptionStatus.current_plan.plan_type
 //                   .charAt(0)
 //                   .toUpperCase() +
@@ -143,7 +143,7 @@
 //                 Plan
 //               </Text>
 //               <Text
-//                 style={[styles.planAmount, { color: Colors[theme].primary }]}
+//                 style={[styles.planAmount, { color: Colors.primary }]}
 //               >
 //                 ₦{subscriptionStatus.current_plan.amount.toLocaleString()}
 //               </Text>
@@ -152,14 +152,14 @@
 
 //           {subscriptionStatus.subscription_expires_at && (
 //             <View style={styles.expiryInfo}>
-//               <Text style={[styles.expiryLabel, { color: Colors[theme].text }]}>
+//               <Text style={[styles.expiryLabel, { color: Colors.text }]}>
 //                 Expires on:
 //               </Text>
-//               <Text style={[styles.expiryDate, { color: Colors[theme].text }]}>
+//               <Text style={[styles.expiryDate, { color: Colors.text }]}>
 //                 {formatDate(subscriptionStatus.subscription_expires_at)}
 //               </Text>
 //               <Text
-//                 style={[styles.daysRemaining, { color: Colors[theme].primary }]}
+//                 style={[styles.daysRemaining, { color: Colors.primary }]}
 //               >
 //                 {getDaysRemaining(subscriptionStatus.subscription_expires_at)}{" "}
 //                 days remaining
@@ -169,20 +169,20 @@
 //         </View>
 //       ) : (
 //         <View style={styles.inactiveSubscription}>
-//           <Text style={[styles.statusText, { color: Colors[theme].text }]}>
+//           <Text style={[styles.statusText, { color: Colors.text }]}>
 //             {hasExpired
 //               ? "Your subscription has expired"
 //               : "No active subscription"}
 //           </Text>
 
 //           {hasExpired && subscriptionStatus.subscription_expires_at && (
-//             <Text style={[styles.expiredDate, { color: Colors[theme].accent }]}>
+//             <Text style={[styles.expiredDate, { color: Colors.accent }]}>
 //               Expired on{" "}
 //               {formatDate(subscriptionStatus.subscription_expires_at)}
 //             </Text>
 //           )}
 
-//           <Text style={[styles.upgradeText, { color: Colors[theme].text }]}>
+//           <Text style={[styles.upgradeText, { color: Colors.text }]}>
 //             Upgrade to access all features and unlimited debtors
 //           </Text>
 
@@ -190,7 +190,7 @@
 //             <TouchableOpacity
 //               style={[
 //                 styles.upgradeButton,
-//                 { backgroundColor: Colors[theme].primary },
+//                 { backgroundColor: Colors.primary },
 //               ]}
 //               onPress={handleUpgrade}
 //             >
@@ -206,11 +206,11 @@
 //         <View
 //           style={[
 //             styles.transactionsSection,
-//             { borderTopColor: Colors[theme].border },
+//             { borderTopColor: Colors.border },
 //           ]}
 //         >
 //           <Text
-//             style={[styles.transactionsTitle, { color: Colors[theme].text }]}
+//             style={[styles.transactionsTitle, { color: Colors.text }]}
 //           >
 //             Recent Transactions
 //           </Text>
@@ -221,7 +221,7 @@
 //                 <Text
 //                   style={[
 //                     styles.transactionAmount,
-//                     { color: Colors[theme].text },
+//                     { color: Colors.text },
 //                   ]}
 //                 >
 //                   ₦{transaction.amount.toLocaleString()}
@@ -232,8 +232,8 @@
 //                     {
 //                       color:
 //                         transaction.status === "success"
-//                           ? Colors[theme].primary
-//                           : Colors[theme].accent,
+//                           ? Colors.primary
+//                           : Colors.accent,
 //                     },
 //                   ]}
 //                 >

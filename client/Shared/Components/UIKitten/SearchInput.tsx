@@ -2,7 +2,6 @@ import React from "react";
 import { Input as UIKittenInput } from "@ui-kitten/components";
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useColorScheme } from "../../Hooks/useColorScheme";
 import { Colors } from "../../Constants/Colors";
 
 interface SearchInputProps {
@@ -20,18 +19,16 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   onClear,
   style,
 }) => {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === "dark" ? Colors.dark : Colors.light;
 
   const renderAccessoryRight = () => {
     if (value && value.length > 0) {
       return () => (
         <TouchableOpacity onPress={onClear}>
-          <Ionicons name="close-circle" size={20} color={theme.icon} />
+          <Ionicons name="close-circle" size={20} color={Colors.icon} />
         </TouchableOpacity>
       );
     }
-    return () => <Ionicons name="search" size={20} color={theme.icon} />;
+    return () => <Ionicons name="search" size={20} color={Colors.icon} />;
   };
 
   return (

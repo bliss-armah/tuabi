@@ -3,28 +3,23 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Colors } from "@/Shared/Constants/Colors";
 
 interface DebtorHeaderProps {
-  theme: keyof typeof Colors;
   title: string;
   actionButton?: React.ReactNode;
   onTap: () => void;
 }
 
 export const DebtorHeader: React.FC<DebtorHeaderProps> = ({
-  theme,
   title,
   actionButton,
   onTap,
 }) => {
   return (
-    <View style={[styles.header, { backgroundColor: Colors[theme].primary }]}>
+    <View style={[styles.header, { backgroundColor: Colors.primary }]}>
       <Text style={styles.headerTitle}>{title}</Text>
 
       {actionButton && (
         <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors[theme].secondary },
-          ]}
+          style={[styles.actionButton, { backgroundColor: Colors.secondary }]}
           onPress={onTap}
         >
           {actionButton}
