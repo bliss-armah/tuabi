@@ -23,7 +23,7 @@ export default function Home() {
   const { user, loading } = useAuth();
 
   if (loading || isLoading) {
-    return <LoadingView  text=" Loading dashboard..." />;
+    return <LoadingView text=" Loading dashboard..." />;
   }
 
   if (!user) {
@@ -33,7 +33,6 @@ export default function Home() {
   if (error) {
     return (
       <ErrorView
-        
         error={(error as any)?.data?.message || "Something went wrong"}
         onRetry={refetch}
       />
@@ -44,10 +43,7 @@ export default function Home() {
     <View style={{ flex: 1 }}>
       <Navbar />
       <ScrollView
-        style={[
-          styles.container,
-          { backgroundColor: Colors.background },
-        ]}
+        style={[styles.container, { backgroundColor: Colors.background }]}
       >
         <Text style={styles.headerTitle}>Debt Overview 📊</Text>
 
@@ -59,37 +55,11 @@ export default function Home() {
           amount={data?.data?.summary?.totalAmountOwed || 0}
         />
 
-        {/* <View style={styles.actionsContainer}>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors.primary },
-          ]}
-          onPress={() => router.push("/debtors" as any)}
-        >
-          <Ionicons name="list" size={24} color="#fff" />
-          <Text style={styles.actionButtonText}>View All Debtors</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            { backgroundColor: Colors.secondary },
-          ]}
-          onPress={openAddDebtor}
-        >
-          <Ionicons name="add-circle" size={24} color="#fff" />
-          <Text style={styles.actionButtonText}>Add New Debtor</Text>
-        </TouchableOpacity>
-      </View> */}
-
         <View style={styles.tipsContainer}>
           <Text style={[styles.tipsTitle, { color: Colors.text }]}>
             Tips for Managing Debtors
           </Text>
-          <View
-            style={[styles.tipCard, { backgroundColor: Colors.card }]}
-          >
+          <View style={[styles.tipCard, { backgroundColor: Colors.card }]}>
             <Ionicons
               name="information-circle"
               size={20}
@@ -100,22 +70,14 @@ export default function Home() {
               transactions.
             </Text>
           </View>
-          <View
-            style={[styles.tipCard, { backgroundColor: Colors.card }]}
-          >
+          <View style={[styles.tipCard, { backgroundColor: Colors.card }]}>
             <Ionicons name="call" size={20} color={Colors.primary} />
             <Text style={[styles.tipText, { color: Colors.text }]}>
               Use the call feature to quickly contact debtors about payments.
             </Text>
           </View>
-          <View
-            style={[styles.tipCard, { backgroundColor: Colors.card }]}
-          >
-            <Ionicons
-              name="notifications"
-              size={20}
-              color={Colors.primary}
-            />
+          <View style={[styles.tipCard, { backgroundColor: Colors.card }]}>
+            <Ionicons name="notifications" size={20} color={Colors.primary} />
             <Text style={[styles.tipText, { color: Colors.text }]}>
               Set reminders for follow-ups with customers who have outstanding
               debts.
