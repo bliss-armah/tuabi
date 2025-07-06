@@ -47,11 +47,16 @@ export const useAuth = () => {
   }, [tokenExpiry]);
 
   const logout = async () => {
-    await AsyncStorage.clear();
-    setUser(null);
-    setToken(null);
-    setTokenExpiry(null);
-    router.replace("/login");
+    try {
+      await AsyncStorage.clear();
+    } catch (error) {
+      console.error("Error clearing AsyncStorage:", error);
+    } finally {
+      setUser(null);
+      setToken(null);
+      setTokenExpiry(null);
+      router.replace("/login");
+    }
   };
 
   return { user, token, logout, loading };

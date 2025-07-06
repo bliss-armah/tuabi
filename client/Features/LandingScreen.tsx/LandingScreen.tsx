@@ -65,7 +65,7 @@ export default function LandingScreen() {
         <View>
           <TouchableOpacity
             className="bg-indigo-600 py-4 rounded-full mb-4"
-            onPress={() => router.push("/login")}
+            onPress={() => router.push("/register")}
           >
             <Text className="text-white font-semibold text-center text-lg">
               Get Started
