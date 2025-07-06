@@ -35,8 +35,15 @@ export const authApi = createApi({
         method: "GET",
       }),
     }),
+    savePushToken: builder.mutation<any, { pushToken: string }>({
+      query: ({ pushToken }) => ({
+        url: "/push-token",
+        method: "POST",
+        body: { pushToken },
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery } =
+export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery,useSavePushTokenMutation } =
   authApi;

@@ -11,6 +11,7 @@ import debtorRoutes from "./routes/debtor";
 import debtHistoryRoutes from "./routes/debtHistory";
 import subscriptionRoutes from "./routes/subscription";
 import reminderRoutes from "./routes/reminderRoutes";
+import pushTokenRoutes from "./routes/pushToken";
 
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
@@ -68,6 +69,7 @@ app.use("/api/debtors", debtorRoutes);
 app.use("/api/debt-history", debtHistoryRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/reminders", reminderRoutes);
+app.use("/api/push-token", pushTokenRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

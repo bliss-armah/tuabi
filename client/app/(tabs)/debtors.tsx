@@ -11,12 +11,12 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
-import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { SearchInput } from "@/Shared/Components/UIKitten";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
+import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 
 type Debtor = {
   id: number;

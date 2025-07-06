@@ -1,5 +1,8 @@
 import cron from "node-cron";
 import prisma from "../config/database";
+import { Expo, ExpoPushMessage } from "expo-server-sdk";
+
+const expo = new Expo();
 
 export class NotificationService {
   private static instance: NotificationService;
@@ -67,6 +70,7 @@ export class NotificationService {
             select: {
               name: true,
               email: true,
+              expoPushToken: true,
             },
           },
         },
@@ -121,36 +125,30 @@ export class NotificationService {
 
   private async sendOverdueNotification(reminder: any): Promise<void> {
     try {
-      const notificationData = {
-        type: "overdue_reminder",
-        title: `Payment Overdue: ${reminder.debtor.name}`,
-        body: `Payment of GHS ${reminder.debtor.amountOwed.toFixed(
-          2
-        )} is overdue. ${reminder.message}`,
-        data: {
-          reminderId: reminder.id,
-          debtorId: reminder.debtorId,
-          debtorName: reminder.debtor.name,
-          amount: reminder.debtor.amountOwed,
-          phoneNumber: reminder.debtor.phoneNumber,
+      const pushToken = reminder.user?.expoPushToken; 
+      if (!pushToken || !Expo.isExpoPushToken(pushToken)) {
+        console.warn(`Invalid Expo Push Token for user: ${reminder.userId}`);
+        return;
+      }
+
+      const messages = [
+        {
+          to: pushToken,
+          sound: "default",
+          title: `Payment Overdue: ${reminder.debtor.name}`,
+          body: `GHS ${reminder.debtor.amountOwed.toFixed(2)} is overdue.`,
+          data: {
+            type: "overdue_reminder",
+            reminderId: reminder.id,
+            ...reminder,
+          },
         },
-      };
+      ];
 
-      // Here you would integrate with your preferred notification service
-      // For now, we'll just log the notification
-      console.log("OVERDUE NOTIFICATION:", {
-        userId: reminder.userId,
-        userEmail: reminder.user.email,
-        ...notificationData,
-      });
-
-      // You could integrate with services like:
-      // - Expo Push Notifications
-      // - Firebase Cloud Messaging
-      // - Twilio SMS
-      // - Email services
+      const ticketChunk = await expo.sendPushNotificationsAsync(messages);
+      console.log("Push ticket:", ticketChunk);
     } catch (error) {
-      console.error("Error sending overdue notification:", error);
+      console.error("Error sending Expo notification:", error);
     }
   }
 
@@ -162,13 +160,24 @@ export class NotificationService {
         (dueDate.getTime() - now.getTime()) / (1000 * 60)
       );
 
-      const notificationData = {
-        type: "upcoming_reminder",
+      const pushToken = reminder.user?.expoPushToken;
+
+      if (!pushToken || !Expo.isExpoPushToken(pushToken)) {
+        console.warn(
+          `Invalid or missing Expo Push Token for user: ${reminder.userId}`
+        );
+        return;
+      }
+
+      const message = {
+        to: pushToken,
+        sound: "default",
         title: `Payment Due Soon: ${reminder.debtor.name}`,
         body: `Payment of GHS ${reminder.debtor.amountOwed.toFixed(
           2
-        )} is due in ${diffMinutes} minutes. ${reminder.message}`,
+        )} is due in ${diffMinutes} minutes.`,
         data: {
+          type: "upcoming_reminder",
           reminderId: reminder.id,
           debtorId: reminder.debtorId,
           debtorName: reminder.debtor.name,
@@ -177,17 +186,12 @@ export class NotificationService {
         },
       };
 
-      // Here you would integrate with your preferred notification service
-      console.log("UPCOMING NOTIFICATION:", {
-        userId: reminder.userId,
-        userEmail: reminder.user.email,
-        ...notificationData,
-      });
+      const ticketChunk = await expo.sendPushNotificationsAsync([message]);
+      console.log("UPCOMING PUSH ticket:", ticketChunk);
     } catch (error) {
       console.error("Error sending upcoming notification:", error);
     }
   }
-
   public async scheduleReminderNotification(reminder: any): Promise<void> {
     try {
       const dueDate = new Date(reminder.dueDate);
@@ -220,6 +224,22 @@ export class NotificationService {
       console.log(`Cancelled notification for reminder ${reminderId}`);
     } catch (error) {
       console.error("Error cancelling reminder notification:", error);
+    }
+  }
+
+  public async sendCustomNotification(message: ExpoPushMessage) {
+    try {
+      if (!Expo.isExpoPushToken(message.to)) {
+        console.warn("Invalid Expo Push Token:", message.to);
+        return { error: "Invalid token" };
+      }
+
+      const ticket = await expo.sendPushNotificationsAsync([message]);
+      console.log("Custom push sent:", ticket);
+      return ticket;
+    } catch (error) {
+      console.error("Error sending custom notification:", error);
+      throw error;
     }
   }
 }

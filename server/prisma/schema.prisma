@@ -12,6 +12,7 @@ model User {
   name                  String
   email                 String    @unique
   password              String
+  expoPushToken         String? 
   isSubscribed          Boolean   @default(false)
   subscriptionExpiresAt DateTime?
   createdAt             DateTime  @default(now())

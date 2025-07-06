@@ -3,6 +3,7 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { useSavePushTokenMutation } from "@/Features/Authentication/AuthAPI";
 
 export interface PushNotificationState {
   expoPushToken?: Notifications.ExpoPushToken;
@@ -10,6 +11,8 @@ export interface PushNotificationState {
 }
 
 export const usePushNotifications = (): PushNotificationState => {
+  const [savePushToken] = useSavePushTokenMutation();
+
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: false,
@@ -34,7 +37,7 @@ export const usePushNotifications = (): PushNotificationState => {
     undefined
   );
 
-  async function registerForPushNotificationsAsync() {
+  async function registerForPushNotificationsAsync(userToken?: string) {
     let token;
 
     if (Device.isDevice) {
@@ -55,6 +58,14 @@ export const usePushNotifications = (): PushNotificationState => {
       token = await Notifications.getExpoPushTokenAsync({
         projectId: Constants.expoConfig?.extra?.eas?.projectId,
       });
+
+      if (token?.data) {
+        try {
+          await savePushToken({ pushToken: token.data }).unwrap();
+        } catch (err) {
+          console.error("❌ Error saving push token:", err);
+        }
+      }
     } else {
       alert("Must be using a physical device for Push notifications");
     }
