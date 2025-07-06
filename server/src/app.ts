@@ -10,9 +10,11 @@ import userRoutes from "./routes/user";
 import debtorRoutes from "./routes/debtor";
 import debtHistoryRoutes from "./routes/debtHistory";
 import subscriptionRoutes from "./routes/subscription";
+import reminderRoutes from "./routes/reminderRoutes";
 
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
+import notificationService from "./services/notificationService";
 
 dotenv.config();
 
@@ -65,6 +67,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/debtors", debtorRoutes);
 app.use("/api/debt-history", debtHistoryRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
+app.use("/api/reminders", reminderRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -72,6 +75,9 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
+
+  // Start the notification scheduler
+  notificationService.startScheduler();
 });
 
 export default app;

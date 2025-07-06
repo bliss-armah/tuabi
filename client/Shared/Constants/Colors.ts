@@ -49,6 +49,7 @@ const tintColorDark = lightPurple;
 
 export const Colors = {
   text: "#11181C",
+  textSecondary: "#687076",
   background: "#fff",
   backgroundGray: "#FAFAFA",
   offwhite: "#EDEBFF",
@@ -61,4 +62,8 @@ export const Colors = {
   accent: darkPurple,
   border: "#E6E8EB",
   card: "#F8F9FA",
+  cardBackground: "#F8F9FA",
+  success: "#28a745",
+  warning: "#ffc107",
+  error: "#dc3545",
 };

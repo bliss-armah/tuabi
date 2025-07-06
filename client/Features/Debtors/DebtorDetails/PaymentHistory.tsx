@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { DebtHistory } from "@/Features/Debtors/DebtorsApi";
-import { FlatList } from "react-native";
 
 interface PaymentHistoryProps {
   history?: DebtHistory[];
@@ -31,14 +30,12 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({ history }) => {
           <Text style={styles.emptyHistoryText}>No payment history yet</Text>
         </View>
       ) : (
-        <FlatList
-          data={history}
-          keyExtractor={(item) => item.id.toString()}
+        <ScrollView
+          style={{ maxHeight: 350 }}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 10 }}
-          style={styles.scrollArea}
-          renderItem={({ item }) => (
-            <View style={styles.historyItem}>
+        >
+          {history?.map((item) => (
+            <View key={item.id} style={styles.historyItem}>
               <View style={styles.historyHeader}>
                 <View style={styles.historyLeft}>
                   <Ionicons
@@ -78,8 +75,8 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({ history }) => {
 
               {item.note && <Text style={styles.historyNote}>{item.note}</Text>}
             </View>
-          )}
-        />
+          ))}
+        </ScrollView>
       )}
     </View>
   );
@@ -91,7 +88,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     margin: 15,
     padding: 20,
-    maxHeight: 375,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -103,9 +99,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#2c3e50",
     marginBottom: 15,
-  },
-  scrollArea: {
-    maxHeight: 350, // Ensures inner scrolling instead of full screen scroll
   },
   emptyHistory: {
     alignItems: "center",

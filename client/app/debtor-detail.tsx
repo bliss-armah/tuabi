@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Alert } from "react-native";
+import { View, ScrollView, StyleSheet, Alert, FlatList } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
@@ -16,6 +16,7 @@ import { DebtorDetailHeader } from "@/Features/Debtors/DebtorDetails/DebtorDetai
 import { DebtorDetailInfoCard } from "@/Features/Debtors/DebtorDetails/DebtorDetailInfoCard";
 import { PaymentHistory } from "@/Features/Debtors/DebtorDetails/PaymentHistory";
 import { PaymentModal } from "@/Features/Debtors/DebtorDetails/PaymentModal";
+import RemindersList from "@/Features/Reminders/RemindersList";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
@@ -100,18 +101,31 @@ export default function DebtorDetail() {
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
-      <DebtorDetailHeader
-        debtorName={debtor.data.name}
-        onEdit={() => openEditDebtor(debtor?.data)}
-      />
+      <FlatList
+        data={[]}
+        ListHeaderComponent={
+          <>
+            <DebtorDetailHeader
+              debtorName={debtor.data.name}
+              onEdit={() => openEditDebtor(debtor?.data)}
+            />
 
-      <DebtorDetailInfoCard
-        debtor={debtor.data}
-        onAddPayment={() => openPaymentModal(false)}
-        onAddDebt={() => openPaymentModal(true)}
-      />
+            <DebtorDetailInfoCard
+              debtor={debtor.data}
+              onAddPayment={() => openPaymentModal(false)}
+              onAddDebt={() => openPaymentModal(true)}
+            />
 
-      <PaymentHistory history={history?.data} />
+            <PaymentHistory history={history?.data} />
+          </>
+        }
+        ListFooterComponent={
+          <RemindersList debtorId={Number(id)} debtorName={debtor.data.name} />
+        }
+        keyExtractor={() => "static"}
+        renderItem={null}
+        showsVerticalScrollIndicator={false}
+      />
 
       <PaymentModal
         visible={modalVisible}
