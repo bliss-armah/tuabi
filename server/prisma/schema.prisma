@@ -109,6 +109,7 @@ model Reminder {
   message     String
   dueDate     DateTime
   isCompleted Boolean  @default(false)
+  wasNotified Boolean @default(false)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

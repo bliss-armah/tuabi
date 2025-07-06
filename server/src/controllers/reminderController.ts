@@ -226,6 +226,9 @@ export const updateReminder = async (
     }
     if (isCompleted !== undefined) updateData.isCompleted = isCompleted;
     if (isActive !== undefined) updateData.isActive = isActive;
+    if (dueDate !== undefined || isActive === true) {
+      updateData.wasNotified = false; // <--- Add this line
+    }
 
     const updatedReminder = await prisma.reminder.update({
       where: { id: parseInt(id) },

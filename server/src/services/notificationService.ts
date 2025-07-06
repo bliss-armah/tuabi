@@ -54,6 +54,7 @@ export class NotificationService {
         where: {
           isActive: true,
           isCompleted: false,
+          wasNotified:false,
           dueDate: {
             lt: new Date(),
           },
@@ -146,6 +147,10 @@ export class NotificationService {
       ];
 
       const ticketChunk = await expo.sendPushNotificationsAsync(messages);
+      await prisma.reminder.update({
+        where: { id: reminder.id },
+        data: { wasNotified: true },
+      });
       console.log("Push ticket:", ticketChunk);
     } catch (error) {
       console.error("Error sending Expo notification:", error);
@@ -197,11 +202,11 @@ export class NotificationService {
       const dueDate = new Date(reminder.dueDate);
       const now = new Date();
 
-      if (dueDate <= now) {
-        // If the reminder is already due, send it immediately
+      if (dueDate <= now && !reminder.wasNotified) {
         await this.sendOverdueNotification(reminder);
         return;
       }
+      
 
       // Schedule the notification for the due date
       const delay = dueDate.getTime() - now.getTime();

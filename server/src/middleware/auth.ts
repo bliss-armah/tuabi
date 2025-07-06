@@ -28,7 +28,6 @@ export const authenticateToken = async (
 
     const payload = verifyToken(token);
 
-    // Verify user still exists in database
     const user = await prisma.user.findUnique({
       where: { id: payload.userId },
     });
