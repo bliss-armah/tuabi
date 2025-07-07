@@ -12,18 +12,28 @@ import debtHistoryRoutes from "./routes/debtHistory";
 import subscriptionRoutes from "./routes/subscription";
 import reminderRoutes from "./routes/reminderRoutes";
 import pushTokenRoutes from "./routes/pushToken";
+import queueRoutes from "./routes/queueRoutes";
 
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
-import notificationService from "./services/notificationService";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Security middleware
 app.use(helmet());
 
+// CORS configuration
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
+
+// Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
@@ -31,38 +41,23 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
-  "http://localhost:3000",
-];
-app.use(
-  cors({
-    // origin: function (origin, callback) {
-    //   if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-    //     callback(null, true);
-    //   } else {
-    //     callback(new Error('Not allowed by CORS'));
-    //   }
-    // },
-    origin: "*",
-    credentials: true,
-  })
-);
+// Logging middleware
+app.use(morgan("combined"));
 
+// Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-if (process.env.NODE_ENV === "development") {
-  app.use(morgan("dev"));
-}
-
+// Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
+    uptime: process.uptime(),
   });
 });
 
+// API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/debtors", debtorRoutes);
@@ -70,16 +65,16 @@ app.use("/api/debt-history", debtHistoryRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/push-token", pushTokenRoutes);
+app.use("/api/queue", queueRoutes);
 
+// Error handling middleware
 app.use(notFound);
 app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-
-  // Start the notification scheduler
-  notificationService.startScheduler();
+  console.log(`💡 Start the notification worker with: npm run worker:dev`);
 });
 
 export default app;
