@@ -7,6 +7,8 @@ import {
   useGetDebtorQuery,
   useAddPaymentMutation,
   useGetDebtorHistoryQuery,
+  useGetDebtorsQuery,
+  useGetDashboardSummaryQuery,
 } from "@/Features/Debtors/DebtorsApi";
 import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
@@ -38,9 +40,14 @@ export default function DebtorDetail() {
     refetch,
   } = useGetDebtorQuery(Number(id));
 
-  const { data: history, isLoading: historyLoading,refetch:historyRefetch } = useGetDebtorHistoryQuery(
-    Number(id)
-  );
+  const {
+    data: history,
+    isLoading: historyLoading,
+    refetch: historyRefetch,
+  } = useGetDebtorHistoryQuery(Number(id));
+
+  const { refetch: refetchDebtors } = useGetDebtorsQuery();
+  const { refetch: refetchDashboard } = useGetDashboardSummaryQuery();
 
   const [addPayment] = useAddPaymentMutation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -70,8 +77,10 @@ export default function DebtorDetail() {
       setPaymentAmount("");
       setPaymentNote("");
       setModalVisible(false);
-      refetch()
-      historyRefetch()
+      refetch();
+      historyRefetch();
+      refetchDebtors();
+      refetchDashboard();
       Alert.alert(
         "Success",
         isAddingDebt

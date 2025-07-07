@@ -8,7 +8,7 @@ import { router } from "expo-router";
  * Handles authentication headers and 401 error responses
  */
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://192.168.2.121:7000/api",
+  baseUrl: "http://192.168.0.164:7000/api",
   prepareHeaders: async (headers) => {
     const tokenString = await AsyncStorage.getItem("token");
     const token = tokenString ? JSON.parse(tokenString) : null;

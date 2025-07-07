@@ -15,8 +15,7 @@ export const usePushNotifications = (): PushNotificationState => {
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
-      shouldPlaySound: false,
-      shouldShowAlert: true,
+      shouldPlaySound: true,
       shouldSetBadge: false,
       shouldShowBanner: true,
       shouldShowList: true,

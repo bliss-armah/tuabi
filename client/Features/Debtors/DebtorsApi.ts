@@ -27,7 +27,7 @@ export interface DebtorResponse {
 export const debtorApi = createApi({
   reducerPath: "debtorApi",
   baseQuery,
-  tagTypes: ["Debtor", "Debtors"],
+  tagTypes: ["Debtor", "Debtors", "Dashboard"],
   endpoints: (builder) => ({
     getDebtors: builder.query<any, void>({
       query: () => "/debtors/",
@@ -58,7 +58,10 @@ export const debtorApi = createApi({
       }),
       invalidatesTags: ["Debtors", "Debtor"],
     }),
-
+    getDashboardSummary: builder.query<any, void>({
+      query: () => "/debtors/dashboard",
+      providesTags: ["Dashboard"],
+    }),
     addPayment: builder.mutation<
       any,
       {
@@ -78,11 +81,7 @@ export const debtorApi = createApi({
         method: "PATCH",
         body: { amount: Math.abs(data.amount), note: data.note },
       }),
-      invalidatesTags: ["Debtors"],
-    }),
-    getDashboardSummary: builder.query<any, void>({
-      query: () => "/debtors/dashboard",
-      providesTags: ["Debtors"],
+      invalidatesTags: ["Debtors", "Dashboard"],
     }),
   }),
 });
