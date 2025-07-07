@@ -36,7 +36,6 @@ export const debtorApi = createApi({
 
     getDebtor: builder.query<DebtorResponse, number>({
       query: (id) => `/debtors/${id}`,
-      providesTags: ["Debtor"],
     }),
 
     createDebtor: builder.mutation<any, any>({
@@ -50,20 +49,16 @@ export const debtorApi = createApi({
 
     getDebtorHistory: builder.query<any, number>({
       query: (id) => `/debt-history/debtor/${id}`,
-      providesTags:["Debtor"]
     }),
-    updateDebtor: builder.mutation<
-    any,
-    { id: number; data: Partial<Debtor> }
-  >({
-    query: ({ id, data }) => ({
-      url: `/debtors/${id}`,
-      method: "PUT",
-      body: data,
+    updateDebtor: builder.mutation<any, { id: number; data: Partial<Debtor> }>({
+      query: ({ id, data }) => ({
+        url: `/debtors/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Debtors", "Debtor"],
     }),
-    invalidatesTags: ["Debtors", "Debtor"],
-  }),
-  
+
     addPayment: builder.mutation<
       any,
       {
@@ -83,11 +78,11 @@ export const debtorApi = createApi({
         method: "PATCH",
         body: { amount: Math.abs(data.amount), note: data.note },
       }),
-      invalidatesTags: ["Debtors", "Debtor"],
+      invalidatesTags: ["Debtors"],
     }),
     getDashboardSummary: builder.query<any, void>({
       query: () => "/debtors/dashboard",
-      providesTags:["Debtors"]
+      providesTags: ["Debtors"],
     }),
   }),
 });

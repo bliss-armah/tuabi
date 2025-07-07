@@ -38,7 +38,7 @@ export default function DebtorDetail() {
     refetch,
   } = useGetDebtorQuery(Number(id));
 
-  const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(
+  const { data: history, isLoading: historyLoading,refetch:historyRefetch } = useGetDebtorHistoryQuery(
     Number(id)
   );
 
@@ -70,6 +70,8 @@ export default function DebtorDetail() {
       setPaymentAmount("");
       setPaymentNote("");
       setModalVisible(false);
+      refetch()
+      historyRefetch()
       Alert.alert(
         "Success",
         isAddingDebt

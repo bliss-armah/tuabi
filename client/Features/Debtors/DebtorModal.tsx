@@ -56,8 +56,7 @@ export default function DebtorModal({
     control,
     handleSubmit,
     reset,
-    watch,
-    formState: { errors, isValid, isSubmitting },
+    formState: { isValid, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(debtorSchema),
     mode: "onChange",
