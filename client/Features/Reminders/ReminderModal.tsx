@@ -208,8 +208,7 @@ export default function ReminderModal({
               <Button
                 title={formatDate(watchedDueDate)}
                 onPress={() => setShowDatePicker(true)}
-                appearance="outline"
-                status="basic"
+                variant="secondary"
                 size="medium"
                 style={styles.dateButton}
               />
@@ -234,8 +233,7 @@ export default function ReminderModal({
               <Button
                 title="Cancel"
                 onPress={onClose}
-                appearance="outline"
-                status="basic"
+                variant="secondary"
                 size="medium"
                 style={styles.cancelButton}
               />
@@ -244,7 +242,7 @@ export default function ReminderModal({
                 disabled={!isValid || isSubmitting}
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
-                status="primary"
+                variant="primary"
                 size="medium"
                 style={styles.submitButton}
               />

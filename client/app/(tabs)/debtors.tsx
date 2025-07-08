@@ -17,6 +17,7 @@ import { ErrorView } from "@/Shared/Components/ErrorView";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
 import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
+import { Button } from "@/Shared/Components/UIKitten";
 
 type Debtor = {
   id: number;
@@ -146,10 +147,12 @@ export default function Debtors() {
             <Text style={styles.emptySubtitle}>
               Start by adding someone who owes you.
             </Text>
-            <TouchableOpacity style={styles.addButton} onPress={openAddDebtor}>
-              <Ionicons name="add-circle-outline" size={24} color="#fff" />
-              <Text style={styles.addButtonText}>Add Debtor</Text>
-            </TouchableOpacity>
+            <Button
+              title="Add Debtor"
+              onPress={openAddDebtor}
+              variant="primary"
+              style={styles.addButton}
+            />
           </View>
         )}
       </View>

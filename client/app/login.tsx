@@ -7,6 +7,7 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Input, Button } from "@/Shared/Components/UIKitten";
 import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { TouchableOpacity } from "react-native";
 
 export default function LoginScreen() {
   const [loginMutation] = useLoginMutation();
@@ -74,17 +75,18 @@ export default function LoginScreen() {
           onPress={handleLogin}
           loading={isLoading}
           disabled={isLoading}
-          status="primary"
+          variant="primary"
           size="large"
         />
 
-        <Button
-          title="Don't have an account? Register"
-          onPress={() => router.push("/register")}
-          appearance="ghost"
-          status="primary"
-          size="medium"
-        />
+        <TouchableOpacity onPress={() => router.push("/register")}>
+          <Text
+            style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}
+          >
+            Don’t have an account?{" "}
+            <Text style={{ fontWeight: "bold" }}>Register</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

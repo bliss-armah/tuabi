@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, ScrollView, StyleSheet, Alert, FlatList } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import {
   useGetDebtorQuery,
   useAddPaymentMutation,
@@ -22,8 +21,6 @@ import RemindersList from "@/Features/Reminders/RemindersList";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
 
   const {
     isVisible,

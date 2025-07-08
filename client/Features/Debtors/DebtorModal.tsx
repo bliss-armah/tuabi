@@ -247,6 +247,7 @@ export default function DebtorModal({
                 disabled={!isValid || isSubmitting}
                 onPress={handleSubmit(onSubmit)}
                 loading={isSubmitting}
+                variant="primary"
                 style={{ marginTop: 12 }}
               />
             </View>

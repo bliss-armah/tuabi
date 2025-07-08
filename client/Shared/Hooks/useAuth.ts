@@ -35,13 +35,13 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (!tokenExpiry) return;
-
+    
     const delay = tokenExpiry * 1000;
     const timeout = setTimeout(logout, delay);
-
+    
     if (delay <= 0) {
-      logout();
     } else {
+      logout();
       return () => clearTimeout(timeout);
     }
   }, [tokenExpiry]);

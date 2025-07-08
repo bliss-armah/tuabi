@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
+import { Button } from "@/Shared/Components/UIKitten";
 
 interface DebtorDetailInfoCardProps {
   debtor: any;
@@ -115,21 +116,18 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
       </View>
 
       <View style={styles.actionButtons}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: Colors.secondary }]}
+        <Button
+          title={`Record Payment`}
           onPress={onAddPayment}
-        >
-          <Ionicons name="arrow-down" size={18} color="#fff" />
-          <Text style={styles.actionButtonText}>Record Payment</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: Colors.accent }]}
+          variant="secondary"
+          icon={<Ionicons name="arrow-down" size={18} color={Colors.primary} />}
+        />
+        <Button
+          title={`Add Debt`}
           onPress={onAddDebt}
-        >
-          <Ionicons name="arrow-up" size={18} color="#fff" />
-          <Text style={styles.actionButtonText}>Add Debt</Text>
-        </TouchableOpacity>
+          variant="primary"
+          icon={<Ionicons name="arrow-up" size={18} color="#fff" />}
+        />
       </View>
     </View>
   );
@@ -192,19 +190,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 15,
     marginTop: 10,
-  },
-  actionButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 5,
-    flex: 1,
-  },
-  actionButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    marginLeft: 5,
   },
 });

@@ -20,6 +20,7 @@ import {
 import ReminderModal from "./ReminderModal";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
+import { Button } from "@/Shared/Components/UIKitten";
 
 interface RemindersListProps {
   debtorId?: number;
@@ -205,16 +206,15 @@ export default function RemindersList({
         <Text style={[styles.headerTitle, { color: Colors.text }]}>
           Reminders {debtorName && `for ${debtorName}`}
         </Text>
-        <TouchableOpacity
-          style={[styles.addButton, { backgroundColor: Colors.primary }]}
+        <Button
+          title="Add Reminder"
           onPress={() => {
             setEditingReminder(undefined);
             setModalVisible(true);
           }}
-        >
-          <Ionicons name="add" size={20} color="#fff" />
-          <Text style={styles.addButtonText}>Add Reminder</Text>
-        </TouchableOpacity>
+          variant="primary"
+          style={styles.addButton}
+        />
       </View>
 
       <FlatList

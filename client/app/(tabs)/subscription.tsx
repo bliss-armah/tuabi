@@ -17,6 +17,8 @@ import {
   useGetUserSubscriptionsQuery,
 } from "@/Features/Subscription/SubscriptionAPI";
 import { router } from "expo-router";
+import { Button } from "@/Shared/Components/UIKitten";
+
 
 export default function SubscriptionScreen() {
   const colorScheme = useColorScheme();
@@ -255,26 +257,21 @@ export default function SubscriptionScreen() {
           </Text>
 
           <View style={styles.quickActions}>
-            <TouchableOpacity
-              style={[styles.actionButton, { backgroundColor: Colors.primary }]}
+            <Button
+              title="Upgrade Plan"
               onPress={() => router.push("/subscription-plans")}
-            >
-              <Ionicons name="card-outline" size={24} color="#fff" />
-              <Text style={styles.actionButtonText}>Upgrade Plan</Text>
-            </TouchableOpacity>
+              variant="primary"
+              style={styles.actionButton}
+            />
 
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                { backgroundColor: Colors.secondary },
-              ]}
+            <Button
+              title="Get Help"
               onPress={() =>
                 Alert.alert("Support", "Contact support feature coming soon!")
               }
-            >
-              <Ionicons name="help-circle-outline" size={24} color="#fff" />
-              <Text style={styles.actionButtonText}>Get Help</Text>
-            </TouchableOpacity>
+              variant="secondary"
+              style={styles.actionButton}
+            />
           </View>
         </View>
       </ScrollView>
