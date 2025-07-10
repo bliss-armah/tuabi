@@ -44,7 +44,7 @@ export const debtorApi = createApi({
         method: "POST",
         body: debtor,
       }),
-      invalidatesTags: ["Debtors"],
+      invalidatesTags: ["Debtors", "Dashboard"],
     }),
 
     getDebtorHistory: builder.query<any, number>({

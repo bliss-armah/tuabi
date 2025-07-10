@@ -112,9 +112,7 @@ export default function Debtors() {
       <DebtorHeader
         title="Debtors"
         actionButton={
-          filteredDebtors.length && (
-            <Ionicons name="add-circle-outline" size={28} color={"#ffffff"} />
-          )
+          <Ionicons name="add-circle-outline" size={28} color={"#ffffff"} />
         }
         onTap={openAddDebtor}
       />
