@@ -278,7 +278,7 @@ export const decrementDebtorAmount = async (
           debtorId: debtorId,
           amountChanged: actualAmountReduced,
           action: "reduce",
-          note: note || `Payment received: ${actualAmountReduced}`,
+          note: note || null,
           performedById: req.user!.id,
         },
       }),

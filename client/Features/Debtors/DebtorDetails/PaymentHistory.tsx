@@ -36,44 +36,47 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({ history }) => {
         >
           {history?.map((item) => (
             <View key={item.id} style={styles.historyItem}>
-              <View style={styles.historyHeader}>
-                <View style={styles.historyLeft}>
-                  <Ionicons
-                    name={
-                      item.action === "add" ? "add-circle" : "remove-circle"
-                    }
-                    size={20}
-                    color={
-                      item.action === "add" ? Colors.accent : Colors.primary
-                    }
-                  />
-                  <Text style={styles.historyAction}>
-                    {item.action === "add"
-                      ? "Debt Added"
-                      : item.action === "reduce"
-                      ? "Payment Received"
-                      : "Settled"}
-                  </Text>
+              <View style={styles.historyRow}>
+                <Ionicons
+                  name={item.action === "add" ? "add-circle" : "remove-circle"}
+                  size={20}
+                  color={item.action === "add" ? Colors.accent : Colors.primary}
+                />
+                <View style={{flex:1}}>
+                  <View style={styles.historyRowTitle}>
+                    <Text style={styles.historyAction}>
+                      {item.action === "add"
+                        ? "Debt Added"
+                        : item.action === "reduce"
+                        ? "Payment Received"
+                        : "Settled"}
+                    </Text>
+                    <Text style={styles.historyDate}>
+                      {formatDate(item.timestamp)}
+                    </Text>
+                  </View>
+                  <View>
+                    <Text
+                      style={[
+                        styles.historyAmount,
+                        {
+                          color:
+                            item.action === "add"
+                              ? Colors.accent
+                              : Colors.primary,
+                        },
+                      ]}
+                    >
+                      {item.action === "add" ? "+" : "-"}GHS{" "}
+                      {Math.abs(item.amountChanged).toFixed(2)}
+                    </Text>
+
+                    {item.note && (
+                      <Text style={styles.historyNote}>{item.note}</Text>
+                    )}
+                  </View>
                 </View>
-                <Text style={styles.historyDate}>
-                  {formatDate(item.timestamp)}
-                </Text>
               </View>
-
-              <Text
-                style={[
-                  styles.historyAmount,
-                  {
-                    color:
-                      item.action === "add" ? Colors.accent : Colors.primary,
-                  },
-                ]}
-              >
-                {item.action === "add" ? "+" : "-"}GHS{" "}
-                {Math.abs(item.amountChanged).toFixed(2)}
-              </Text>
-
-              {item.note && <Text style={styles.historyNote}>{item.note}</Text>}
             </View>
           ))}
         </ScrollView>
@@ -115,21 +118,20 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f0f0f0",
     paddingVertical: 15,
   },
-  historyHeader: {
+  historyRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 5,
+    columnGap: 15,
   },
-  historyLeft: {
+  historyRowTitle: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
+    width:"100%",
   },
   historyAction: {
     fontSize: 16,
     fontWeight: "bold",
     color: "#2c3e50",
-    marginLeft: 10,
   },
   historyDate: {
     fontSize: 12,
@@ -143,6 +145,5 @@ const styles = StyleSheet.create({
   historyNote: {
     fontSize: 14,
     color: "#7f8c8d",
-    marginTop: 5,
   },
 });
