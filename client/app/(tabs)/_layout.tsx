@@ -97,34 +97,6 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="reminders"
-        options={{
-          title: "Reminders",
-          tabBarIcon: ({ color, focused }) => (
-            <View style={{ alignItems: "center" }}>
-              {focused && (
-                <View
-                  style={{
-                    height: 3,
-                    width: 30,
-                    backgroundColor: Colors.primary,
-                    borderRadius: 2,
-                    position: "absolute",
-                    top: -15,
-                  }}
-                />
-              )}
-              <Ionicons
-                name={focused ? "notifications" : "notifications-outline"}
-                size={24}
-                color={color}
-              />
-            </View>
-          ),
-        }}
-      />
-
-      <Tabs.Screen
         name="subscription"
         options={{
           title: "Subscription",

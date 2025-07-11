@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     paddingHorizontal: 20,
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: "bold",
     color: "#0a0a0a",
     marginTop: 5,

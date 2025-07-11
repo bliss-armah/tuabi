@@ -66,4 +66,5 @@ export const Colors = {
   success: "#28a745",
   warning: "#ffc107",
   error: "#dc3545",
+  gray:"#343434"
 };

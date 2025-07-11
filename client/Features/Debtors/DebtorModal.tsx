@@ -6,8 +6,8 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Modal,
+  ScrollView,
 } from "react-native";
 import {
   useCreateDebtorMutation,
@@ -113,12 +113,15 @@ export default function DebtorModal({
 
   return (
     <Modal visible={visible} animationType="slide">
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.scroll}>
-          <SafeAreaView>
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+          >
             <View style={styles.header}>
               <Text style={styles.headerTitle}>
                 {mode === "add" ? "Add Debtor" : "Edit Debtor"}
@@ -251,21 +254,24 @@ export default function DebtorModal({
                 style={{ marginTop: 12 }}
               />
             </View>
-          </SafeAreaView>
-        </ScrollView>
-      </KeyboardAvoidingView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: { padding: 30 },
+  scroll: {
+    padding: 30,
+    paddingBottom: 60,
+    flexGrow: 1,
+  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    paddingVertical: 10,
+    marginVertical: 20,
   },
   headerTitle: {
     fontSize: 20,

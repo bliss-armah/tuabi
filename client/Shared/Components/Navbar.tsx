@@ -11,7 +11,7 @@ export const Navbar = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
-      <Text style={[styles.greeting,{ color: Colors.text }]}>Hi, {user?.name}</Text>
+      <Text style={[styles.greeting,{ color: Colors.gray }]}>Hi, {user?.name}</Text>
       <TouchableOpacity
         onPress={() => router.push("/notifications")}
         style={styles.iconButton}
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     zIndex: 999,
   },
   greeting: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "600",
 
   },
