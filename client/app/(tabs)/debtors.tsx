@@ -117,7 +117,7 @@ export default function Debtors() {
         onTap={openAddDebtor}
       />
       <View style={styles.container}>
-        {filteredDebtors.length && (
+        {filteredDebtors.length > 0 && (
           <View style={styles.searchContainer}>
             <SearchInput
               placeholder="Search"
@@ -128,7 +128,7 @@ export default function Debtors() {
           </View>
         )}
 
-        {filteredDebtors.length > 0 ? (
+        {filteredDebtors.length ? (
           <FlatList
             data={filteredDebtors}
             keyExtractor={(item) => item.id.toString()}

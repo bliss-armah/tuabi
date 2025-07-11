@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Alert } from "react-native";
+import { View, ScrollView, StyleSheet, Alert, FlatList } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
 import {
@@ -106,21 +106,26 @@ export default function DebtorDetail() {
         debtorName={debtor.data.name}
         onEdit={() => openEditDebtor(debtor?.data)}
       />
-      <ScrollView
+      <FlatList
+        data={[1]}
+        keyExtractor={() => "static"}
+        renderItem={() => (
+          <>
+            <DebtorDetailInfoCard
+              debtor={debtor.data}
+              onAddPayment={() => openPaymentModal(false)}
+              onAddDebt={() => openPaymentModal(true)}
+            />
+            <PaymentHistory history={history?.data} />
+            <RemindersList
+              debtorId={Number(id)}
+              debtorName={debtor.data.name}
+            />
+          </>
+        )}
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-      >
-        <DebtorDetailInfoCard
-          debtor={debtor.data}
-          onAddPayment={() => openPaymentModal(false)}
-          onAddDebt={() => openPaymentModal(true)}
-        />
-
-        <PaymentHistory history={history?.data} />
-
-        <RemindersList debtorId={Number(id)} debtorName={debtor.data.name} />
-      </ScrollView>
-
+      />
       <PaymentModal
         visible={modalVisible}
         isAddingDebt={isAddingDebt}
@@ -131,7 +136,6 @@ export default function DebtorDetail() {
         onSave={handleAddPayment}
         onCancel={() => setModalVisible(false)}
       />
-
       <DebtorModal
         visible={isVisible}
         mode={mode}
