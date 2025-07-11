@@ -59,7 +59,36 @@ docker-compose down
 
 - Code changes are hot-reloaded in dev mode.
 - Prisma client is auto-generated in dev mode.
-- Migrations are handled by Prisma.
+- **Safe database migrations** with automatic prompts for dangerous changes.
+- Schema changes are handled safely with migration files.
+
+## 🔒 Database Safety Features
+
+### **Development Mode**
+- ✅ **Automatic migration creation** for safe schema changes
+- ✅ **Safe push** for non-breaking changes
+- ✅ **Manual intervention required** for dangerous changes
+- ✅ **Migration files** created for version control
+
+### **Production Mode**
+- ✅ **Migration deployment** only (no schema changes)
+- ✅ **Safe and predictable** database updates
+- ✅ **No data loss** during deployments
+
+### **Manual Database Operations**
+```bash
+# Create a new migration
+docker-compose exec api npx prisma migrate dev --name your-migration-name
+
+# Apply migrations
+docker-compose exec api npx prisma migrate deploy
+
+# Reset database (WARNING: deletes all data)
+docker-compose exec api npx prisma migrate reset
+
+# Open Prisma Studio
+docker-compose exec api npx prisma studio
+```
 
 ## 🏭 Production Workflow
 
