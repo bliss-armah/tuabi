@@ -5,7 +5,7 @@
 
 // Purple color scheme
 const primaryPurple = "#8A2BE2"; // Vibrant purple
-const lightPurple = "#9370DB"; // Medium purple
+const lightPurple = "#8A2BE2"; // Medium purple
 const darkPurple = "#4B0082"; // Indigo/Dark purple
 const deepPurple = "#301934"; // Very dark purple
 
@@ -49,6 +49,7 @@ const tintColorDark = lightPurple;
 
 export const Colors = {
   text: "#11181C",
+  textSecondary: "#687076",
   background: "#fff",
   backgroundGray: "#FAFAFA",
   offwhite: "#EDEBFF",
@@ -56,9 +57,14 @@ export const Colors = {
   icon: darkPurple,
   tabIconDefault: "#687076",
   tabIconSelected: tintColorLight,
-  primary: primaryPurple,
+  primary: darkPurple,
   secondary: lightPurple,
   accent: darkPurple,
   border: "#E6E8EB",
   card: "#F8F9FA",
+  cardBackground: "#F8F9FA",
+  success: "#28a745",
+  warning: "#ffc107",
+  error: "#dc3545",
+  gray:"#343434"
 };

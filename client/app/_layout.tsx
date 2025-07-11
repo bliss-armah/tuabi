@@ -18,6 +18,7 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import store from "@/Shared/Store/store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { UIKittenProvider } from "@/Shared/Components/UIKittenProvider";
+import NotificationSetup from "@/Shared/Components/NotificationSetup";
 
 const persistor = persistStore(store);
 
@@ -48,9 +49,10 @@ export default function RootLayout() {
             <ThemeProvider
               value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
             >
-              <Stack screenOptions={{ headerShown: false }}></Stack>
-
-              <StatusBar style="auto" />
+              <NotificationSetup>
+                <Stack screenOptions={{ headerShown: false }}></Stack>
+                <StatusBar style="auto" />
+              </NotificationSetup>
             </ThemeProvider>
           </UIKittenProvider>
         </PersistGate>

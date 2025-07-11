@@ -15,18 +15,27 @@ export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
 }) => {
   return (
     <View style={[styles.header, { backgroundColor: Colors.primary }]}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
+      <View style={styles.sideButtonContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <Text style={styles.headerTitle}>{debtorName}</Text>
+      <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
+        {debtorName}
+      </Text>
 
-      <TouchableOpacity
-        style={[styles.editButton, { backgroundColor: Colors.secondary }]}
-        onPress={onEdit}
-      >
-        <Ionicons name="create" size={24} color="#fff" />
-      </TouchableOpacity>
+      <View style={styles.sideButtonContainer}>
+        <TouchableOpacity
+          style={[styles.editButton, { backgroundColor: Colors.secondary }]}
+          onPress={onEdit}
+        >
+          <Ionicons name="create" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -34,10 +43,14 @@ export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#3498db",
+    // backgroundColor: "#3498db", // Remove hardcoded color
+  },
+  sideButtonContainer: {
+    width: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
   backButton: {
     width: 40,
@@ -48,11 +61,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerTitle: {
+    flex: 1,
     fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
-    flex: 1,
     textAlign: "center",
+    marginHorizontal: 8,
   },
   editButton: {
     width: 40,

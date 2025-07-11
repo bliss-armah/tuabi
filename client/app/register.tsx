@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
@@ -99,17 +99,16 @@ export default function Register() {
           onPress={handleRegister}
           loading={isLoading}
           disabled={isLoading}
-          status="primary"
+          variant="primary"
           size="large"
         />
 
-        <Button
-          title="Already have an account? Login"
-          onPress={() => router.push("/login")}
-          appearance="ghost"
-          status="primary"
-          size="medium"
-        />
+        <TouchableOpacity onPress={() => router.push("/login")}>
+          <Text style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}>
+            Already have an account? Login
+            <Text style={{ fontWeight: "bold" }}>Register</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

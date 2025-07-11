@@ -12,6 +12,7 @@ model User {
   name                  String
   email                 String    @unique
   password              String
+  expoPushToken         String? 
   isSubscribed          Boolean   @default(false)
   subscriptionExpiresAt DateTime?
   createdAt             DateTime  @default(now())
@@ -22,6 +23,7 @@ model User {
   subscriptions Subscription[]
   transactions  Transaction[]
   debtHistory   DebtHistory[]
+  reminders     Reminder[]
 
   @@map("users")
 }
@@ -39,6 +41,7 @@ model Debtor {
   userId  Int
   user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   history DebtHistory[]
+  reminders Reminder[]
 
   @@map("debtors")
 }
@@ -96,4 +99,24 @@ model Transaction {
   // Relations
   user         User          @relation(fields: [userId], references: [id])
   subscription Subscription? @relation(fields: [subscriptionId], references: [id])
+}
+
+model Reminder {
+  id          Int      @id @default(autoincrement())
+  debtorId    Int
+  userId      Int
+  title       String
+  message     String
+  dueDate     DateTime
+  isCompleted Boolean  @default(false)
+  wasNotified Boolean @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  debtor Debtor @relation(fields: [debtorId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("reminders")
 }

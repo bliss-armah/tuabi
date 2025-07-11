@@ -19,6 +19,7 @@ import {
 } from "@/Features/Subscription/SubscriptionAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
+import { Button } from "@/Shared/Components/UIKitten";
 
 export default function SubscriptionPlansScreen() {
   const colorScheme = useColorScheme();
@@ -217,22 +218,14 @@ export default function SubscriptionPlansScreen() {
         )}
 
         {selectedPlan && (
-          <TouchableOpacity
-            style={[
-              styles.subscribeButton,
-              { backgroundColor: Colors.primary },
-            ]}
+          <Button
+            title={`Subscribe for ₦${selectedPlan.amount.toLocaleString()}`}
             onPress={handleSubscribe}
             disabled={isInitializing}
-          >
-            {isInitializing ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.subscribeButtonText}>
-                Subscribe for ₦{selectedPlan.amount.toLocaleString()}
-              </Text>
-            )}
-          </TouchableOpacity>
+            loading={isInitializing}
+            variant="primary"
+            style={styles.subscribeButton}
+          />
         )}
       </ScrollView>
     </View>

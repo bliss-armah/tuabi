@@ -35,7 +35,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           <Text style={styles.modalTitle}>
             {isAddingDebt ? "Add Debt" : "Record Payment"}
           </Text>
-          
+
           <Input
             label="Amount ($)"
             placeholder="0.00"
@@ -44,7 +44,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             onChangeText={onAmountChange}
             status="basic"
           />
-          
+
           <Input
             label="Note (Optional)"
             placeholder="Add a note..."
@@ -54,20 +54,19 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             onChangeText={onNoteChange}
             status="basic"
           />
-          
+
           <View style={styles.modalButtons}>
             <Button
               title="Cancel"
               onPress={onCancel}
-              appearance="outline"
-              status="basic"
+              variant="secondary"
               size="medium"
               style={styles.cancelButton}
             />
             <Button
               title="Save"
               onPress={onSave}
-              status="primary"
+              variant="primary"
               size="medium"
               style={styles.saveButton}
             />

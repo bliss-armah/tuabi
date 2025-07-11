@@ -9,6 +9,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import CardComponent from "@/Shared/Components/CardComponent";
+import { Button } from "@/Shared/Components/UIKitten";
 
 export default function LandingScreen() {
   const router = useRouter();
@@ -63,18 +64,18 @@ export default function LandingScreen() {
         </View>
 
         <View>
-          <TouchableOpacity
-            className="bg-indigo-600 py-4 rounded-full mb-4"
-            onPress={() => router.push("/login")}
-          >
-            <Text className="text-white font-semibold text-center text-lg">
-              Get Started
-            </Text>
-          </TouchableOpacity>
-
+          <Button
+            title="Get Started"
+            onPress={() => router.push("/register")}
+            variant="primary"
+            style={{ marginBottom: 16 }}
+          />
           <TouchableOpacity onPress={() => router.push("/login")}>
-            <Text className="text-center text-gray-600">
+            <Text
+              style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}
+            >
               Already have an account?
+              <Text style={{ fontWeight: "bold" }}>Register</Text>
             </Text>
           </TouchableOpacity>
         </View>

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Alert } from "react-native";
+import { View, ScrollView, StyleSheet, Alert, FlatList } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import {
   useGetDebtorQuery,
   useAddPaymentMutation,
@@ -16,11 +15,10 @@ import { DebtorDetailHeader } from "@/Features/Debtors/DebtorDetails/DebtorDetai
 import { DebtorDetailInfoCard } from "@/Features/Debtors/DebtorDetails/DebtorDetailInfoCard";
 import { PaymentHistory } from "@/Features/Debtors/DebtorDetails/PaymentHistory";
 import { PaymentModal } from "@/Features/Debtors/DebtorDetails/PaymentModal";
+import RemindersList from "@/Features/Reminders/RemindersList";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
 
   const {
     isVisible,
@@ -37,9 +35,11 @@ export default function DebtorDetail() {
     refetch,
   } = useGetDebtorQuery(Number(id));
 
-  const { data: history, isLoading: historyLoading } = useGetDebtorHistoryQuery(
-    Number(id)
-  );
+  const {
+    data: history,
+    isLoading: historyLoading,
+    refetch: historyRefetch,
+  } = useGetDebtorHistoryQuery(Number(id));
 
   const [addPayment] = useAddPaymentMutation();
   const [modalVisible, setModalVisible] = useState(false);
@@ -69,6 +69,8 @@ export default function DebtorDetail() {
       setPaymentAmount("");
       setPaymentNote("");
       setModalVisible(false);
+      refetch();
+      historyRefetch();
       Alert.alert(
         "Success",
         isAddingDebt
@@ -104,15 +106,26 @@ export default function DebtorDetail() {
         debtorName={debtor.data.name}
         onEdit={() => openEditDebtor(debtor?.data)}
       />
-
-      <DebtorDetailInfoCard
-        debtor={debtor.data}
-        onAddPayment={() => openPaymentModal(false)}
-        onAddDebt={() => openPaymentModal(true)}
+      <FlatList
+        data={[1]}
+        keyExtractor={() => "static"}
+        renderItem={() => (
+          <>
+            <DebtorDetailInfoCard
+              debtor={debtor.data}
+              onAddPayment={() => openPaymentModal(false)}
+              onAddDebt={() => openPaymentModal(true)}
+            />
+            <PaymentHistory history={history?.data} />
+            <RemindersList
+              debtorId={Number(id)}
+              debtorName={debtor.data.name}
+            />
+          </>
+        )}
+        contentContainerStyle={{ paddingBottom: 24 }}
+        showsVerticalScrollIndicator={false}
       />
-
-      <PaymentHistory history={history?.data} />
-
       <PaymentModal
         visible={modalVisible}
         isAddingDebt={isAddingDebt}
@@ -123,7 +136,6 @@ export default function DebtorDetail() {
         onSave={handleAddPayment}
         onCancel={() => setModalVisible(false)}
       />
-
       <DebtorModal
         visible={isVisible}
         mode={mode}
