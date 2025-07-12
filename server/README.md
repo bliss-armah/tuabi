@@ -1,159 +1,130 @@
-# Tuabi Backend API
+# Tuabi Server - Docker Setup (Unified)
 
-A modern Express.js TypeScript backend with PostgreSQL and Prisma ORM.
+This project uses a single Dockerfile and docker-compose.yml for both development and production. You can run both the API and the worker from the same image using environment variables.
 
-## Features
+## 🐳 Quick Start
 
-- 🔐 JWT Authentication
-- 🗄️ PostgreSQL Database with Prisma ORM
-- 🛡️ Security middleware (Helmet, CORS, Rate limiting)
-- ✅ Input validation with express-validator
-- 📝 Comprehensive error handling
-- 🔄 TypeScript for type safety
-- 🚀 Fast and scalable architecture
+### 1. Build the Images
 
-## Prerequisites
-
-- Node.js (v16 or higher)
-- PostgreSQL database
-- npm or yarn
-
-## Installation
-
-1. **Clone the repository and navigate to server directory:**
-   ```bash
-   cd server
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` with your database credentials and other configuration.
-
-4. **Set up the database:**
-   ```bash
-   # Generate Prisma client
-   npm run db:generate
-   
-   # Push schema to database
-   npm run db:push
-   
-   # Or run migrations
-   npm run db:migrate
-   ```
-
-5. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
-
-## Available Scripts
-
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run db:generate` - Generate Prisma client
-- `npm run db:push` - Push schema changes to database
-- `npm run db:migrate` - Run database migrations
-- `npm run db:studio` - Open Prisma Studio
-- `npm run db:seed` - Seed database with initial data
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-
-### Users
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update user profile
-
-### Debtors
-- `GET /api/debtors` - Get all debtors
-- `GET /api/debtors/:id` - Get debtor by ID
-- `POST /api/debtors` - Create new debtor
-- `PUT /api/debtors/:id` - Update debtor
-- `DELETE /api/debtors/:id` - Delete debtor
-
-### Debt History
-- `GET /api/debt-history/debtor/:debtorId` - Get debt history for debtor
-- `POST /api/debt-history` - Add debt history entry
-
-### Subscriptions
-- `GET /api/subscriptions` - Get user subscriptions
-- `POST /api/subscriptions` - Create subscription
-- `PUT /api/subscriptions/:id/cancel` - Cancel subscription
-
-## Database Schema
-
-The application uses the following main entities:
-- **Users** - Application users with authentication
-- **Debtors** - People who owe money to users
-- **DebtHistory** - History of debt changes
-- **Subscriptions** - User subscription plans
-- **Transactions** - Payment transactions
-
-## Security Features
-
-- JWT token authentication
-- Password hashing with bcrypt
-- CORS protection
-- Rate limiting
-- Input validation
-- SQL injection protection (via Prisma)
-
-## Environment Variables
-
-```env
-# Database
-DATABASE_URL="postgresql://username:password@localhost:5432/tuabi_db"
-
-# JWT
-JWT_SECRET="your-super-secret-jwt-key"
-JWT_EXPIRES_IN="7d"
-
-# Server
-PORT=3000
-NODE_ENV=development
-
-# CORS
-ALLOWED_ORIGINS="http://localhost:3000,http://localhost:5173"
+```bash
+cd server
+# Build all images
+docker-compose build
 ```
 
-## Development
+### 2. Start the Stack (Development)
 
-The project uses TypeScript for type safety. The source code is in the `src/` directory:
+```bash
+# Start all services in development mode (default)
+docker-compose up -d
+```
 
-- `controllers/` - Request handlers
-- `middleware/` - Custom middleware
-- `routes/` - API route definitions
-- `utils/` - Utility functions
-- `config/` - Configuration files
+- API: http://localhost:3000
+- Postgres: localhost:5433
+- Redis: localhost:6380
 
-## Production Deployment
+### 3. Start the Stack (Production)
 
-1. Build the application:
-   ```bash
-   npm run build
-   ```
+```bash
+# Set NODE_ENV=production in your environment or .env file
+docker-compose up -d
+```
 
-2. Set production environment variables
+### 4. Logs & Management
 
-3. Start the server:
-   ```bash
-   npm start
-   ```
+```bash
+# View logs
+docker-compose logs -f
+# View API logs
+docker-compose logs -f api
+# View worker logs
+docker-compose logs -f worker
+# Stop all services
+docker-compose down
+```
 
-## Contributing
+## 🔧 Configuration
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request 
+- All configuration is via environment variables (see `env.example`).
+- To run in production, set `NODE_ENV=production`.
+- To run the worker, set `SERVICE=worker` (default is `SERVICE=api`).
+
+## 🏗️ How It Works
+
+- **Single Dockerfile**: Installs all dependencies, supports both dev (hot reload) and prod (compiled) modes.
+- **Single Compose File**: Orchestrates Postgres, Redis, API, and worker. Uses the same image for both API and worker, just with different `SERVICE` env var.
+- **Entrypoint Script**: Decides what to run based on `SERVICE` and `NODE_ENV`.
+
+## 🛠️ Development Workflow
+
+- Code changes are hot-reloaded in dev mode.
+- Prisma client is auto-generated in dev mode.
+- **Safe database migrations** with automatic prompts for dangerous changes.
+- Schema changes are handled safely with migration files.
+
+## 🔒 Database Safety Features
+
+### **Development Mode**
+- ✅ **Automatic migration creation** for safe schema changes
+- ✅ **Safe push** for non-breaking changes
+- ✅ **Manual intervention required** for dangerous changes
+- ✅ **Migration files** created for version control
+
+### **Production Mode**
+- ✅ **Migration deployment** only (no schema changes)
+- ✅ **Safe and predictable** database updates
+- ✅ **No data loss** during deployments
+
+### **Manual Database Operations**
+```bash
+# Create a new migration
+docker-compose exec api npx prisma migrate dev --name your-migration-name
+
+# Apply migrations
+docker-compose exec api npx prisma migrate deploy
+
+# Reset database (WARNING: deletes all data)
+docker-compose exec api npx prisma migrate reset
+
+# Open Prisma Studio
+docker-compose exec api npx prisma studio
+```
+
+## 🏭 Production Workflow
+
+- Set `NODE_ENV=production` and use strong secrets in your `.env` file.
+- The API and worker run compiled code for performance.
+
+## 📋 Example .env
+
+See `env.example` for all required variables.
+
+```
+NODE_ENV=development
+SERVICE=api
+PORT=3000
+DATABASE_URL=postgresql://tuabi_user:tuabi_password@postgres:5432/tuabi_db
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=redis_password
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=7d
+FRONTEND_URL=http://localhost:3000
+```
+
+## 🧹 Clean Up
+
+- To remove all containers and volumes:
+  ```bash
+  docker-compose down -v
+  ```
+
+## 📝 Notes
+
+- You can override any environment variable in your `.env` file or via the `environment` section in `docker-compose.yml`.
+- For production, use a secure `.env` file and set `NODE_ENV=production`.
+- Both API and worker use the same image, just with different `SERVICE` values.
+
+---
+
+For any questions, see the comments in `docker-compose.yml` and `Dockerfile`.
