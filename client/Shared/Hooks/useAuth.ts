@@ -21,7 +21,9 @@ export const useAuth = () => {
         if (tokenString) {
           const parsed = JSON.parse(tokenString);
           setToken(parsed.access_token);
-          setTokenExpiry(parsed.expires_in);
+          // Convert expiry to timestamp
+          const expiryTimestamp = Date.now() + (parsed.expires_in * 1000);
+          setTokenExpiry(expiryTimestamp);
         }
       } catch (err) {
         console.error("Failed to load auth data:", err);
@@ -35,15 +37,21 @@ export const useAuth = () => {
 
   useEffect(() => {
     if (!tokenExpiry) return;
-    
-    const delay = tokenExpiry * 1000;
-    const timeout = setTimeout(logout, delay);
-    
-    if (delay <= 0) {
-    } else {
-      logout();
-      return () => clearTimeout(timeout);
-    }
+
+    const checkTokenExpiry = () => {
+      const now = Date.now();
+      if (now >= tokenExpiry) {
+        logout();
+      }
+    };
+
+    // Check immediately
+    checkTokenExpiry();
+
+    // Then check every 5 seconds
+    const interval = setInterval(checkTokenExpiry, 5000);
+
+    return () => clearInterval(interval);
   }, [tokenExpiry]);
 
   const logout = async () => {
