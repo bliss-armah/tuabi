@@ -15,6 +15,7 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import {
   useGetSubscriptionPlansQuery,
   useInitializeSubscriptionPaymentMutation,
+  useVerifySubscriptionPaymentMutation,
   SubscriptionPlan,
 } from "@/Features/Subscription/SubscriptionAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -29,6 +30,11 @@ export default function SubscriptionPlansScreen() {
   );
   const [showWebView, setShowWebView] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState("");
+  const [verifyPayment, { isLoading: isVerifying }] =
+    useVerifySubscriptionPaymentMutation();
+  const [paystackReference, setPaystackReference] = useState<string | null>(
+    null
+  );
 
   const { data: plans, isLoading, error } = useGetSubscriptionPlansQuery();
   const [initializePayment, { isLoading: isInitializing }] =
@@ -62,6 +68,7 @@ export default function SubscriptionPlansScreen() {
 
       if (response.status && response.data.authorization_url) {
         setPaymentUrl(response.data.authorization_url);
+        setPaystackReference(response.data.reference);
         setShowWebView(true);
       } else {
         Alert.alert("Error", "Failed to initialize payment");
@@ -71,20 +78,48 @@ export default function SubscriptionPlansScreen() {
     }
   };
 
-  const handleWebViewNavigationStateChange = (navState: any) => {
-    // Check if payment was successful (you might need to adjust this based on your callback URL)
-    if (navState.url.includes("success") || navState.url.includes("callback")) {
+  const handleWebViewNavigationStateChange = async (navState: any) => {
+    // Check if payment was successful (adjust based on your callback URL)
+    if (
+      navState.url.includes("success") ||
+      navState.url.includes("callback") ||
+      navState.url.includes("paystack.com/close")
+    ) {
       setShowWebView(false);
-      Alert.alert(
-        "Payment Successful",
-        "Your subscription has been activated!",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/(tabs)"),
-          },
-        ]
-      );
+      if (paystackReference) {
+        try {
+          // Show loading indicator
+          Alert.alert(
+            "Verifying Payment",
+            "Please wait while we verify your payment..."
+          );
+          const verifyRes = await verifyPayment({
+            reference: paystackReference,
+          }).unwrap();
+          if (verifyRes.status && verifyRes.data.status === "success") {
+            Alert.alert(
+              "Payment Successful",
+              "Your subscription has been activated!",
+              [
+                {
+                  text: "OK",
+                  onPress: () => router.replace("/(tabs)"),
+                },
+              ]
+            );
+          } else {
+            Alert.alert(
+              "Verification Failed",
+              "We could not verify your payment. Please contact support."
+            );
+          }
+        } catch (error) {
+          Alert.alert(
+            "Verification Error",
+            "An error occurred while verifying your payment."
+          );
+        }
+      }
     }
   };
 
