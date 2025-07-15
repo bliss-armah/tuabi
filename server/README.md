@@ -6,15 +6,15 @@ This project uses a single Dockerfile and docker-compose.yml for both developmen
 
 ### 1. Build the Images
 
-```bash
-cd server
+   ```bash
+   cd server
 # Build all images
 docker-compose build
-```
+   ```
 
 ### 2. Start the Stack (Development)
 
-```bash
+   ```bash
 # Start all services in development mode (default)
 docker-compose up -d
 ```
@@ -25,7 +25,7 @@ docker-compose up -d
 
 ### 3. Start the Stack (Production)
 
-```bash
+   ```bash
 # Set NODE_ENV=production in your environment or .env file
 docker-compose up -d
 ```
@@ -76,7 +76,7 @@ docker-compose down
 - ✅ **No data loss** during deployments
 
 ### **Manual Database Operations**
-```bash
+   ```bash
 # Create a new migration
 docker-compose exec api npx prisma migrate dev --name your-migration-name
 
@@ -115,7 +115,7 @@ FRONTEND_URL=http://localhost:3000
 ## 🧹 Clean Up
 
 - To remove all containers and volumes:
-  ```bash
+   ```bash
   docker-compose down -v
   ```
 

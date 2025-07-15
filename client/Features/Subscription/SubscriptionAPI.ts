@@ -100,42 +100,35 @@ export const subscriptionApi = createApi({
         method: "PUT",
       }),
     }),
-    // Commented out endpoints that do not exist in backend
-    // getSubscriptionPlans: builder.query<SubscriptionPlan[], void>({
-    //   query: () => ({
-    //     url: "/subscription/plans",
-    //     method: "GET",
-    //   }),
-    // }),
-    // initializeSubscriptionPayment: builder.mutation<
-    //   PaystackInitializeResponse,
-    //   PaystackInitializeRequest
-    // >({
-    //   query: (data) => ({
-    //     url: "/subscription/initialize",
-    //     method: "POST",
-    //     body: data,
-    //   }),
-    // }),
-    // verifySubscriptionPayment: builder.mutation<
-    //   PaystackVerifyResponse,
-    //   PaystackVerifyRequest
-    // >({
-    //   query: (data) => ({
-    //     url: "/subscription/verify",
-    //     method: "POST",
-    //     body: data,
-    //   }),
-    // }),
+    initializeSubscriptionPayment: builder.mutation<
+      PaystackInitializeResponse,
+      PaystackInitializeRequest
+    >({
+      query: (data) => ({
+        url: "/subscriptions/initialize",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    verifySubscriptionPayment: builder.mutation<
+      PaystackVerifyResponse,
+      PaystackVerifyRequest
+    >({
+      query: (data) => ({
+        url: "/subscriptions/verify",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    getUserTransactions: builder.query<Transaction[], void>({
+      query: () => ({
+        url: "/subscriptions/transactions",
+        method: "GET",
+      }),
+    }),
     // getUserSubscriptionStatus: builder.query<UserSubscriptionStatus, void>({
     //   query: () => ({
     //     url: "/subscription/status",
-    //     method: "GET",
-    //   }),
-    // }),
-    // getUserTransactions: builder.query<Transaction[], void>({
-    //   query: () => ({
-    //     url: "/subscription/transactions",
     //     method: "GET",
     //   }),
     // }),
@@ -152,4 +145,7 @@ export const {
   useGetSubscriptionsQuery,
   useCreateSubscriptionMutation,
   useCancelSubscriptionMutation,
+  useInitializeSubscriptionPaymentMutation,
+  useVerifySubscriptionPaymentMutation,
+  useGetUserTransactionsQuery,
 } = subscriptionApi;
