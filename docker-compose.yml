@@ -21,7 +21,7 @@ services:
       - redis_data:/data
 
   api:
-    build: .
+    build: ./server
     environment:
       SERVICE: api
       NODE_ENV: ${NODE_ENV:-development}
@@ -34,17 +34,17 @@ services:
       JWT_EXPIRES_IN: 7d
       FRONTEND_URL: http://localhost:3000
     ports:
-      - "3000:3000"
+      - "3500:3000"
     depends_on:
       - postgres
       - redis
     volumes:
-      - .:/app
+      - ./server:/app
       - /app/node_modules
-      - ./uploads:/app/uploads
+      - ./server/uploads:/app/uploads
 
   worker:
-    build: .
+    build: ./server
     environment:
       SERVICE: worker
       NODE_ENV: ${NODE_ENV:-development}
@@ -58,11 +58,10 @@ services:
       - postgres
       - redis
     volumes:
-      - .:/app
+      - ./server:/app
       - /app/node_modules
-      - ./uploads:/app/uploads
+      - ./server/uploads:/app/uploads
 
 volumes:
   postgres_data:
   redis_data:
- 

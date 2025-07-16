@@ -6,15 +6,15 @@ This project uses a single Dockerfile and docker-compose.yml for both developmen
 
 ### 1. Build the Images
 
-   ```bash
-   cd server
+```bash
+cd server
 # Build all images
 docker-compose build
-   ```
+```
 
 ### 2. Start the Stack (Development)
 
-   ```bash
+```bash
 # Start all services in development mode (default)
 docker-compose up -d
 ```
@@ -25,7 +25,7 @@ docker-compose up -d
 
 ### 3. Start the Stack (Production)
 
-   ```bash
+```bash
 # Set NODE_ENV=production in your environment or .env file
 docker-compose up -d
 ```
@@ -65,18 +65,21 @@ docker-compose down
 ## 🔒 Database Safety Features
 
 ### **Development Mode**
+
 - ✅ **Automatic migration creation** for safe schema changes
 - ✅ **Safe push** for non-breaking changes
 - ✅ **Manual intervention required** for dangerous changes
 - ✅ **Migration files** created for version control
 
 ### **Production Mode**
+
 - ✅ **Migration deployment** only (no schema changes)
 - ✅ **Safe and predictable** database updates
 - ✅ **No data loss** during deployments
 
 ### **Manual Database Operations**
-   ```bash
+
+```bash
 # Create a new migration
 docker-compose exec api npx prisma migrate dev --name your-migration-name
 
@@ -115,7 +118,7 @@ FRONTEND_URL=http://localhost:3000
 ## 🧹 Clean Up
 
 - To remove all containers and volumes:
-   ```bash
+  ```bash
   docker-compose down -v
   ```
 
@@ -128,3 +131,30 @@ FRONTEND_URL=http://localhost:3000
 ---
 
 For any questions, see the comments in `docker-compose.yml` and `Dockerfile`.
+
+# Docker Compose Usage
+
+The `docker-compose.yml` file is now located in the project root. All Docker Compose commands should be run from the root directory.
+
+## Common Commands
+
+- Start all services:
+  ```bash
+  docker-compose up -d
+  ```
+- Stop all services:
+  ```bash
+  docker-compose down
+  ```
+- Run migrations:
+  ```bash
+  docker-compose exec api npx prisma migrate deploy
+  ```
+- Push schema (dev):
+  ```bash
+  docker-compose exec api npx prisma db push
+  ```
+- Seed database:
+  ```bash
+  docker-compose exec api npm run db:seed
+  ```
