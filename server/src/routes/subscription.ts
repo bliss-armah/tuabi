@@ -6,6 +6,8 @@ import {
   initializePaystackPayment,
   verifyPaystackPayment,
   getUserTransactions,
+  getUserSubscriptionStatus,
+  getSubscriptionPlans,
 } from "../controllers/subscriptionController";
 import { authenticateToken } from "../middleware/auth";
 
@@ -20,5 +22,7 @@ router.put("/:id/cancel", cancelSubscription);
 router.post("/initialize", initializePaystackPayment);
 router.post("/verify", verifyPaystackPayment);
 router.get("/transactions", getUserTransactions);
+router.get("/status", getUserSubscriptionStatus);
+router.get("/plans", getSubscriptionPlans);
 
 export default router;

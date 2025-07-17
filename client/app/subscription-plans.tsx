@@ -36,7 +36,7 @@ export default function SubscriptionPlansScreen() {
     null
   );
 
-  const { data: plans, isLoading, error } = useGetSubscriptionPlansQuery();
+  const { data: plans = [], isLoading, error } = useGetSubscriptionPlansQuery();
   const [initializePayment, { isLoading: isInitializing }] =
     useInitializeSubscriptionPaymentMutation();
 
@@ -63,7 +63,7 @@ export default function SubscriptionPlansScreen() {
         email: user.email,
         amount: selectedPlan.amount,
         plan_type: selectedPlan.id,
-        currency: selectedPlan.currency,
+        currency: "GHS",
       }).unwrap();
 
       if (response.status && response.data.authorization_url) {
@@ -122,6 +122,8 @@ export default function SubscriptionPlansScreen() {
       }
     }
   };
+
+  console.log("plans:::::::", plans);
 
   if (showWebView) {
     return (
@@ -187,7 +189,7 @@ export default function SubscriptionPlansScreen() {
           </View>
         ) : (
           <View style={styles.plansContainer}>
-            {plans?.map((plan) => (
+            {plans.map((plan: any) => (
               <TouchableOpacity
                 key={plan.id}
                 style={[
@@ -219,7 +221,7 @@ export default function SubscriptionPlansScreen() {
                 </View>
 
                 <Text style={[styles.planPrice, { color: Colors.primary }]}>
-                  ₦{plan.amount.toLocaleString()}
+                  ₵{plan.amount.toLocaleString()}
                 </Text>
                 <Text style={[styles.planInterval, { color: Colors.text }]}>
                   per {plan.interval}
@@ -254,7 +256,7 @@ export default function SubscriptionPlansScreen() {
 
         {selectedPlan && (
           <Button
-            title={`Subscribe for ₦${selectedPlan.amount.toLocaleString()}`}
+            title={`Subscribe for ₵${selectedPlan.amount.toLocaleString()}`}
             onPress={handleSubscribe}
             disabled={isInitializing}
             loading={isInitializing}

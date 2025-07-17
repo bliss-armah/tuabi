@@ -238,8 +238,12 @@ export const verifyPaystackPayment = async (
           status: "active",
           startDate: now,
           endDate,
-          paystackSubscriptionId: paystackRes.subscription ? paystackRes.subscription.toString() : undefined,
-          paystackCustomerId: paystackRes.customer ? paystackRes.customer.toString() : undefined,
+          paystackSubscriptionId: paystackRes.subscription
+            ? paystackRes.subscription.toString()
+            : undefined,
+          paystackCustomerId: paystackRes.customer
+            ? paystackRes.customer.toString()
+            : undefined,
         },
       });
       // Update user
@@ -284,5 +288,69 @@ export const getUserTransactions = async (
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+export const getUserSubscriptionStatus = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user!.id },
+      select: {
+        isSubscribed: true,
+        subscriptionExpiresAt: true,
+      },
+    });
+
+    // Get the most recent active subscription
+    const currentPlan = await prisma.subscription.findFirst({
+      where: {
+        userId: req.user!.id,
+        status: "active",
+        endDate: { gte: new Date() },
+      },
+      orderBy: { endDate: "desc" },
+    });
+
+    // Get recent successful transactions
+    const activeTransactions = await prisma.transaction.findMany({
+      where: {
+        userId: req.user!.id,
+        status: "success",
+      },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {
+        is_subscribed: user?.isSubscribed || false,
+        subscription_expires_at: user?.subscriptionExpiresAt,
+        current_plan: currentPlan,
+        active_transactions: activeTransactions,
+      },
+    });
+  } catch (error) {
+    console.error("Get user subscription status error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getSubscriptionPlans = async (_req: any, res: Response) => {
+  try {
+    const plans = await prisma.subscriptionPlan.findMany({
+      where: { isActive: true },
+      orderBy: { amount: "asc" },
+    });
+    res.status(200).json({ success: true, data: plans });
+  } catch (error) {
+    console.error("Get subscription plans error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

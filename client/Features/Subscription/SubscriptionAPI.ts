@@ -3,12 +3,14 @@ import baseQuery from "@/Shared/Api/config";
 
 // Types
 export interface SubscriptionPlan {
-  id: string;
+  id: number;
   name: string;
   amount: number;
   currency: string;
-  interval: string;
-  description?: string;
+  duration: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PaystackInitializeRequest {
@@ -126,12 +128,18 @@ export const subscriptionApi = createApi({
         method: "GET",
       }),
     }),
-    // getUserSubscriptionStatus: builder.query<UserSubscriptionStatus, void>({
-    //   query: () => ({
-    //     url: "/subscription/status",
-    //     method: "GET",
-    //   }),
-    // }),
+    getUserSubscriptionStatus: builder.query<UserSubscriptionStatus, void>({
+      query: () => ({
+        url: "/subscriptions/status",
+        method: "GET",
+      }),
+    }),
+    getSubscriptionPlans: builder.query<SubscriptionPlan[], void>({
+      query: () => ({
+        url: "/subscriptions/plans",
+        method: "GET",
+      }),
+    }),
     // getUserSubscriptions: builder.query<Subscription[], void>({
     //   query: () => ({
     //     url: "/subscription/subscriptions",
@@ -148,4 +156,6 @@ export const {
   useInitializeSubscriptionPaymentMutation,
   useVerifySubscriptionPaymentMutation,
   useGetUserTransactionsQuery,
+  useGetUserSubscriptionStatusQuery,
+  useGetSubscriptionPlansQuery,
 } = subscriptionApi;

@@ -13,21 +13,20 @@ import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 import {
-  useGetUserTransactionsQuery,
-  useGetUserSubscriptionsQuery,
+  useGetUserSubscriptionStatusQuery,
+  useGetSubscriptionsQuery,
 } from "@/Features/Subscription/SubscriptionAPI";
 import { router } from "expo-router";
 import { Button } from "@/Shared/Components/UIKitten";
-
 
 export default function SubscriptionScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
-  const { data: transactions, isLoading: transactionsLoading } =
-    useGetUserTransactionsQuery();
+  const { data: subscriptionStatus, isLoading: statusLoading } =
+    useGetUserSubscriptionStatusQuery();
   const { data: subscriptions, isLoading: subscriptionsLoading } =
-    useGetUserSubscriptionsQuery();
+    useGetSubscriptionsQuery();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -89,70 +88,79 @@ export default function SubscriptionScreen() {
             <Text style={[styles.sectionTitle, { color: Colors.text }]}>
               Recent Transactions
             </Text>
-            {transactions && transactions.length > 3 && (
-              <TouchableOpacity onPress={handleViewAllTransactions}>
-                <Text style={[styles.viewAllText, { color: Colors.primary }]}>
-                  View All
-                </Text>
-              </TouchableOpacity>
-            )}
+            {subscriptionStatus?.active_transactions &&
+              subscriptionStatus.active_transactions.length > 3 && (
+                <TouchableOpacity onPress={handleViewAllTransactions}>
+                  <Text style={[styles.viewAllText, { color: Colors.primary }]}>
+                    View All
+                  </Text>
+                </TouchableOpacity>
+              )}
           </View>
 
-          {transactionsLoading ? (
+          {statusLoading ? (
             <Text style={[styles.loadingText, { color: Colors.text }]}>
               Loading transactions...
             </Text>
-          ) : transactions && transactions.length > 0 ? (
+          ) : subscriptionStatus?.active_transactions &&
+            subscriptionStatus.active_transactions.length > 0 ? (
             <View style={styles.transactionsList}>
-              {transactions.slice(0, 3).map((transaction) => (
-                <View
-                  key={transaction.id}
-                  style={[
-                    styles.transactionItem,
-                    { borderBottomColor: Colors.border },
-                  ]}
-                >
-                  <View style={styles.transactionInfo}>
-                    <Text
-                      style={[styles.transactionAmount, { color: Colors.text }]}
-                    >
-                      {formatAmount(transaction.amount)}
-                    </Text>
-                    <Text
-                      style={[styles.transactionDate, { color: Colors.text }]}
-                    >
-                      {formatDate(transaction.created_at)}
-                    </Text>
-                    {transaction.description && (
+              {subscriptionStatus.active_transactions
+                .slice(0, 3)
+                .map((transaction) => (
+                  <View
+                    key={transaction.id}
+                    style={[
+                      styles.transactionItem,
+                      { borderBottomColor: Colors.border },
+                    ]}
+                  >
+                    <View style={styles.transactionInfo}>
                       <Text
                         style={[
-                          styles.transactionDescription,
+                          styles.transactionAmount,
                           { color: Colors.text },
                         ]}
                       >
-                        {transaction.description}
+                        {formatAmount(transaction.amount)}
                       </Text>
-                    )}
+                      <Text
+                        style={[styles.transactionDate, { color: Colors.text }]}
+                      >
+                        {formatDate(transaction.created_at)}
+                      </Text>
+                      {transaction.description && (
+                        <Text
+                          style={[
+                            styles.transactionDescription,
+                            { color: Colors.text },
+                          ]}
+                        >
+                          {transaction.description}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={styles.transactionStatus}>
+                      <View
+                        style={[
+                          styles.statusDot,
+                          {
+                            backgroundColor: getStatusColor(transaction.status),
+                          },
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.statusText,
+                          { color: getStatusColor(transaction.status) },
+                        ]}
+                      >
+                        {transaction.status.charAt(0).toUpperCase() +
+                          transaction.status.slice(1)}
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.transactionStatus}>
-                    <View
-                      style={[
-                        styles.statusDot,
-                        { backgroundColor: getStatusColor(transaction.status) },
-                      ]}
-                    />
-                    <Text
-                      style={[
-                        styles.statusText,
-                        { color: getStatusColor(transaction.status) },
-                      ]}
-                    >
-                      {transaction.status.charAt(0).toUpperCase() +
-                        transaction.status.slice(1)}
-                    </Text>
-                  </View>
-                </View>
-              ))}
+                ))}
             </View>
           ) : (
             <Text style={[styles.emptyText, { color: Colors.text }]}>
@@ -182,7 +190,7 @@ export default function SubscriptionScreen() {
             </Text>
           ) : subscriptions && subscriptions.length > 0 ? (
             <View style={styles.subscriptionsList}>
-              {subscriptions.slice(0, 3).map((subscription) => (
+              {subscriptions.slice(0, 3).map((subscription: any) => (
                 <View
                   key={subscription.id}
                   style={[
