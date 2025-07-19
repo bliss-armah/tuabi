@@ -11,6 +11,11 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tuabi_user -d tuabi_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -19,6 +24,11 @@ services:
       - "6380:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   api:
     build: ./server
@@ -36,12 +46,15 @@ services:
     ports:
       - "3500:3000"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./server:/app
       - /app/node_modules
       - ./server/uploads:/app/uploads
+    restart: unless-stopped
 
   worker:
     build: ./server
@@ -55,12 +68,17 @@ services:
       JWT_SECRET: your-super-secret-jwt-key
       JWT_EXPIRES_IN: 7d
     depends_on:
-      - postgres
-      - redis
+      api:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     volumes:
       - ./server:/app
       - /app/node_modules
       - ./server/uploads:/app/uploads
+    restart: unless-stopped
 
 volumes:
   postgres_data:

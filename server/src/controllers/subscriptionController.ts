@@ -35,22 +35,30 @@ export const createSubscription = async (
   res: Response
 ) => {
   try {
-    const {
-      planType,
-      amount,
-      currency,
-      endDate,
-      paystackSubscriptionId,
-      paystackCustomerId,
-    } = req.body;
+    const { planId, endDate, paystackSubscriptionId, paystackCustomerId } =
+      req.body;
+
+    // Fetch the plan to get duration if endDate is not provided
+    let calculatedEndDate = endDate ? new Date(endDate) : undefined;
+    if (!calculatedEndDate) {
+      const plan = await prisma.subscriptionPlan.findUnique({
+        where: { id: planId },
+      });
+      if (!plan) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid planId",
+        });
+      }
+      calculatedEndDate = new Date();
+      calculatedEndDate.setDate(calculatedEndDate.getDate() + plan.duration);
+    }
 
     const subscription = await prisma.subscription.create({
       data: {
         userId: req.user!.id,
-        planType,
-        amount: parseFloat(amount),
-        currency: currency || "NGN",
-        endDate: new Date(endDate),
+        planId,
+        endDate: calculatedEndDate,
         paystackSubscriptionId,
         paystackCustomerId,
       },
@@ -61,7 +69,7 @@ export const createSubscription = async (
       where: { id: req.user!.id },
       data: {
         isSubscribed: true,
-        subscriptionExpiresAt: new Date(endDate),
+        subscriptionExpiresAt: calculatedEndDate,
       },
     });
 
@@ -227,14 +235,38 @@ export const verifyPaystackPayment = async (
     // If successful, create or update subscription
     if (paystackRes.status === "success") {
       const now = new Date();
-      const endDate = new Date();
-      endDate.setMonth(now.getMonth() + 1); // Example: 1 month subscription
+      let planId: number | undefined = undefined;
+      // Try to get planId from transaction metadata or paystackRes.metadata
+      if (paystackRes.metadata?.planId) {
+        planId = Number(paystackRes.metadata.planId);
+      } else if (transaction && transaction.transactionMetadata) {
+        try {
+          const meta = JSON.parse(transaction.transactionMetadata);
+          if (meta.planId) planId = Number(meta.planId);
+        } catch {}
+      }
+      if (!planId) {
+        return res.status(400).json({
+          success: false,
+          message: "planId missing from payment metadata",
+        });
+      }
+      // Fetch plan to get duration
+      const plan = await prisma.subscriptionPlan.findUnique({
+        where: { id: planId },
+      });
+      if (!plan) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid planId",
+        });
+      }
+      const endDate = new Date(now);
+      endDate.setDate(endDate.getDate() + plan.duration);
       await prisma.subscription.create({
         data: {
           userId: user.id,
-          planType: paystackRes.metadata?.planType || "default",
-          amount: paystackRes.amount / 100,
-          currency: paystackRes.currency || "NGN",
+          planId,
           status: "active",
           startDate: now,
           endDate,

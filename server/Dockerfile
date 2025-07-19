@@ -4,7 +4,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install system dependencies
-RUN apk add --no-cache libc6-compat openssl netcat-openbsd
+RUN apk add --no-cache libc6-compat openssl postgresql-client netcat-openbsd
 
 # Copy package files and install all dependencies
 COPY package.json package-lock.json* ./

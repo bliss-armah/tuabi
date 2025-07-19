@@ -12,8 +12,11 @@
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
-    "worker": "ts-node src/workers/notificationWorker.ts",
+    "worker": "node dist/workers/notificationWorker.js",
     "worker:dev": "nodemon src/workers/notificationWorker.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.7.1",
