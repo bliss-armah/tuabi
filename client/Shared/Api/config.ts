@@ -86,20 +86,17 @@ const performLogout = async () => {
   } catch (error) {
     console.error("Error clearing storage during logout:", error);
   } finally {
-    router.replace("/login");
+    router.replace("/");
   }
 };
 
 const isAuthEndpoint = (url: string): boolean => {
-  const authPaths = [
-    "/auth",
-    "/login",
-    "/register",
-    "/password",
-    "/reset",
-    "/refresh",
-  ];
+  if (url === "/" || url === "") return true;
+
+  const authPaths = ["/auth", "/register", "/password", "/reset", "/refresh"];
+
   return authPaths.some(
-    (path) => url.startsWith(path) || url.includes(`${path}/`)
+    (path) =>
+      url === path || url.startsWith(path + "/") || url.startsWith(path + "?")
   );
 };
