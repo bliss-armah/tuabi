@@ -8,14 +8,10 @@ const Index = () => {
   useEffect(() => {
     if (user) {
       router.replace("/(tabs)");
+    } else {
+      router.replace("/login");
     }
   }, [user]);
-
-  // If not logged in, show login page
-  if (!user) {
-    router.replace("/login");
-    return null;
-  }
 
   return null;
 };
