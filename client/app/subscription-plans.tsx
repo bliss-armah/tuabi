@@ -19,7 +19,7 @@ import {
   SubscriptionPlan,
 } from "@/Features/Subscription/SubscriptionAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { WebView } from "react-native-webview";
+import { usePaystack } from "react-native-paystack-webview";
 import { Button } from "@/Shared/Components/UIKitten";
 import { useAuth } from "@/Shared/Hooks/useAuth";
 
@@ -29,19 +29,14 @@ export default function SubscriptionPlansScreen() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null
   );
-  const [showWebView, setShowWebView] = useState(false);
-  const [paymentUrl, setPaymentUrl] = useState("");
   const [verifyPayment, { isLoading: isVerifying }] =
     useVerifySubscriptionPaymentMutation();
-  const [paystackReference, setPaystackReference] = useState<string | null>(
-    null
-  );
   const { user } = useAuth();
-  console.log("user::::", user);
-
   const { data: plans, isLoading, error } = useGetSubscriptionPlansQuery();
   const [initializePayment, { isLoading: isInitializing }] =
     useInitializeSubscriptionPaymentMutation();
+
+  const { popup } = usePaystack();
 
   const handlePlanSelection = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
@@ -59,6 +54,7 @@ export default function SubscriptionPlansScreen() {
         return;
       }
 
+      // Initialize payment to get reference
       const response = await initializePayment({
         email: user.email,
         amount: selectedPlan.amount,
@@ -66,10 +62,21 @@ export default function SubscriptionPlansScreen() {
         currency: "GHS",
       }).unwrap();
 
-      if (response.status && response.data.authorization_url) {
-        setPaymentUrl(response.data.authorization_url);
-        setPaystackReference(response.data.reference);
-        setShowWebView(true);
+      if (response.status && response.data.reference) {
+        // Use Paystack popup checkout
+        popup.checkout({
+          email: user.email,
+          amount: selectedPlan.amount * 100, // Paystack expects amount in kobo (smallest currency unit)
+          metadata: {
+            plan_id: selectedPlan.id,
+            plan_name: selectedPlan.name,
+            user_id: user.id,
+            server_reference: response.data.reference, // Store server reference in metadata
+          },
+          onSuccess: handlePaystackSuccess,
+          onCancel: handlePaystackCancel,
+          onError: handlePaystackError,
+        });
       } else {
         Alert.alert("Error", "Failed to initialize payment");
       }
@@ -78,81 +85,61 @@ export default function SubscriptionPlansScreen() {
     }
   };
 
-  const handleWebViewNavigationStateChange = async (navState: any) => {
-    // Check if payment was successful (adjust based on your callback URL)
-    if (
-      navState.url.includes("success") ||
-      navState.url.includes("callback") ||
-      navState.url.includes("paystack.com/close")
-    ) {
-      setShowWebView(false);
-      if (paystackReference) {
-        try {
-          // Show loading indicator
-          Alert.alert(
-            "Verifying Payment",
-            "Please wait while we verify your payment..."
-          );
-          const verifyRes = await verifyPayment({
-            reference: paystackReference,
-          }).unwrap();
-          if (verifyRes.status && verifyRes.data.status === "success") {
-            Alert.alert(
-              "Payment Successful",
-              "Your subscription has been activated!",
-              [
-                {
-                  text: "OK",
-                  onPress: () => router.replace("/(tabs)"),
-                },
-              ]
-            );
-          } else {
-            Alert.alert(
-              "Verification Failed",
-              "We could not verify your payment. Please contact support."
-            );
-          }
-        } catch (error) {
-          Alert.alert(
-            "Verification Error",
-            "An error occurred while verifying your payment."
-          );
-        }
+  const handlePaystackSuccess = async (response: any) => {
+    console.log("Paystack success:", response);
+
+    try {
+      Alert.alert(
+        "Verifying Payment",
+        "Please wait while we verify your payment..."
+      );
+
+      const verifyRes = await verifyPayment({
+        reference: response.reference, // Use the reference from Paystack response
+      }).unwrap();
+
+      console.log('verify:::',verifyRes)
+
+      if (verifyRes.status && verifyRes.data.status === "success") {
+        Alert.alert(
+          "Payment Successful",
+          "Your subscription has been activated!",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/(tabs)"),
+            },
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Verification Failed",
+          "We could not verify your payment. Please contact support."
+        );
       }
+    } catch (error) {
+      Alert.alert(
+        "Verification Error",
+        "An error occurred while verifying your payment."
+      );
     }
   };
 
-  if (showWebView) {
-    return (
-      <View style={styles.container}>
-        <StatusBar style={theme === "dark" ? "light" : "dark"} />
-        <View style={[styles.webViewHeader, { backgroundColor: Colors.card }]}>
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setShowWebView(false)}
-          >
-            <Text style={[styles.closeButtonText, { color: Colors.primary }]}>
-              Close
-            </Text>
-          </TouchableOpacity>
-          <Text style={[styles.webViewTitle, { color: Colors.text }]}>
-            Complete Payment
-          </Text>
-        </View>
-        <WebView
-          source={{ uri: paymentUrl }}
-          onNavigationStateChange={handleWebViewNavigationStateChange}
-          style={styles.webView}
-        />
-      </View>
+  const handlePaystackCancel = () => {
+    Alert.alert("Payment Cancelled", "You have cancelled the payment process.");
+  };
+
+  const handlePaystackError = (error: any) => {
+    console.error("Paystack error:", error);
+    Alert.alert(
+      "Payment Error",
+      "An error occurred during payment. Please try again."
     );
-  }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
-
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -217,14 +204,12 @@ export default function SubscriptionPlansScreen() {
                     </View>
                   )}
                 </View>
-
                 <Text style={[styles.planPrice, { color: Colors.primary }]}>
                   ₵{plan.amount.toLocaleString()}
                 </Text>
                 <Text style={[styles.planInterval, { color: Colors.text }]}>
                   per {plan.interval}
                 </Text>
-
                 {plan.description && (
                   <Text
                     style={[styles.planDescription, { color: Colors.text }]}
@@ -232,7 +217,6 @@ export default function SubscriptionPlansScreen() {
                     {plan.description}
                   </Text>
                 )}
-
                 <View style={styles.featuresList}>
                   <Text style={[styles.feature, { color: Colors.text }]}>
                     ✓ Unlimited debtors
@@ -379,25 +363,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  webViewHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    paddingTop: 60,
-  },
-  closeButton: {
-    marginRight: 15,
-  },
-  closeButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  webViewTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  webView: {
-    flex: 1,
   },
 });

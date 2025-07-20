@@ -65,11 +65,8 @@ export const useAuth = () => {
       ];
 
       await AsyncStorage.multiRemove(keysToRemove);
-      console.log("AsyncStorage cleared successfully");
     } catch (error) {
       console.error("Error clearing AsyncStorage:", error);
-
-      // Fallback: try to remove keys individually
       try {
         await AsyncStorage.removeItem("token");
         await AsyncStorage.removeItem("user");
@@ -79,7 +76,6 @@ export const useAuth = () => {
         console.error("Fallback key removal also failed:", fallbackError);
       }
     } finally {
-      console.log("got here");
       setUser(null);
       setToken(null);
       setTokenExpiry(null);

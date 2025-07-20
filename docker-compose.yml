@@ -42,6 +42,8 @@ services:
       REDIS_PASSWORD: redis_password
       JWT_SECRET: your-super-secret-jwt-key
       JWT_EXPIRES_IN: 7d
+      PAYSTACK_SECRET_KEY: sk_test_70c6c775e0169588132b6c504761debcf85a6a1d
+      PAYSTACK_PUBLIC_KEY: pk_test_ed3746d376ed5f4e09fd8654cc7839e359a831ba
       FRONTEND_URL: http://localhost:3000
     ports:
       - "3500:3000"

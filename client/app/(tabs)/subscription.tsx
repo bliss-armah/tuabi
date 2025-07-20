@@ -82,7 +82,7 @@ export default function SubscriptionScreen() {
         {/* Subscription Status */}
         <SubscriptionStatus showUpgradeButton={true} />
 
-        {/* Recent Transactions */}
+        {/* Recent Transactions
         <View style={[styles.section, { backgroundColor: Colors.card }]}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: Colors.text }]}>
@@ -167,9 +167,9 @@ export default function SubscriptionScreen() {
               No transactions found
             </Text>
           )}
-        </View>
+        </View> */}
 
-        {/* Subscription History */}
+        {/* Subscription History
         <View style={[styles.section, { backgroundColor: Colors.card }]}>
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: Colors.text }]}>
@@ -256,7 +256,7 @@ export default function SubscriptionScreen() {
               No subscription history found
             </Text>
           )}
-        </View>
+        </View> */}
 
         {/* Quick Actions */}
         <View style={[styles.section, { backgroundColor: Colors.card }]}>

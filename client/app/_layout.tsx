@@ -19,6 +19,7 @@ import store from "@/Shared/Store/store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { UIKittenProvider } from "@/Shared/Components/UIKittenProvider";
 import NotificationSetup from "@/Shared/Components/NotificationSetup";
+import { PaystackProvider } from "react-native-paystack-webview";
 
 const persistor = persistStore(store);
 
@@ -42,21 +43,23 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-          <UIKittenProvider>
-            <ThemeProvider
-              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-            >
-              <NotificationSetup>
-                <Stack screenOptions={{ headerShown: false }}></Stack>
-                <StatusBar style="auto" />
-              </NotificationSetup>
-            </ThemeProvider>
-          </UIKittenProvider>
-        </PersistGate>
-      </Provider>
-    </SafeAreaView>
+    <PaystackProvider debug publicKey="pk_test_ed3746d376ed5f4e09fd8654cc7839e359a831ba" currency="GHS">
+      <SafeAreaView style={{ flex: 1 }}>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <UIKittenProvider>
+              <ThemeProvider
+                value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+              >
+                <NotificationSetup>
+                  <Stack screenOptions={{ headerShown: false }}></Stack>
+                  <StatusBar style="auto" />
+                </NotificationSetup>
+              </ThemeProvider>
+            </UIKittenProvider>
+          </PersistGate>
+        </Provider>
+      </SafeAreaView>
+    </PaystackProvider>
   );
 }

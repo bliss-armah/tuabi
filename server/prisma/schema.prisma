@@ -100,7 +100,7 @@ model Transaction {
   paystackTransactionId String   @unique
   paystackReference     String   @unique
   amount                Float
-  currency              String   @default("NGN")
+  currency              String   @default("GHS")
   status                String
   paymentMethod         String?
   description           String?

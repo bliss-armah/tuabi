@@ -18,14 +18,16 @@ export const getSubscriptions = async (
     });
 
     return res.status(200).json({
-      success: true,
+      status: true,
+      message: "Subscriptions retrieved successfully",
       data: subscriptions,
     });
   } catch (error) {
     console.error("Get subscriptions error:", error);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Internal server error",
+      data: null,
     });
   }
 };
@@ -46,8 +48,9 @@ export const createSubscription = async (
       });
       if (!plan) {
         return res.status(400).json({
-          success: false,
+          status: false,
           message: "Invalid planId",
+          data: null,
         });
       }
       calculatedEndDate = new Date();
@@ -74,15 +77,16 @@ export const createSubscription = async (
     });
 
     return res.status(201).json({
-      success: true,
+      status: true,
       message: "Subscription created successfully",
       data: subscription,
     });
   } catch (error) {
     console.error("Create subscription error:", error);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Internal server error",
+      data: null,
     });
   }
 };
@@ -97,8 +101,9 @@ export const cancelSubscription = async (
 
     if (isNaN(subscriptionId)) {
       res.status(400).json({
-        success: false,
+        status: false,
         message: "Invalid subscription ID",
+        data: null,
       });
       return;
     }
@@ -113,8 +118,9 @@ export const cancelSubscription = async (
 
     if (!subscription) {
       res.status(404).json({
-        success: false,
+        status: false,
         message: "Subscription not found",
+        data: null,
       });
       return;
     }
@@ -136,15 +142,16 @@ export const cancelSubscription = async (
     }
 
     return res.status(200).json({
-      success: true,
+      status: true,
       message: "Subscription cancelled successfully",
       data: updatedSubscription,
     });
   } catch (error) {
     console.error("Cancel subscription error:", error);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Internal server error",
+      data: null,
     });
   }
 };
@@ -156,45 +163,26 @@ export const initializePaystackPayment = async (
   try {
     const { amount, planType, currency } = req.body;
     const user = req.user!;
-    const reference = uuidv4();
 
-    // Create a pending transaction record
-    const transaction = await prisma.transaction.create({
-      data: {
-        userId: user.id,
-        amount: parseFloat(amount),
-        currency: currency || "NGN",
-        status: "pending",
-        paystackReference: reference,
-        paystackTransactionId: reference, // Use reference as temporary ID
-        description: `Subscription payment for ${planType}`,
-        transactionMetadata: JSON.stringify({ planType }),
-      },
-    });
-
-    // Initialize Paystack transaction
-    const paystackRes = await initializeTransaction(user.email, amount, {
-      userId: user.id,
-      planType,
-      transactionId: transaction.id,
-      reference,
-    });
-
-    // Update transaction with Paystack transaction ID
-    await prisma.transaction.update({
-      where: { id: transaction.id },
-      data: { paystackTransactionId: paystackRes.reference },
-    });
-
+    // For Paystack webview, we don't need to initialize a transaction on Paystack's side
+    // The webview will handle the transaction creation
+    // We just need to return success to allow the client to proceed
     return res.status(200).json({
-      success: true,
-      data: paystackRes,
+      status: true,
+      message: "Payment ready to initialize",
+      data: {
+        reference: uuidv4(), // Generate a temporary reference for client-side tracking
+        amount: parseFloat(amount),
+        currency: currency || "GHS",
+        planType,
+      },
     });
   } catch (error) {
     console.error("Paystack initialize error:", error);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Failed to initialize payment",
+      data: null,
     });
   }
 };
@@ -210,14 +198,32 @@ export const verifyPaystackPayment = async (
     // Verify with Paystack
     const paystackRes = await verifyTransaction(reference);
 
-    // Find the transaction by reference
-    const transaction = await prisma.transaction.findFirst({
+    // For Paystack webview, we create the transaction record during verification
+    // Check if transaction already exists
+    let transaction = await prisma.transaction.findFirst({
       where: { paystackReference: reference, userId: user.id },
     });
+
     if (!transaction) {
-      return res.status(404).json({
-        success: false,
-        message: "Transaction not found",
+      // Try finding by paystackTransactionId as fallback
+      transaction = await prisma.transaction.findFirst({
+        where: { paystackTransactionId: reference, userId: user.id },
+      });
+    }
+
+    // If transaction doesn't exist, create it (this happens with webview payments)
+    if (!transaction) {
+      transaction = await prisma.transaction.create({
+        data: {
+          userId: user.id,
+          amount: paystackRes.data.amount / 100, // Convert from kobo to naira
+          currency: paystackRes.data.currency || "GHS",
+          status: paystackRes.status === "success" ? "success" : "failed",
+          paystackReference: reference,
+          paystackTransactionId: paystackRes.data.id?.toString() || reference,
+          description: `Subscription payment via Paystack webview`,
+          transactionMetadata: JSON.stringify(paystackRes),
+        },
       });
     }
 
@@ -236,19 +242,17 @@ export const verifyPaystackPayment = async (
     if (paystackRes.status === "success") {
       const now = new Date();
       let planId: number | undefined = undefined;
-      // Try to get planId from transaction metadata or paystackRes.metadata
-      if (paystackRes.metadata?.planId) {
-        planId = Number(paystackRes.metadata.planId);
-      } else if (transaction && transaction.transactionMetadata) {
-        try {
-          const meta = JSON.parse(transaction.transactionMetadata);
-          if (meta.planId) planId = Number(meta.planId);
-        } catch {}
+      // Try to get planId from Paystack response metadata
+      if (paystackRes.data.metadata?.plan_id) {
+        planId = Number(paystackRes.data.metadata.plan_id);
+      } else if (paystackRes.data.metadata?.planId) {
+        planId = Number(paystackRes.data.metadata.planId);
       }
       if (!planId) {
         return res.status(400).json({
-          success: false,
+          status: false,
           message: "planId missing from payment metadata",
+          data: null,
         });
       }
       // Fetch plan to get duration
@@ -257,8 +261,9 @@ export const verifyPaystackPayment = async (
       });
       if (!plan) {
         return res.status(400).json({
-          success: false,
+          status: false,
           message: "Invalid planId",
+          data: null,
         });
       }
       const endDate = new Date(now);
@@ -289,14 +294,16 @@ export const verifyPaystackPayment = async (
     }
 
     return res.status(200).json({
-      success: true,
+      status: true,
+      message: "Payment verified successfully",
       data: paystackRes,
     });
   } catch (error) {
     console.error("Paystack verify error:", error);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Failed to verify payment",
+      data: null,
     });
   }
 };
@@ -311,14 +318,16 @@ export const getUserTransactions = async (
       orderBy: { createdAt: "desc" },
     });
     return res.status(200).json({
-      success: true,
+      status: true,
+      message: "Transactions retrieved successfully",
       data: transactions,
     });
   } catch (error) {
     console.error("Get user transactions error:", error);
     return res.status(500).json({
-      success: false,
+      status: false,
       message: "Internal server error",
+      data: null,
     });
   }
 };
@@ -357,7 +366,8 @@ export const getUserSubscriptionStatus = async (
     });
 
     res.status(200).json({
-      success: true,
+      status: true,
+      message: "Subscription status retrieved successfully",
       data: {
         is_subscribed: user?.isSubscribed || false,
         subscription_expires_at: user?.subscriptionExpiresAt,
@@ -368,8 +378,9 @@ export const getUserSubscriptionStatus = async (
   } catch (error) {
     console.error("Get user subscription status error:", error);
     res.status(500).json({
-      success: false,
+      status: false,
       message: "Internal server error",
+      data: null,
     });
   }
 };
@@ -380,9 +391,17 @@ export const getSubscriptionPlans = async (_req: any, res: Response) => {
       where: { isActive: true },
       orderBy: { amount: "asc" },
     });
-    res.status(200).json({ success: true, data: plans });
+    res.status(200).json({
+      status: true,
+      message: "Subscription plans retrieved successfully",
+      data: plans,
+    });
   } catch (error) {
     console.error("Get subscription plans error:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(500).json({
+      status: false,
+      message: "Internal server error",
+      data: null,
+    });
   }
 };
