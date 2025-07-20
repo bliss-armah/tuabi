@@ -1,8 +1,9 @@
 import { useAuth } from "@/Shared/Hooks/useAuth";
 import { useEffect } from "react";
 import { router } from "expo-router";
+import LoginScreen from "@/Features/Authentication/Login";
 
-const Index = () => {
+const Login = () => {
   const { user } = useAuth();
 
   useEffect(() => {
@@ -11,13 +12,7 @@ const Index = () => {
     }
   }, [user]);
 
-  // If not logged in, show login page
-  if (!user) {
-    router.replace("/login");
-    return null;
-  }
-
-  return null;
+  return <LoginScreen />;
 };
 
-export default Index;
+export default Login;

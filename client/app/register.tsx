@@ -35,7 +35,7 @@ export default function Register() {
       Alert.alert(
         "Registration Successful",
         "You can now login with your credentials",
-        [{ text: "OK", onPress: () => router.push("/login") }]
+        [{ text: "OK", onPress: () => router.push("/") }]
       );
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -103,7 +103,7 @@ export default function Register() {
           size="large"
         />
 
-        <TouchableOpacity onPress={() => router.push("/login")}>
+        <TouchableOpacity onPress={() => router.push("/")}>
           <Text style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}>
             Already have an account? Login
           </Text>

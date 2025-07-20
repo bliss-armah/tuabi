@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { Redirect, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
@@ -27,7 +33,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return <Redirect href="/login" />;
+    return <Redirect href="/" />;
   }
 
   if (error) {
@@ -45,7 +51,7 @@ export default function Home() {
       <ScrollView
         style={[styles.container, { backgroundColor: Colors.background }]}
         refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} /> 
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
         }
       >
         <Text style={styles.headerTitle}>Debt Overview 📊</Text>

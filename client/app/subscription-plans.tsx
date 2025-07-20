@@ -21,6 +21,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { WebView } from "react-native-webview";
 import { Button } from "@/Shared/Components/UIKitten";
+import { useAuth } from "@/Shared/Hooks/useAuth";
 
 export default function SubscriptionPlansScreen() {
   const colorScheme = useColorScheme();
@@ -35,8 +36,10 @@ export default function SubscriptionPlansScreen() {
   const [paystackReference, setPaystackReference] = useState<string | null>(
     null
   );
+  const { user } = useAuth();
+  console.log("user::::", user);
 
-  const { data: plans = [], isLoading, error } = useGetSubscriptionPlansQuery();
+  const { data: plans, isLoading, error } = useGetSubscriptionPlansQuery();
   const [initializePayment, { isLoading: isInitializing }] =
     useInitializeSubscriptionPaymentMutation();
 
@@ -51,9 +54,6 @@ export default function SubscriptionPlansScreen() {
     }
 
     try {
-      const userString = await AsyncStorage.getItem("user");
-      const user = userString ? JSON.parse(userString) : null;
-
       if (!user || !user.email) {
         Alert.alert("Error", "User information not found");
         return;
@@ -62,7 +62,7 @@ export default function SubscriptionPlansScreen() {
       const response = await initializePayment({
         email: user.email,
         amount: selectedPlan.amount,
-        plan_type: selectedPlan.id,
+        plan_type: selectedPlan.id as unknown as string,
         currency: "GHS",
       }).unwrap();
 
@@ -122,8 +122,6 @@ export default function SubscriptionPlansScreen() {
       }
     }
   };
-
-  console.log("plans:::::::", plans);
 
   if (showWebView) {
     return (
@@ -189,7 +187,7 @@ export default function SubscriptionPlansScreen() {
           </View>
         ) : (
           <View style={styles.plansContainer}>
-            {plans.map((plan: any) => (
+            {plans?.data.map((plan: any) => (
               <TouchableOpacity
                 key={plan.id}
                 style={[

@@ -13,6 +13,10 @@ export interface SubscriptionPlan {
   updatedAt: string;
 }
 
+export interface SubscriptionPlanData {
+  data: SubscriptionPlan[];
+}
+
 export interface PaystackInitializeRequest {
   email: string;
   amount: number;
@@ -134,7 +138,7 @@ export const subscriptionApi = createApi({
         method: "GET",
       }),
     }),
-    getSubscriptionPlans: builder.query<SubscriptionPlan[], void>({
+    getSubscriptionPlans: builder.query<SubscriptionPlanData, void>({
       query: () => ({
         url: "/subscriptions/plans",
         method: "GET",

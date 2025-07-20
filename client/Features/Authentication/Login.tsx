@@ -9,7 +9,7 @@ import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { TouchableOpacity } from "react-native";
 
-export default function LoginScreen() {
+export default function Login() {
   const [loginMutation] = useLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,21 +27,40 @@ export default function LoginScreen() {
         username: email,
         password,
       }).unwrap();
+
       if (response.data) {
+        // Save authentication data
         await AsyncStorage.setItem(
           "token",
           JSON.stringify(response.data.token)
         );
         await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+
+        router.replace("/(tabs)");
+      } else {
+        Alert.alert("Login Failed", "No data received from server");
       }
-      router.replace("/(tabs)");
-    } catch (error) {
-      Alert.alert("Login Failed", "Invalid email or password");
+    } catch (error: any) {
+      console.error("Login error:", error);
+
+      // Handle different types of errors
+      let errorMessage = "Invalid email or password";
+
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.status === "FETCH_ERROR") {
+        errorMessage = "Network error. Please check your connection.";
+      } else if (error?.status === 500) {
+        errorMessage = "Server error. Please try again later.";
+      }
+
+      Alert.alert("Login Failed", errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={"dark"} />
@@ -80,9 +99,7 @@ export default function LoginScreen() {
         />
 
         <TouchableOpacity onPress={() => router.push("/register")}>
-          <Text
-            style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}
-          >
+          <Text style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}>
             Don’t have an account?{" "}
             <Text style={{ fontWeight: "bold" }}>Register</Text>
           </Text>
