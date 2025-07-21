@@ -63,15 +63,14 @@ export default function SubscriptionPlansScreen() {
       }).unwrap();
 
       if (response.status && response.data.reference) {
-        // Use Paystack popup checkout
         popup.checkout({
           email: user.email,
-          amount: selectedPlan.amount * 100, // Paystack expects amount in kobo (smallest currency unit)
+          amount: selectedPlan.amount,
           metadata: {
             plan_id: selectedPlan.id,
             plan_name: selectedPlan.name,
             user_id: user.id,
-            server_reference: response.data.reference, // Store server reference in metadata
+            server_reference: response.data.reference,
           },
           onSuccess: handlePaystackSuccess,
           onCancel: handlePaystackCancel,
@@ -89,16 +88,14 @@ export default function SubscriptionPlansScreen() {
     console.log("Paystack success:", response);
 
     try {
-      Alert.alert(
-        "Verifying Payment",
-        "Please wait while we verify your payment..."
-      );
-
+      // Removed Alert.alert for 'Verifying Payment'
       const verifyRes = await verifyPayment({
         reference: response.reference, // Use the reference from Paystack response
       }).unwrap();
 
-      if (verifyRes.status && verifyRes.data.status === "success") {
+      console.log(verifyRes);
+
+      if (verifyRes?.data && verifyRes?.data?.status) {
         Alert.alert(
           "Payment Successful",
           "Your subscription has been activated!",
@@ -138,6 +135,15 @@ export default function SubscriptionPlansScreen() {
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
+      {/* Spinner overlay for verifying payment */}
+      {isVerifying && (
+        <View style={styles.verifyingOverlay}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={[styles.verifyingText, { color: Colors.text }]}>
+            Verifying payment...
+          </Text>
+        </View>
+      )}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -361,5 +367,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  verifyingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
+  verifyingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: "500",
   },
 });

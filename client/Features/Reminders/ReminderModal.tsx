@@ -179,6 +179,8 @@ export default function ReminderModal({
                   onBlur={onBlur}
                   status={errors.title ? "danger" : "basic"}
                   caption={errors.title?.message}
+                  className=""
+                  style={{fontSize:12}}
                 />
               )}
             />
@@ -266,9 +268,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 10,
   },
   subtitle: {
     fontSize: 16,

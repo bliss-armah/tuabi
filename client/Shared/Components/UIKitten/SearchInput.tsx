@@ -19,7 +19,6 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   onClear,
   style,
 }) => {
-
   const renderAccessoryRight = () => {
     if (value && value.length > 0) {
       return () => (
@@ -43,6 +42,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         },
         style,
       ]}
+      textStyle={{ fontSize: 12 }}
     />
   );
 };

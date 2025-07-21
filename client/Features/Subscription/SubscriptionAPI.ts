@@ -40,7 +40,7 @@ export interface PaystackVerifyRequest {
 }
 
 export interface PaystackVerifyResponse {
-  status: boolean;
+  status: string;
   message: string;
   data: any;
 }
