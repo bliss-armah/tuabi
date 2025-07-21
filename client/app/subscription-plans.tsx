@@ -98,8 +98,6 @@ export default function SubscriptionPlansScreen() {
         reference: response.reference, // Use the reference from Paystack response
       }).unwrap();
 
-      console.log('verify:::',verifyRes)
-
       if (verifyRes.status && verifyRes.data.status === "success") {
         Alert.alert(
           "Payment Successful",
@@ -193,7 +191,7 @@ export default function SubscriptionPlansScreen() {
                   <Text style={[styles.planName, { color: Colors.text }]}>
                     {plan.name}
                   </Text>
-                  {plan.id === "yearly" && (
+                  {plan.name.toLowerCase() === "yearly" && (
                     <View
                       style={[
                         styles.savingsBadge,
@@ -208,7 +206,7 @@ export default function SubscriptionPlansScreen() {
                   ₵{plan.amount.toLocaleString()}
                 </Text>
                 <Text style={[styles.planInterval, { color: Colors.text }]}>
-                  per {plan.interval}
+                  per {plan.name.toLowerCase()}
                 </Text>
                 {plan.description && (
                   <Text

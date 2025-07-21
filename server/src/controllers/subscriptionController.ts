@@ -225,6 +225,7 @@ export const verifyPaystackPayment = async (
           transactionMetadata: JSON.stringify(paystackRes),
         },
       });
+      console.log("Transaction created:", transaction);
     }
 
     // Update transaction status
@@ -243,10 +244,16 @@ export const verifyPaystackPayment = async (
       const now = new Date();
       let planId: number | undefined = undefined;
       // Try to get planId from Paystack response metadata
+      console.log("Paystack response metadata:", paystackRes.data.metadata);
+
       if (paystackRes.data.metadata?.plan_id) {
         planId = Number(paystackRes.data.metadata.plan_id);
+        console.log("Found plan_id in metadata:", planId);
       } else if (paystackRes.data.metadata?.planId) {
         planId = Number(paystackRes.data.metadata.planId);
+        console.log("Found planId in metadata:", planId);
+      } else {
+        console.log("No plan ID found in metadata");
       }
       if (!planId) {
         return res.status(400).json({
@@ -268,29 +275,62 @@ export const verifyPaystackPayment = async (
       }
       const endDate = new Date(now);
       endDate.setDate(endDate.getDate() + plan.duration);
-      await prisma.subscription.create({
+
+      console.log("Creating subscription with:", {
+        userId: user.id,
+        planId,
+        planName: plan.name,
+        startDate: now,
+        endDate,
+        duration: plan.duration,
+      });
+
+      const subscription = await prisma.subscription.create({
         data: {
           userId: user.id,
           planId,
           status: "active",
           startDate: now,
           endDate,
-          paystackSubscriptionId: paystackRes.subscription
-            ? paystackRes.subscription.toString()
+          paystackSubscriptionId: paystackRes.data.subscription
+            ? paystackRes.data.subscription.toString()
             : undefined,
-          paystackCustomerId: paystackRes.customer
-            ? paystackRes.customer.toString()
+          paystackCustomerId: paystackRes.data.customer
+            ? paystackRes.data.customer.toString()
             : undefined,
         },
       });
+
+      console.log("Subscription created:", subscription);
+
       // Update user
-      await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: user.id },
         data: {
           isSubscribed: true,
           subscriptionExpiresAt: endDate,
         },
       });
+
+      console.log("User updated:", {
+        id: updatedUser.id,
+        isSubscribed: updatedUser.isSubscribed,
+        subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
+      });
+
+      // Link transaction to subscription
+      if (transaction) {
+        await prisma.transaction.update({
+          where: { id: transaction.id },
+          data: { subscriptionId: subscription.id },
+        });
+        console.log(
+          "Transaction linked to subscription:",
+          transaction.id,
+          "->",
+          subscription.id
+        );
+      }
     }
 
     return res.status(200).json({
@@ -345,12 +385,15 @@ export const getUserSubscriptionStatus = async (
       },
     });
 
-    // Get the most recent active subscription
+    // Get the most recent active subscription with plan details
     const currentPlan = await prisma.subscription.findFirst({
       where: {
         userId: req.user!.id,
         status: "active",
         endDate: { gte: new Date() },
+      },
+      include: {
+        plan: true, // Include the plan details
       },
       orderBy: { endDate: "desc" },
     });

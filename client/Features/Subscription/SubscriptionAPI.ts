@@ -64,12 +64,11 @@ export interface Transaction {
 export interface Subscription {
   id: number;
   user_id: number;
-  plan_type: string;
-  amount: number;
-  currency: string;
+  planId: number;
+  plan: SubscriptionPlan; // Include the plan details
   status: string;
-  start_date: string;
-  end_date: string;
+  startDate: string;
+  endDate: string;
   paystack_subscription_id?: string;
   paystack_customer_id?: string;
   created_at: string;

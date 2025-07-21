@@ -123,14 +123,10 @@ export default function SubscriptionStatus({
           {subscriptionStatus.current_plan && (
             <View style={styles.planInfo}>
               <Text style={[styles.planName, { color: Colors.text }]}>
-                {subscriptionStatus.current_plan.plan_type
-                  .charAt(0)
-                  .toUpperCase() +
-                  subscriptionStatus.current_plan.plan_type.slice(1)}{" "}
-                Plan
+                {subscriptionStatus.current_plan.plan.name} Plan
               </Text>
               <Text style={[styles.planAmount, { color: Colors.primary }]}>
-                ₵{subscriptionStatus.current_plan.amount.toLocaleString()}
+                ₵{subscriptionStatus.current_plan.plan.amount.toLocaleString()}
               </Text>
             </View>
           )}
