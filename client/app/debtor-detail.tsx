@@ -20,13 +20,7 @@ import RemindersList from "@/Features/Reminders/RemindersList";
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
 
-  const {
-    isVisible,
-    mode,
-    debtor: hookDebtor,
-    openEditDebtor,
-    closeModal,
-  } = useDebtorModal();
+  // Remove useDebtorModal, use router navigation instead
 
   const {
     data: debtor,
@@ -104,7 +98,9 @@ export default function DebtorDetail() {
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <DebtorDetailHeader
         debtorName={debtor.data.name}
-        onEdit={() => openEditDebtor(debtor?.data)}
+        onEdit={() =>
+          router.push(`/edit-debtor?mode=edit&debtorId=${debtor.data.id}`)
+        }
       />
       <FlatList
         data={[1]}
@@ -136,13 +132,7 @@ export default function DebtorDetail() {
         onSave={handleAddPayment}
         onCancel={() => setModalVisible(false)}
       />
-      <DebtorModal
-        visible={isVisible}
-        mode={mode}
-        debtor={hookDebtor}
-        onClose={closeModal}
-        onSuccess={refetch}
-      />
+      {/* DebtorModal removed, now handled as a page */}
     </View>
   );
 }

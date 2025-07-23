@@ -27,6 +27,8 @@ export default function SubscriptionStatus({
     refetchOnMountOrArgChange: true,
   });
 
+  console.log(subscriptionStatus)
+
   const handleUpgrade = () => {
     router.push("/subscription-plans");
   };

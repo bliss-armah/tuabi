@@ -71,11 +71,6 @@ export const initializeTransaction = async (
   metadata: any = {}
 ) => {
   try {
-    console.log("Initializing transaction:", {
-      email,
-      amount: amount * 100,
-      metadata,
-    });
 
     const requestData = {
       email,

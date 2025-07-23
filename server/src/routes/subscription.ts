@@ -8,10 +8,12 @@ import {
   getUserTransactions,
   getUserSubscriptionStatus,
   getSubscriptionPlans,
+  paystackWebhookHandler,
 } from "../controllers/subscriptionController";
 import { authenticateToken } from "../middleware/auth";
 
 const router = Router();
+
 
 // All routes require authentication
 router.use(authenticateToken);

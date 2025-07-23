@@ -16,11 +16,19 @@ import queueRoutes from "./routes/queueRoutes";
 
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
+import { paystackWebhookHandler } from "./controllers/subscriptionController";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(
+  "/api/subscriptions/webhook/paystack",
+  express.raw({ type: "application/json" }),
+  paystackWebhookHandler
+);
+
 
 // Security middleware
 app.use(helmet());

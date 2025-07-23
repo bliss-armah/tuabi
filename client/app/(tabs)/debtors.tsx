@@ -26,7 +26,7 @@ type Debtor = {
 };
 
 export default function Debtors() {
-  const { isVisible, mode, openAddDebtor, closeModal } = useDebtorModal();
+  // Remove useDebtorModal, use router navigation instead
 
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
@@ -114,7 +114,7 @@ export default function Debtors() {
         actionButton={
           <Ionicons name="add-circle-outline" size={28} color={"#ffffff"} />
         }
-        onTap={openAddDebtor}
+        onTap={() => router.push("/add-debtor?mode=add")}
       />
       <View style={styles.container}>
         {filteredDebtors.length > 0 && (
@@ -147,7 +147,7 @@ export default function Debtors() {
             </Text>
             <Button
               title="Add Debtor"
-              onPress={openAddDebtor}
+              onPress={() => router.push("/add-debtor?mode=add")}
               variant="primary"
               style={styles.addButton}
             />
@@ -155,12 +155,7 @@ export default function Debtors() {
         )}
       </View>
 
-      <DebtorModal
-        visible={isVisible}
-        mode={mode}
-        onClose={closeModal}
-        onSuccess={refetch}
-      />
+      {/* DebtorModal removed, now handled as a page */}
     </View>
   );
 }

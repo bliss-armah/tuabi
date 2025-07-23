@@ -19,9 +19,11 @@ import {
   SubscriptionPlan,
 } from "@/Features/Subscription/SubscriptionAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Linking from "expo-linking";
 import { usePaystack } from "react-native-paystack-webview";
 import { Button } from "@/Shared/Components/UIKitten";
 import { useAuth } from "@/Shared/Hooks/useAuth";
+import { useGetUserSubscriptionStatusQuery } from "@/Features/Subscription/SubscriptionAPI";
 
 export default function SubscriptionPlansScreen() {
   const colorScheme = useColorScheme();
@@ -35,6 +37,7 @@ export default function SubscriptionPlansScreen() {
   const { data: plans, isLoading, error } = useGetSubscriptionPlansQuery();
   const [initializePayment, { isLoading: isInitializing }] =
     useInitializeSubscriptionPaymentMutation();
+  const [polling, setPolling] = useState(false);
 
   const { popup } = usePaystack();
 
@@ -54,7 +57,7 @@ export default function SubscriptionPlansScreen() {
         return;
       }
 
-      // Initialize payment to get reference
+      // Initialize payment to get authorization_url
       const response = await initializePayment({
         email: user.email,
         amount: selectedPlan.amount,
@@ -62,26 +65,53 @@ export default function SubscriptionPlansScreen() {
         currency: "GHS",
       }).unwrap();
 
-      if (response.status && response.data.reference) {
-        popup.checkout({
-          email: user.email,
-          amount: selectedPlan.amount,
-          metadata: {
-            plan_id: selectedPlan.id,
-            plan_name: selectedPlan.name,
-            user_id: user.id,
-            server_reference: response.data.reference,
-          },
-          onSuccess: handlePaystackSuccess,
-          onCancel: handlePaystackCancel,
-          onError: handlePaystackError,
-        });
+      if (response.status && response.data.authorization_url) {
+        // Open the Paystack payment page in browser
+        Linking.openURL(response.data.authorization_url);
+        // Start polling for subscription status
+        setPolling(true);
+        pollSubscriptionStatus();
       } else {
         Alert.alert("Error", "Failed to initialize payment");
       }
     } catch (error) {
       Alert.alert("Error", "Failed to process payment");
     }
+  };
+
+  // Polling function for subscription status
+  const { refetch: refetchStatus } = useGetUserSubscriptionStatusQuery(
+    undefined,
+    { skip: true }
+  );
+  const pollSubscriptionStatus = async () => {
+    let attempts = 0;
+    const maxAttempts = 20; // e.g., poll for up to 2 minutes
+    const delay = 6000; // 6 seconds
+    while (attempts < maxAttempts) {
+      const { data } = await refetchStatus();
+      if (data?.is_subscribed) {
+        setPolling(false);
+        Alert.alert(
+          "Payment Successful",
+          "Your subscription has been activated!",
+          [
+            {
+              text: "OK",
+              onPress: () => router.replace("/(tabs)"),
+            },
+          ]
+        );
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
+      attempts++;
+    }
+    setPolling(false);
+    Alert.alert(
+      "Verification Timeout",
+      "We could not verify your payment in time. Please check your subscription status later."
+    );
   };
 
   const handlePaystackSuccess = async (response: any) => {
@@ -135,8 +165,8 @@ export default function SubscriptionPlansScreen() {
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
-      {/* Spinner overlay for verifying payment */}
-      {isVerifying && (
+      {/* Spinner overlay for verifying payment or polling */}
+      {(isVerifying || polling) && (
         <View style={styles.verifyingOverlay}>
           <ActivityIndicator size="large" color={Colors.primary} />
           <Text style={[styles.verifyingText, { color: Colors.text }]}>

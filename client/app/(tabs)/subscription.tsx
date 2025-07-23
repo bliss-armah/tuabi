@@ -258,30 +258,6 @@ export default function SubscriptionScreen() {
           )}
         </View> */}
 
-        {/* Quick Actions */}
-        <View style={[styles.section, { backgroundColor: Colors.card }]}>
-          <Text style={[styles.sectionTitle, { color: Colors.text }]}>
-            Quick Actions
-          </Text>
-
-          <View style={styles.quickActions}>
-            <Button
-              title="Upgrade Plan"
-              onPress={() => router.push("/subscription-plans")}
-              variant="primary"
-              style={styles.actionButton}
-            />
-
-            <Button
-              title="Get Help"
-              onPress={() =>
-                Alert.alert("Support", "Contact support feature coming soon!")
-              }
-              variant="secondary"
-              style={styles.actionButton}
-            />
-          </View>
-        </View>
       </ScrollView>
     </View>
   );
