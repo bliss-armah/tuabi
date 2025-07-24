@@ -162,12 +162,12 @@ export const initializePaystackPayment = async (
   res: Response
 ) => {
   try {
-    const { amount, planType, currency } = req.body;
+    const { amount, planId, currency } = req.body;
     const user = req.user!;
 
     // Call Paystack to initialize the transaction
     const paystackRes = await initializeTransaction(user.email, amount, {
-      planType,
+      planId,
       userId: user.id,
     });
 
@@ -180,7 +180,7 @@ export const initializePaystackPayment = async (
         reference: paystackRes.data.reference,
         amount: amount,
         currency: currency || "GHS",
-        planType,
+        planId,
       },
     });
   } catch (error) {
@@ -231,7 +231,7 @@ export const verifyPaystackPayment = async (
           transactionMetadata: JSON.stringify(paystackRes),
         },
       });
-      console.log("Transaction created:", transaction);
+      console.log("Transaction created:");
     }
 
     // Update transaction status
@@ -249,15 +249,11 @@ export const verifyPaystackPayment = async (
     if (paystackRes.status === "success") {
       const now = new Date();
       let planId: number | undefined = undefined;
-      // Try to get planId from Paystack response metadata
-      console.log("Paystack response metadata:", paystackRes.data.metadata);
 
-      if (paystackRes.data.metadata?.plan_id) {
-        planId = Number(paystackRes.data.metadata.plan_id);
-        console.log("Found plan_id in metadata:", planId);
+      if (paystackRes.data.metadata?.planId) {
+        planId = Number(paystackRes.data.metadata.planId);
       } else if (paystackRes.data.metadata?.planId) {
         planId = Number(paystackRes.data.metadata.planId);
-        console.log("Found planId in metadata:", planId);
       } else {
         console.log("No plan ID found in metadata");
       }
@@ -282,15 +278,6 @@ export const verifyPaystackPayment = async (
       const endDate = new Date(now);
       endDate.setDate(endDate.getDate() + plan.duration);
 
-      console.log("Creating subscription with:", {
-        userId: user.id,
-        planId,
-        planName: plan.name,
-        startDate: now,
-        endDate,
-        duration: plan.duration,
-      });
-
       const subscription = await prisma.subscription.create({
         data: {
           userId: user.id,
@@ -307,7 +294,7 @@ export const verifyPaystackPayment = async (
         },
       });
 
-      console.log("Subscription created:", subscription);
+      console.log("Subscription created:");
 
       // Update user
       const updatedUser = await prisma.user.update({
@@ -318,13 +305,6 @@ export const verifyPaystackPayment = async (
         },
       });
 
-      console.log("User updated:", {
-        id: updatedUser.id,
-        isSubscribed: updatedUser.isSubscribed,
-        subscriptionExpiresAt: updatedUser.subscriptionExpiresAt,
-      });
-
-      // Link transaction to subscription
       if (transaction) {
         await prisma.transaction.update({
           where: { id: transaction.id },
@@ -486,20 +466,6 @@ export const paystackWebhookHandler = async (req: any, res: Response) => {
       console.error("Invalid signature");
       return res.status(401).send("Invalid signature");
     }
-
-    // Enhanced logging for debugging
-    console.log("=== PAYSTACK WEBHOOK EVENT ===");
-    console.log("Event Type:", event.event);
-    console.log("Event Data:", JSON.stringify(event.data, null, 2));
-    console.log(
-      "Event Metadata:",
-      JSON.stringify(event.data?.metadata, null, 2)
-    );
-    console.log(
-      "Customer Info:",
-      JSON.stringify(event.data?.customer, null, 2)
-    );
-
     // Handle different event types
     switch (event.event) {
       case "charge.success":
@@ -541,8 +507,6 @@ const handleChargeSuccess = async (event: any, res: Response) => {
       channel,
       authorization,
     } = event.data;
-
-    console.log("Processing charge success for reference:", reference);
 
     const email = customer?.email;
     if (!email) {
@@ -595,7 +559,7 @@ const handleChargeSuccess = async (event: any, res: Response) => {
     }
 
     // Handle subscription creation/renewal
-    const planId = Number(metadata?.plan_id || metadata?.planId);
+    const planId = Number(metadata?.planId || metadata?.planId);
     if (!planId) {
       console.error(
         "planId missing from payment metadata. Available metadata:",
@@ -678,21 +642,15 @@ const handleChargeSuccess = async (event: any, res: Response) => {
 
 // Handle subscription creation
 const handleSubscriptionCreate = async (event: any, res: Response) => {
-  console.log("Processing subscription.create event");
   const { customer, plan, subscription_code } = event.data;
 
-  console.log("Subscription created:", {
-    customer: customer?.email,
-    plan: plan?.plan_code,
-    subscription_code,
-  });
+  console.log("Subscription created:");
 
   return res.sendStatus(200);
 };
 
 // Handle subscription disable
 const handleSubscriptionDisable = async (event: any, res: Response) => {
-  console.log("Processing subscription.disable event");
   const { customer, subscription_code } = event.data;
 
   try {
@@ -726,16 +684,14 @@ const handleSubscriptionDisable = async (event: any, res: Response) => {
 
 // Handle invoice creation
 const handleInvoiceCreate = async (event: any, res: Response) => {
-  console.log("Processing invoice.create event");
   return res.sendStatus(200);
 };
 
 // Handle payment failure
 const handlePaymentFailed = async (event: any, res: Response) => {
-  console.log("Processing invoice.payment_failed event");
   const { customer } = event.data;
 
-  console.log("Payment failed for customer:", customer?.email);
+  console.log("Payment failed for customer:");
 
   return res.sendStatus(200);
 };

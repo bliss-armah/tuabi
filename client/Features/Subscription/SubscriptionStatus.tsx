@@ -2,8 +2,10 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
-import { useGetUserSubscriptionStatusQuery } from "@/Features/Subscription/SubscriptionAPI";
+import {
+  useGetUserSubscriptionStatusQuery,
+  Transaction,
+} from "@/Features/Subscription/SubscriptionAPI";
 
 interface SubscriptionStatusProps {
   showUpgradeButton?: boolean;
@@ -14,11 +16,8 @@ export default function SubscriptionStatus({
   showUpgradeButton = true,
   compact = false,
 }: SubscriptionStatusProps) {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
-
   const {
-    data: subscriptionStatus,
+    data: subscriptionResponse,
     isLoading,
     error,
     refetch,
@@ -26,8 +25,6 @@ export default function SubscriptionStatus({
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
-
-  console.log(subscriptionStatus)
 
   const handleUpgrade = () => {
     router.push("/subscription-plans");
@@ -60,31 +57,46 @@ export default function SubscriptionStatus({
     );
   }
 
-  if (error || !subscriptionStatus) {
+  if (error || !subscriptionResponse?.status) {
     return (
       <View style={[styles.container, { backgroundColor: Colors.card }]}>
         <Text style={[styles.errorText, { color: Colors.accent }]}>
           Failed to load subscription status
         </Text>
+        <TouchableOpacity
+          style={[styles.retryButton, { backgroundColor: Colors.primary }]}
+          onPress={() => refetch()}
+        >
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }
 
-  const isSubscribed = subscriptionStatus?.is_subscribed;
-  const hasExpired =
-    subscriptionStatus?.subscription_expires_at &&
-    new Date(subscriptionStatus.subscription_expires_at) < new Date();
+  // Extract the actual subscription data
+  const subscriptionData = subscriptionResponse?.data;
+  const isSubscribed = subscriptionData?.is_subscribed || false;
+  const currentPlan = subscriptionData?.current_plan;
+  const expirationDate = subscriptionData?.subscription_expires_at;
+  const activeTransactions = subscriptionData?.active_transactions || [];
+
+  // Check if subscription has expired
+  const hasExpired = expirationDate && new Date(expirationDate) < new Date();
+
+  // Determine actual subscription status
+  const isActiveSubscription =
+    isSubscribed && !hasExpired && currentPlan?.status === "active";
 
   if (compact) {
     return (
       <View style={[styles.compactContainer, { backgroundColor: Colors.card }]}>
-        {isSubscribed && !hasExpired ? (
+        {isActiveSubscription ? (
           <View style={styles.compactActive}>
             <View
               style={[styles.statusDot, { backgroundColor: Colors.primary }]}
             />
             <Text style={[styles.compactText, { color: Colors.text }]}>
-              Active
+              Active - {currentPlan?.plan?.name || "Unknown Plan"}
             </Text>
           </View>
         ) : (
@@ -93,7 +105,7 @@ export default function SubscriptionStatus({
               style={[styles.statusDot, { backgroundColor: Colors.accent }]}
             />
             <Text style={[styles.compactText, { color: Colors.text }]}>
-              {hasExpired ? "Expired" : "No Subscription"}
+              {hasExpired ? "Expired" : "No Active Subscription"}
             </Text>
           </View>
         )}
@@ -107,43 +119,67 @@ export default function SubscriptionStatus({
         <Text style={[styles.title, { color: Colors.text }]}>
           Subscription Status
         </Text>
-        {isSubscribed && !hasExpired && (
+        {isActiveSubscription && (
           <View
             style={[styles.statusBadge, { backgroundColor: Colors.primary }]}
           >
             <Text style={styles.statusBadgeText}>Active</Text>
           </View>
         )}
+        {hasExpired && (
+          <View
+            style={[styles.statusBadge, { backgroundColor: Colors.accent }]}
+          >
+            <Text style={styles.statusBadgeText}>Expired</Text>
+          </View>
+        )}
       </View>
 
-      {isSubscribed && !hasExpired ? (
+      {isActiveSubscription ? (
         <View style={styles.activeSubscription}>
           <Text style={[styles.statusText, { color: Colors.text }]}>
             Your subscription is active
           </Text>
 
-          {subscriptionStatus.current_plan && (
+          {currentPlan && (
             <View style={styles.planInfo}>
-              <Text style={[styles.planName, { color: Colors.text }]}>
-                {subscriptionStatus.current_plan.plan.name} Plan
-              </Text>
+              <View>
+                <Text style={[styles.planName, { color: Colors.text }]}>
+                  {currentPlan.plan.name} Plan
+                </Text>
+                {/* {currentPlan.plan.description && (
+                  <Text
+                    style={[styles.planDescription, { color: Colors.text }]}
+                  >
+                    {currentPlan.plan.description}
+                  </Text>
+                )} */}
+              </View>
               <Text style={[styles.planAmount, { color: Colors.primary }]}>
-                ₵{subscriptionStatus.current_plan.plan.amount.toLocaleString()}
+                ₵{currentPlan.plan.amount.toLocaleString()}
               </Text>
             </View>
           )}
 
-          {subscriptionStatus.subscription_expires_at && (
+          {expirationDate && (
             <View style={styles.expiryInfo}>
               <Text style={[styles.expiryLabel, { color: Colors.text }]}>
-                Expires on:
+                Subscription Period:
               </Text>
               <Text style={[styles.expiryDate, { color: Colors.text }]}>
-                {formatDate(subscriptionStatus.subscription_expires_at)}
+                {formatDate(currentPlan?.startDate || "")} -{" "}
+                {formatDate(expirationDate)}
               </Text>
               <Text style={[styles.daysRemaining, { color: Colors.primary }]}>
-                {getDaysRemaining(subscriptionStatus.subscription_expires_at)}{" "}
-                days remaining
+                {getDaysRemaining(expirationDate)} days remaining
+              </Text>
+            </View>
+          )}
+
+          {currentPlan?.paystack_customer_id && (
+            <View style={styles.customerInfo}>
+              <Text style={[styles.customerLabel, { color: Colors.text }]}>
+                Customer ID: {currentPlan.paystack_customer_id}
               </Text>
             </View>
           )}
@@ -156,15 +192,22 @@ export default function SubscriptionStatus({
               : "No active subscription"}
           </Text>
 
-          {hasExpired && subscriptionStatus.subscription_expires_at && (
+          {hasExpired && expirationDate && (
             <Text style={[styles.expiredDate, { color: Colors.accent }]}>
-              Expired on{" "}
-              {formatDate(subscriptionStatus.subscription_expires_at)}
+              Expired on {formatDate(expirationDate)}
+            </Text>
+          )}
+
+          {currentPlan && hasExpired && (
+            <Text style={[styles.expiredPlan, { color: Colors.text }]}>
+              Previous plan: {currentPlan.plan.name}
             </Text>
           )}
 
           <Text style={[styles.upgradeText, { color: Colors.text }]}>
-            Upgrade to access all features and unlimited debtors
+            {hasExpired
+              ? "Renew your subscription to continue accessing all features"
+              : "Upgrade to access all features and unlimited debtors"}
           </Text>
 
           {showUpgradeButton && (
@@ -183,7 +226,7 @@ export default function SubscriptionStatus({
         </View>
       )}
 
-      {subscriptionStatus?.active_transactions?.length > 0 && (
+      {activeTransactions.length > 0 && (
         <View
           style={[
             styles.transactionsSection,
@@ -191,24 +234,47 @@ export default function SubscriptionStatus({
           ]}
         >
           <Text style={[styles.transactionsTitle, { color: Colors.text }]}>
-            Recent Transactions
+            Recent Transactions ({activeTransactions.length})
           </Text>
-          {subscriptionStatus.active_transactions
-            .slice(0, 3)
-            .map((transaction) => (
-              <View key={transaction.id} style={styles.transactionItem}>
+          {activeTransactions.slice(0, 3).map((transaction: Transaction) => (
+            <View key={transaction.id} style={styles.transactionItem}>
+              <View>
                 <Text
                   style={[styles.transactionAmount, { color: Colors.text }]}
                 >
                   ₵{transaction.amount.toLocaleString()}
                 </Text>
+                {transaction.created_at && (
+                  <Text
+                    style={[styles.transactionDate, { color: Colors.text }]}
+                  >
+                    {formatDate(transaction.created_at)}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.transactionStatus}>
+                <View
+                  style={[
+                    styles.statusIndicator,
+                    {
+                      backgroundColor:
+                        transaction.status === "success"
+                          ? Colors.primary
+                          : transaction.status === "pending"
+                          ? "#FFA500"
+                          : Colors.accent,
+                    },
+                  ]}
+                />
                 <Text
                   style={[
-                    styles.transactionStatus,
+                    styles.transactionStatusText,
                     {
                       color:
                         transaction.status === "success"
                           ? Colors.primary
+                          : transaction.status === "pending"
+                          ? "#FFA500"
                           : Colors.accent,
                     },
                   ]}
@@ -217,7 +283,25 @@ export default function SubscriptionStatus({
                     transaction.status.slice(1)}
                 </Text>
               </View>
-            ))}
+            </View>
+          ))}
+
+          {activeTransactions.length > 3 && (
+            <TouchableOpacity
+              style={styles.viewAllTransactions}
+              onPress={() => {
+                // Navigate to full transactions view or show alert
+                Alert.alert(
+                  "Transactions",
+                  "View all transactions feature coming soon!"
+                );
+              }}
+            >
+              <Text style={[styles.viewAllText, { color: Colors.primary }]}>
+                View all {activeTransactions.length} transactions
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       )}
     </View>
@@ -274,13 +358,23 @@ const styles = StyleSheet.create({
   planInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: "rgba(0,0,0,0.05)",
+    borderRadius: 8,
   },
   planName: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  planDescription: {
+    fontSize: 12,
+    marginTop: 2,
+    opacity: 0.7,
   },
   planAmount: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
   },
   expiryInfo: {
@@ -288,6 +382,7 @@ const styles = StyleSheet.create({
   },
   expiryLabel: {
     fontSize: 14,
+    fontWeight: "500",
   },
   expiryDate: {
     fontSize: 16,
@@ -297,9 +392,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
   },
+  customerInfo: {
+    paddingTop: 5,
+  },
+  customerLabel: {
+    fontSize: 12,
+    opacity: 0.6,
+  },
   expiredDate: {
     fontSize: 14,
     fontWeight: "500",
+  },
+  expiredPlan: {
+    fontSize: 14,
+    opacity: 0.7,
   },
   upgradeText: {
     fontSize: 14,
@@ -317,6 +423,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
   },
+  retryButton: {
+    height: 36,
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
   transactionsSection: {
     marginTop: 20,
     paddingTop: 20,
@@ -331,14 +450,41 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    backgroundColor: "rgba(0,0,0,0.02)",
+    borderRadius: 6,
+    marginBottom: 8,
   },
   transactionAmount: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  transactionDate: {
+    fontSize: 11,
+    opacity: 0.6,
+    marginTop: 2,
   },
   transactionStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  statusIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  transactionStatusText: {
     fontSize: 12,
+    fontWeight: "500",
+  },
+  viewAllTransactions: {
+    paddingVertical: 8,
+    alignItems: "center",
+  },
+  viewAllText: {
+    fontSize: 14,
     fontWeight: "500",
   },
   compactActive: {
@@ -367,5 +513,6 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 14,
     textAlign: "center",
+    marginBottom: 10,
   },
 });

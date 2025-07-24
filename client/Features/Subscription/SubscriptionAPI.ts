@@ -20,7 +20,7 @@ export interface SubscriptionPlanData {
 export interface PaystackInitializeRequest {
   email: string;
   amount: number;
-  plan_type: string;
+  planId: string;
   currency: string;
   callback_url?: string;
 }
@@ -76,10 +76,14 @@ export interface Subscription {
 }
 
 export interface UserSubscriptionStatus {
-  is_subscribed: boolean;
-  subscription_expires_at?: string;
-  current_plan?: Subscription;
-  active_transactions: Transaction[];
+  data: {
+    is_subscribed: boolean;
+    subscription_expires_at: string;
+    current_plan: Subscription | null;
+    active_transactions: Transaction[];
+  };
+  message: string;
+  status: boolean;
 }
 
 export const subscriptionApi = createApi({

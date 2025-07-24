@@ -61,7 +61,7 @@ export default function SubscriptionPlansScreen() {
       const response = await initializePayment({
         email: user.email,
         amount: selectedPlan.amount,
-        plan_type: selectedPlan.id as unknown as string,
+        planId: selectedPlan.id.toString(),
         currency: "GHS",
       }).unwrap();
 
@@ -90,7 +90,7 @@ export default function SubscriptionPlansScreen() {
     const delay = 6000; // 6 seconds
     while (attempts < maxAttempts) {
       const { data } = await refetchStatus();
-      if (data?.is_subscribed) {
+      if (data?.data?.is_subscribed) {
         setPolling(false);
         Alert.alert(
           "Payment Successful",
@@ -111,54 +111,6 @@ export default function SubscriptionPlansScreen() {
     Alert.alert(
       "Verification Timeout",
       "We could not verify your payment in time. Please check your subscription status later."
-    );
-  };
-
-  const handlePaystackSuccess = async (response: any) => {
-    console.log("Paystack success:", response);
-
-    try {
-      // Removed Alert.alert for 'Verifying Payment'
-      const verifyRes = await verifyPayment({
-        reference: response.reference, // Use the reference from Paystack response
-      }).unwrap();
-
-      console.log(verifyRes);
-
-      if (verifyRes?.data && verifyRes?.data?.status) {
-        Alert.alert(
-          "Payment Successful",
-          "Your subscription has been activated!",
-          [
-            {
-              text: "OK",
-              onPress: () => router.replace("/(tabs)"),
-            },
-          ]
-        );
-      } else {
-        Alert.alert(
-          "Verification Failed",
-          "We could not verify your payment. Please contact support."
-        );
-      }
-    } catch (error) {
-      Alert.alert(
-        "Verification Error",
-        "An error occurred while verifying your payment."
-      );
-    }
-  };
-
-  const handlePaystackCancel = () => {
-    Alert.alert("Payment Cancelled", "You have cancelled the payment process.");
-  };
-
-  const handlePaystackError = (error: any) => {
-    console.error("Paystack error:", error);
-    Alert.alert(
-      "Payment Error",
-      "An error occurred during payment. Please try again."
     );
   };
 
