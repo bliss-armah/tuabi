@@ -178,3 +178,9 @@ Enable debug logging by setting `NODE_ENV=development` in the server environment
 - Database queries are optimized with proper indexing
 - Notification scheduling uses efficient cron jobs
 - Client-side caching reduces API calls
+
+
+ngrok command
+
+ngrok http 3500
+

@@ -1,13 +1,17 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+} from "react-native";
 import { Redirect, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { useGetDashboardSummaryQuery } from "@/Features/Debtors/DebtorsApi";
 import { useAuth } from "@/Shared/Hooks/useAuth";
-import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
-import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import DashboardSummaryCard from "@/Features/Debtors/DashboardSummaryCard";
@@ -18,7 +22,6 @@ export default function Home() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
   const { data, isLoading, error, refetch } = useGetDashboardSummaryQuery();
-  const { closeModal, openAddDebtor, mode, isVisible } = useDebtorModal();
 
   const { user, loading } = useAuth();
 
@@ -27,7 +30,7 @@ export default function Home() {
   }
 
   if (!user) {
-    return <Redirect href="/login" />;
+    return <Redirect href="/" />;
   }
 
   if (error) {
@@ -45,7 +48,7 @@ export default function Home() {
       <ScrollView
         style={[styles.container, { backgroundColor: Colors.background }]}
         refreshControl={
-          <RefreshControl refreshing={isLoading} onRefresh={refetch} /> 
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
         }
       >
         <Text style={styles.headerTitle}>Debt Overview 📊</Text>
@@ -88,12 +91,6 @@ export default function Home() {
           </View>
         </View>
       </ScrollView>
-      <DebtorModal
-        visible={isVisible}
-        mode={mode}
-        onClose={closeModal}
-        onSuccess={refetch}
-      />
     </View>
   );
 }

@@ -62,12 +62,24 @@ model DebtHistory {
   @@map("debt_history")
 }
 
+model SubscriptionPlan {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  amount    Float
+  currency  String
+  duration  Int     // in days
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions Subscription[]
+}
+
 model Subscription {
   id                     Int      @id @default(autoincrement())
   userId                 Int
-  planType               String
-  amount                 Float
-  currency               String   @default("NGN")
+  planId                 Int
+  plan                   SubscriptionPlan @relation(fields: [planId], references: [id])
   status                 String   @default("active")
   startDate              DateTime @default(now())
   endDate                DateTime
@@ -88,7 +100,7 @@ model Transaction {
   paystackTransactionId String   @unique
   paystackReference     String   @unique
   amount                Float
-  currency              String   @default("NGN")
+  currency              String   @default("GHS")
   status                String
   paymentMethod         String?
   description           String?

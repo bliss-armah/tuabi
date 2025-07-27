@@ -8,7 +8,8 @@ import { router } from "expo-router";
  * Handles authentication headers and 401 error responses
  */
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: "http://192.168.3.7:3000/api",
+  baseUrl: "https://87e700b24490.ngrok-free.app/api",
+  // baseUrl: "http://192.168.0.174:3500/api",
   prepareHeaders: async (headers) => {
     const tokenString = await AsyncStorage.getItem("token");
     const token = tokenString ? JSON.parse(tokenString) : null;
@@ -80,26 +81,54 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
 
 export default baseQuery;
 
+/**
+ * Safely clear AsyncStorage by removing specific keys
+ * This avoids the iOS directory deletion error that occurs with clear()
+ */
 const performLogout = async () => {
   try {
-    await AsyncStorage.clear();
+    // Define all the keys your app uses
+    const keysToRemove = [
+      "token",
+      "user",
+      "refreshToken",
+      // Add any other keys your app stores
+    ];
+
+    // Method 1: Remove specific keys (safer)
+    await AsyncStorage.multiRemove(keysToRemove);
+
+    // Method 2: Alternative - get all keys and remove them
+    // const allKeys = await AsyncStorage.getAllKeys();
+    // if (allKeys.length > 0) {
+    //   await AsyncStorage.multiRemove(allKeys);
+    // }
+
+    console.log("AsyncStorage cleared successfully");
   } catch (error) {
     console.error("Error clearing storage during logout:", error);
+
+    // Fallback: try to remove keys individually
+    try {
+      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("user");
+      await AsyncStorage.removeItem("refreshToken");
+      console.log("Fallback key removal completed");
+    } catch (fallbackError) {
+      console.error("Fallback key removal also failed:", fallbackError);
+    }
   } finally {
     router.replace("/login");
   }
 };
 
 const isAuthEndpoint = (url: string): boolean => {
-  const authPaths = [
-    "/auth",
-    "/login",
-    "/register",
-    "/password",
-    "/reset",
-    "/refresh",
-  ];
+  if (url === "/" || url === "") return true;
+
+  const authPaths = ["/auth", "/register", "/password", "/reset", "/refresh"];
+
   return authPaths.some(
-    (path) => url.startsWith(path) || url.includes(`${path}/`)
+    (path) =>
+      url === path || url.startsWith(path + "/") || url.startsWith(path + "?")
   );
 };

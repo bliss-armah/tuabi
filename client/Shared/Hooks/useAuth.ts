@@ -22,7 +22,7 @@ export const useAuth = () => {
           const parsed = JSON.parse(tokenString);
           setToken(parsed.access_token);
           // Convert expiry to timestamp
-          const expiryTimestamp = Date.now() + (parsed.expires_in * 1000);
+          const expiryTimestamp = Date.now() + parsed.expires_in * 1000;
           setTokenExpiry(expiryTimestamp);
         }
       } catch (err) {
@@ -56,9 +56,25 @@ export const useAuth = () => {
 
   const logout = async () => {
     try {
-      await AsyncStorage.clear();
+      // Use selective removal instead of clear() to avoid iOS directory deletion error
+      const keysToRemove = [
+        "token",
+        "user",
+        "refreshToken",
+        // Add any other keys your app stores
+      ];
+
+      await AsyncStorage.multiRemove(keysToRemove);
     } catch (error) {
       console.error("Error clearing AsyncStorage:", error);
+      try {
+        await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("user");
+        await AsyncStorage.removeItem("refreshToken");
+        console.log("Fallback key removal completed");
+      } catch (fallbackError) {
+        console.error("Fallback key removal also failed:", fallbackError);
+      }
     } finally {
       setUser(null);
       setToken(null);
