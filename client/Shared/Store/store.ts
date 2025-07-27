@@ -14,6 +14,7 @@ import { authApi } from "@/Features/Authentication/AuthAPI";
 import { debtorApi } from "@/Features/Debtors/DebtorsApi";
 import { subscriptionApi } from "@/Features/Subscription/SubscriptionAPI";
 import { remindersApi } from "@/Features/Reminders/RemindersApi";
+import { aiApi } from "@/Features/AI/AIApi";
 // import authSlice from "../features/auth/authSlice";
 
 const persistConfig = {
@@ -30,6 +31,7 @@ const reducer = combineReducers({
   [debtorApi.reducerPath]: debtorApi.reducer,
   [subscriptionApi.reducerPath]: subscriptionApi.reducer,
   [remindersApi.reducerPath]: remindersApi.reducer,
+  [aiApi.reducerPath]: aiApi.reducer,
 });
 const persistedReducer = persistReducer(persistConfig, reducer);
 
@@ -44,7 +46,8 @@ const store = configureStore({
       authApi.middleware,
       debtorApi.middleware,
       subscriptionApi.middleware,
-      remindersApi.middleware
+      remindersApi.middleware,
+      aiApi.middleware
     ),
 });
 

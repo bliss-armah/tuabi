@@ -13,6 +13,7 @@ import subscriptionRoutes from "./routes/subscription";
 import reminderRoutes from "./routes/reminderRoutes";
 import pushTokenRoutes from "./routes/pushToken";
 import queueRoutes from "./routes/queueRoutes";
+import aiRoutes from "./routes/ai";
 
 import { errorHandler } from "./middleware/errorHandler";
 import { notFound } from "./middleware/notFound";
@@ -66,6 +67,7 @@ app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/reminders", reminderRoutes);
 app.use("/api/push-token", pushTokenRoutes);
 app.use("/api/queue", queueRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Error handling middleware
 app.use(notFound);

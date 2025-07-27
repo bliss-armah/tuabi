@@ -16,6 +16,7 @@ import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import DashboardSummaryCard from "@/Features/Debtors/DashboardSummaryCard";
 import { Navbar } from "@/Shared/Components/Navbar";
+import { AIInsightsCard } from "@/Features/AI/AIInsightsCard";
 // import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
 export default function Home() {
@@ -59,6 +60,14 @@ export default function Home() {
         <DashboardSummaryCard
           debtors={data?.data?.summary?.totalDebtors || 0}
           amount={data?.data?.summary?.totalAmountOwed || 0}
+        />
+
+        {/* AI Insights Card */}
+        <AIInsightsCard 
+          compact={true}
+          onRecommendationPress={(debtorId) => 
+            router.push({ pathname: "/debtor-detail", params: { id: debtorId } })
+          }
         />
 
         <View style={styles.tipsContainer}>
