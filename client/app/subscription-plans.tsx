@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -16,10 +16,9 @@ import {
   useGetSubscriptionPlansQuery,
   useInitializeSubscriptionPaymentMutation,
   useVerifySubscriptionPaymentMutation,
+  useRefreshSubscriptionStatusMutation,
   SubscriptionPlan,
 } from "@/Features/Subscription/SubscriptionAPI";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Linking from "expo-linking";
 import { usePaystack } from "react-native-paystack-webview";
 import { Button } from "@/Shared/Components/UIKitten";
 import { useAuth } from "@/Shared/Hooks/useAuth";
@@ -31,15 +30,23 @@ export default function SubscriptionPlansScreen() {
   const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(
     null
   );
-  const [verifyPayment, { isLoading: isVerifying }] =
-    useVerifySubscriptionPaymentMutation();
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const { user } = useAuth();
   const { data: plans, isLoading, error } = useGetSubscriptionPlansQuery();
   const [initializePayment, { isLoading: isInitializing }] =
     useInitializeSubscriptionPaymentMutation();
-  const [polling, setPolling] = useState(false);
+  const [verifyPayment, { isLoading: isVerifying }] =
+    useVerifySubscriptionPaymentMutation();
+  const [refreshStatus] = useRefreshSubscriptionStatusMutation();
+  const { refetch: refetchStatus } = useGetUserSubscriptionStatusQuery();
 
   const { popup } = usePaystack();
+
+  // Auto-refresh subscription status when component mounts
+  useEffect(() => {
+    refetchStatus();
+  }, [refetchStatus]);
 
   const handlePlanSelection = (plan: SubscriptionPlan) => {
     setSelectedPlan(plan);
@@ -51,13 +58,15 @@ export default function SubscriptionPlansScreen() {
       return;
     }
 
-    try {
-      if (!user || !user.email) {
-        Alert.alert("Error", "User information not found");
-        return;
-      }
+    if (!user || !user.email) {
+      Alert.alert("Error", "User information not found");
+      return;
+    }
 
-      // Initialize payment to get authorization_url
+    try {
+      setIsProcessing(true);
+
+      // Initialize payment to get reference and access code
       const response = await initializePayment({
         email: user.email,
         amount: selectedPlan.amount,
@@ -65,71 +74,151 @@ export default function SubscriptionPlansScreen() {
         currency: "GHS",
       }).unwrap();
 
-      if (response.status && response.data.authorization_url) {
-        // Open the Paystack payment page in browser
-        Linking.openURL(response.data.authorization_url);
-        // Start polling for subscription status
-        setPolling(true);
-        pollSubscriptionStatus();
-      } else {
+      if (!response.status || !response.data.reference) {
         Alert.alert("Error", "Failed to initialize payment");
+        setIsProcessing(false);
+        return;
       }
-    } catch (error) {
-      Alert.alert("Error", "Failed to process payment");
+
+      // Use Paystack popup for in-app payment
+      popup.checkout({
+        email: user.email,
+        amount: selectedPlan.amount, // Paystack expects amount in kobo/pesewas
+        reference: response.data.reference,
+        metadata: {
+          planId: selectedPlan.id.toString(),
+          userId: user.id?.toString(),
+          planName: selectedPlan.name,
+          description: `${selectedPlan.name} subscription payment`,
+        },
+        onSuccess: async (transaction) => {
+          // Payment successful, now verify on backend
+          await handlePaymentSuccess(transaction.reference);
+        },
+        onCancel: () => {
+          setIsProcessing(false);
+          Alert.alert("Payment Cancelled", "Your payment was cancelled");
+        },
+        onError: (error) => {
+          setIsProcessing(false);
+          Alert.alert(
+            "Payment Error",
+            error.message || "An error occurred during payment"
+          );
+        },
+      });
+    } catch (error: any) {
+      setIsProcessing(false);
+      Alert.alert("Error", error?.data?.message || "Failed to process payment");
     }
   };
 
-  // Polling function for subscription status
-  const { refetch: refetchStatus } = useGetUserSubscriptionStatusQuery(
-    undefined,
-    { skip: true }
-  );
-  const pollSubscriptionStatus = async () => {
-    let attempts = 0;
-    const maxAttempts = 20; // e.g., poll for up to 2 minutes
-    const delay = 6000; // 6 seconds
-    while (attempts < maxAttempts) {
-      const { data } = await refetchStatus();
-      if (data?.data?.is_subscribed) {
-        setPolling(false);
+  const handlePaymentSuccess = async (reference: string) => {
+    try {
+      // Verify payment on your backend - your backend only needs reference
+      const verificationResponse = await verifyPayment({
+        reference: reference,
+      }).unwrap();
+
+      if (verificationResponse.status) {
+        // Payment verified successfully
+        console.log(
+          "Payment verification response:",
+          verificationResponse.data
+        );
+
+        // Check if subscription was processed
+        if (verificationResponse.data.subscription_active) {
+          console.log("Subscription is active, refreshing status...");
+        } else {
+          console.log("Subscription not yet active, waiting for webhook...");
+        }
+
+        // Refresh user subscription status immediately
+        await Promise.all([refetchStatus(), refreshStatus()]);
+
+        // If subscription is not active yet, wait a bit and check again
+        if (!verificationResponse.data.subscription_active) {
+          console.log("Waiting for subscription to be processed...");
+          setTimeout(async () => {
+            try {
+              await Promise.all([refetchStatus(), refreshStatus()]);
+              console.log("Subscription status refreshed after delay");
+            } catch (error) {
+              console.error(
+                "Error refreshing subscription after delay:",
+                error
+              );
+            }
+          }, 3000); // Wait 3 seconds
+        }
+
+        setIsProcessing(false);
         Alert.alert(
           "Payment Successful",
-          "Your subscription has been activated!",
+          "Your subscription has been activated successfully!",
           [
             {
-              text: "OK",
+              text: "Continue",
               onPress: () => router.replace("/(tabs)"),
             },
           ]
         );
-        return;
+      } else {
+        throw new Error("Payment verification failed");
       }
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      attempts++;
+    } catch (error: any) {
+      console.error("Payment verification error:", error);
+      setIsProcessing(false);
+      Alert.alert(
+        "Verification Error",
+        error?.data?.message ||
+          "Failed to verify payment. Please contact support if you were charged.",
+        [
+          {
+            text: "Contact Support",
+            onPress: () => {
+              // Navigate to support or show contact info
+              // You could add a support screen navigation here
+            },
+          },
+          {
+            text: "Try Again",
+            onPress: () => handleSubscribe(),
+          },
+        ]
+      );
     }
-    setPolling(false);
-    Alert.alert(
-      "Verification Timeout",
-      "We could not verify your payment in time. Please check your subscription status later."
-    );
   };
+
+  const isLoaderVisible =
+    isLoading || isInitializing || isVerifying || isProcessing;
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
-      {/* Spinner overlay for verifying payment or polling */}
-      {(isVerifying || polling) && (
-        <View style={styles.verifyingOverlay}>
+
+      {/* Loading overlay */}
+      {isLoaderVisible && (
+        <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color={Colors.primary} />
-          <Text style={[styles.verifyingText, { color: Colors.text }]}>
-            Verifying payment...
+          <Text style={[styles.loadingText, { color: Colors.text }]}>
+            {isLoading
+              ? "Loading plans..."
+              : isInitializing
+              ? "Initializing payment..."
+              : isVerifying
+              ? "Verifying payment..."
+              : "Processing payment..."}
           </Text>
         </View>
       )}
+
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
+          disabled={isLoaderVisible}
         >
           <Text style={[styles.backButtonText, { color: Colors.primary }]}>
             ← Back
@@ -146,21 +235,27 @@ export default function SubscriptionPlansScreen() {
         </Text>
 
         {isLoading ? (
-          <View style={styles.loadingContainer}>
+          <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={Colors.primary} />
-            <Text style={[styles.loadingText, { color: Colors.text }]}>
+            <Text style={[styles.centerText, { color: Colors.text }]}>
               Loading plans...
             </Text>
           </View>
         ) : error ? (
-          <View style={styles.errorContainer}>
+          <View style={styles.centerContainer}>
             <Text style={[styles.errorText, { color: Colors.accent }]}>
               Failed to load subscription plans
             </Text>
+            <TouchableOpacity
+              style={[styles.retryButton, { backgroundColor: Colors.primary }]}
+              onPress={() => window.location.reload()} // or refetch
+            >
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.plansContainer}>
-            {plans?.data.map((plan: any) => (
+            {plans?.data.map((plan: SubscriptionPlan) => (
               <TouchableOpacity
                 key={plan.id}
                 style={[
@@ -171,9 +266,11 @@ export default function SubscriptionPlansScreen() {
                       selectedPlan?.id === plan.id
                         ? Colors.primary
                         : Colors.border,
+                    opacity: isLoaderVisible ? 0.5 : 1,
                   },
                 ]}
-                onPress={() => handlePlanSelection(plan)}
+                onPress={() => !isLoaderVisible && handlePlanSelection(plan)}
+                disabled={isLoaderVisible}
               >
                 <View style={styles.planHeader}>
                   <Text style={[styles.planName, { color: Colors.text }]}>
@@ -190,12 +287,15 @@ export default function SubscriptionPlansScreen() {
                     </View>
                   )}
                 </View>
+
                 <Text style={[styles.planPrice, { color: Colors.primary }]}>
                   ₵{plan.amount.toLocaleString()}
                 </Text>
+
                 <Text style={[styles.planInterval, { color: Colors.text }]}>
                   per {plan.name.toLowerCase()}
                 </Text>
+
                 {plan.description && (
                   <Text
                     style={[styles.planDescription, { color: Colors.text }]}
@@ -203,6 +303,7 @@ export default function SubscriptionPlansScreen() {
                     {plan.description}
                   </Text>
                 )}
+
                 <View style={styles.featuresList}>
                   <Text style={[styles.feature, { color: Colors.text }]}>
                     ✓ Unlimited debtors
@@ -217,6 +318,17 @@ export default function SubscriptionPlansScreen() {
                     ✓ Priority support
                   </Text>
                 </View>
+
+                {selectedPlan?.id === plan.id && (
+                  <View
+                    style={[
+                      styles.selectedIndicator,
+                      { backgroundColor: Colors.primary },
+                    ]}
+                  >
+                    <Text style={styles.selectedText}>Selected</Text>
+                  </View>
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -226,10 +338,13 @@ export default function SubscriptionPlansScreen() {
           <Button
             title={`Subscribe for ₵${selectedPlan.amount.toLocaleString()}`}
             onPress={handleSubscribe}
-            disabled={isInitializing}
-            loading={isInitializing}
+            disabled={isLoaderVisible}
+            loading={isLoaderVisible}
             variant="primary"
-            style={styles.subscribeButton}
+            style={[
+              styles.subscribeButton,
+              { opacity: isLoaderVisible ? 0.5 : 1 },
+            ]}
           />
         )}
       </ScrollView>
@@ -267,22 +382,30 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     textAlign: "center",
   },
-  loadingContainer: {
+  centerContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingVertical: 40,
   },
-  loadingText: {
+  centerText: {
     marginTop: 10,
     fontSize: 16,
   },
-  errorContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   errorText: {
     fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  retryButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
   plansContainer: {
     gap: 20,
@@ -296,6 +419,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    position: "relative",
   },
   planHeader: {
     flexDirection: "row",
@@ -337,6 +461,19 @@ const styles = StyleSheet.create({
   feature: {
     fontSize: 14,
   },
+  selectedIndicator: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  selectedText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
   subscribeButton: {
     height: 50,
     borderRadius: 8,
@@ -345,25 +482,21 @@ const styles = StyleSheet.create({
     marginTop: 30,
     marginBottom: 20,
   },
-  subscribeButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  verifyingOverlay: {
+  loadingOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.3)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
   },
-  verifyingText: {
+  loadingText: {
     marginTop: 16,
     fontSize: 16,
     fontWeight: "500",
+    textAlign: "center",
   },
 });

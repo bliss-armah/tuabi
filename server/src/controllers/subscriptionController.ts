@@ -193,146 +193,146 @@ export const initializePaystackPayment = async (
   }
 };
 
-export const verifyPaystackPayment = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const { reference } = req.body;
-    const user = req.user!;
+// export const verifyPaystackPayment = async (
+//   req: AuthenticatedRequest,
+//   res: Response
+// ) => {
+//   try {
+//     const { reference } = req.body;
+//     const user = req.user!;
 
-    // Verify with Paystack
-    const paystackRes = await verifyTransaction(reference);
+//     // Verify with Paystack
+//     const paystackRes = await verifyTransaction(reference);
 
-    // For Paystack webview, we create the transaction record during verification
-    // Check if transaction already exists
-    let transaction = await prisma.transaction.findFirst({
-      where: { paystackReference: reference, userId: user.id },
-    });
+//     // For Paystack webview, we create the transaction record during verification
+//     // Check if transaction already exists
+//     let transaction = await prisma.transaction.findFirst({
+//       where: { paystackReference: reference, userId: user.id },
+//     });
 
-    if (!transaction) {
-      // Try finding by paystackTransactionId as fallback
-      transaction = await prisma.transaction.findFirst({
-        where: { paystackTransactionId: reference, userId: user.id },
-      });
-    }
+//     if (!transaction) {
+//       // Try finding by paystackTransactionId as fallback
+//       transaction = await prisma.transaction.findFirst({
+//         where: { paystackTransactionId: reference, userId: user.id },
+//       });
+//     }
 
-    // If transaction doesn't exist, create it (this happens with webview payments)
-    if (!transaction) {
-      transaction = await prisma.transaction.create({
-        data: {
-          userId: user.id,
-          amount: paystackRes.data.amount / 100, // Convert from kobo to naira
-          currency: paystackRes.data.currency || "GHS",
-          status: paystackRes.status === "success" ? "success" : "failed",
-          paystackReference: reference,
-          paystackTransactionId: paystackRes.data.id?.toString() || reference,
-          description: `Subscription payment via Paystack webview`,
-          transactionMetadata: JSON.stringify(paystackRes),
-        },
-      });
-      console.log("Transaction created:");
-    }
+//     // If transaction doesn't exist, create it (this happens with webview payments)
+//     if (!transaction) {
+//       transaction = await prisma.transaction.create({
+//         data: {
+//           userId: user.id,
+//           amount: paystackRes.data.amount / 100, // Convert from kobo to naira
+//           currency: paystackRes.data.currency || "GHS",
+//           status: paystackRes.status === "success" ? "success" : "failed",
+//           paystackReference: reference,
+//           paystackTransactionId: paystackRes.data.id?.toString() || reference,
+//           description: `Subscription payment via Paystack webview`,
+//           transactionMetadata: JSON.stringify(paystackRes),
+//         },
+//       });
+//       console.log("Transaction created:");
+//     }
 
-    // Update transaction status
-    await prisma.transaction.update({
-      where: { id: transaction.id },
-      data: {
-        status: paystackRes.status === "success" ? "success" : "failed",
-        paystackTransactionId:
-          paystackRes.id?.toString() || transaction.paystackTransactionId,
-        transactionMetadata: JSON.stringify(paystackRes),
-      },
-    });
+//     // Update transaction status
+//     await prisma.transaction.update({
+//       where: { id: transaction.id },
+//       data: {
+//         status: paystackRes.status === "success" ? "success" : "failed",
+//         paystackTransactionId:
+//           paystackRes.id?.toString() || transaction.paystackTransactionId,
+//         transactionMetadata: JSON.stringify(paystackRes),
+//       },
+//     });
 
-    // If successful, create or update subscription
-    if (paystackRes.status === "success") {
-      const now = new Date();
-      let planId: number | undefined = undefined;
+//     // If successful, create or update subscription
+//     if (paystackRes.status === "success") {
+//       const now = new Date();
+//       let planId: number | undefined = undefined;
 
-      if (paystackRes.data.metadata?.planId) {
-        planId = Number(paystackRes.data.metadata.planId);
-      } else if (paystackRes.data.metadata?.planId) {
-        planId = Number(paystackRes.data.metadata.planId);
-      } else {
-        console.log("No plan ID found in metadata");
-      }
-      if (!planId) {
-        return res.status(400).json({
-          status: false,
-          message: "planId missing from payment metadata",
-          data: null,
-        });
-      }
-      // Fetch plan to get duration
-      const plan = await prisma.subscriptionPlan.findUnique({
-        where: { id: planId },
-      });
-      if (!plan) {
-        return res.status(400).json({
-          status: false,
-          message: "Invalid planId",
-          data: null,
-        });
-      }
-      const endDate = new Date(now);
-      endDate.setDate(endDate.getDate() + plan.duration);
+//       if (paystackRes.data.metadata?.planId) {
+//         planId = Number(paystackRes.data.metadata.planId);
+//       } else if (paystackRes.data.metadata?.planId) {
+//         planId = Number(paystackRes.data.metadata.planId);
+//       } else {
+//         console.log("No plan ID found in metadata");
+//       }
+//       if (!planId) {
+//         return res.status(400).json({
+//           status: false,
+//           message: "planId missing from payment metadata",
+//           data: null,
+//         });
+//       }
+//       // Fetch plan to get duration
+//       const plan = await prisma.subscriptionPlan.findUnique({
+//         where: { id: planId },
+//       });
+//       if (!plan) {
+//         return res.status(400).json({
+//           status: false,
+//           message: "Invalid planId",
+//           data: null,
+//         });
+//       }
+//       const endDate = new Date(now);
+//       endDate.setDate(endDate.getDate() + plan.duration);
 
-      const subscription = await prisma.subscription.create({
-        data: {
-          userId: user.id,
-          planId,
-          status: "active",
-          startDate: now,
-          endDate,
-          paystackSubscriptionId: paystackRes.data.subscription
-            ? paystackRes.data.subscription.toString()
-            : undefined,
-          paystackCustomerId: paystackRes.data.customer
-            ? paystackRes.data.customer.toString()
-            : undefined,
-        },
-      });
+//       const subscription = await prisma.subscription.create({
+//         data: {
+//           userId: user.id,
+//           planId,
+//           status: "active",
+//           startDate: now,
+//           endDate,
+//           paystackSubscriptionId: paystackRes.data.subscription
+//             ? paystackRes.data.subscription.toString()
+//             : undefined,
+//           paystackCustomerId: paystackRes.data.customer
+//             ? paystackRes.data.customer.toString()
+//             : undefined,
+//         },
+//       });
 
-      console.log("Subscription created:");
+//       console.log("Subscription created:");
 
-      // Update user
-      const updatedUser = await prisma.user.update({
-        where: { id: user.id },
-        data: {
-          isSubscribed: true,
-          subscriptionExpiresAt: endDate,
-        },
-      });
+//       // Update user
+//       const updatedUser = await prisma.user.update({
+//         where: { id: user.id },
+//         data: {
+//           isSubscribed: true,
+//           subscriptionExpiresAt: endDate,
+//         },
+//       });
 
-      if (transaction) {
-        await prisma.transaction.update({
-          where: { id: transaction.id },
-          data: { subscriptionId: subscription.id },
-        });
-        console.log(
-          "Transaction linked to subscription:",
-          transaction.id,
-          "->",
-          subscription.id
-        );
-      }
-    }
+//       if (transaction) {
+//         await prisma.transaction.update({
+//           where: { id: transaction.id },
+//           data: { subscriptionId: subscription.id },
+//         });
+//         console.log(
+//           "Transaction linked to subscription:",
+//           transaction.id,
+//           "->",
+//           subscription.id
+//         );
+//       }
+//     }
 
-    return res.status(200).json({
-      status: true,
-      message: "Payment verified successfully",
-      data: paystackRes,
-    });
-  } catch (error) {
-    console.error("Paystack verify error:", error);
-    return res.status(500).json({
-      status: false,
-      message: "Failed to verify payment",
-      data: null,
-    });
-  }
-};
+//     return res.status(200).json({
+//       status: true,
+//       message: "Payment verified successfully",
+//       data: paystackRes,
+//     });
+//   } catch (error) {
+//     console.error("Paystack verify error:", error);
+//     return res.status(500).json({
+//       status: false,
+//       message: "Failed to verify payment",
+//       data: null,
+//     });
+//   }
+// };
 
 export const getUserTransactions = async (
   req: AuthenticatedRequest,
@@ -503,7 +503,6 @@ const handleChargeSuccess = async (event: any, res: Response) => {
       customer,
       metadata,
       id: transactionId,
-      paid_at,
       channel,
       authorization,
     } = event.data;
@@ -521,53 +520,54 @@ const handleChargeSuccess = async (event: any, res: Response) => {
       return res.status(404).send("User not found");
     }
 
-    // Create or update transaction with enhanced data
+    // Check if transaction already processed (prevent duplicate processing)
+    let existingTransaction = await prisma.transaction.findFirst({
+      where: {
+        paystackReference: reference,
+        userId: user.id,
+        status: "success",
+      },
+    });
+
+    if (existingTransaction) {
+      console.log("Transaction already processed:", reference);
+      return res.sendStatus(200);
+    }
+
+    // Create or update transaction
     let transaction = await prisma.transaction.findFirst({
       where: { paystackReference: reference, userId: user.id },
     });
 
     const transactionData = {
       userId: user.id,
-      amount: amount / 100, // Paystack amounts are in kobo/cents
+      amount: amount / 100,
       currency: currency || "GHS",
       status: "success",
       paystackReference: reference,
       paystackTransactionId: transactionId?.toString() || reference,
       description: `${
         metadata?.description || "Subscription payment"
-      } via Paystack webhook`,
+      } via webhook`,
       transactionMetadata: JSON.stringify({
         ...event.data,
         webhook_processed_at: new Date().toISOString(),
-        payment_channel: channel,
-        authorization_code: authorization?.authorization_code,
-        card_type: authorization?.card_type,
-        last4: authorization?.last4,
-        bank: authorization?.bank,
       }),
     };
 
     if (!transaction) {
       transaction = await prisma.transaction.create({ data: transactionData });
-      console.log("Created new transaction:", transaction.id);
     } else {
       transaction = await prisma.transaction.update({
         where: { id: transaction.id },
         data: transactionData,
       });
-      console.log("Updated existing transaction:", transaction.id);
     }
 
-    // Handle subscription creation/renewal
-    const planId = Number(metadata?.planId || metadata?.planId);
+    // Handle subscription
+    const planId = Number(metadata?.planId);
     if (!planId) {
-      console.error(
-        "planId missing from payment metadata. Available metadata:",
-        metadata
-      );
-
-      // If no planId in metadata, you might want to handle this differently
-      // For now, let's just create the transaction without subscription
+      console.error("planId missing from metadata");
       return res.sendStatus(200);
     }
 
@@ -584,17 +584,18 @@ const handleChargeSuccess = async (event: any, res: Response) => {
     const endDate = new Date(now);
     endDate.setDate(endDate.getDate() + plan.duration);
 
-    // Check for existing active subscription
+    // Handle subscription creation/extension
     let subscription = await prisma.subscription.findFirst({
       where: {
         userId: user.id,
-        planId,
         status: "active",
         endDate: { gte: now },
       },
+      orderBy: { endDate: "desc" },
     });
 
     if (!subscription) {
+      // Create new subscription
       subscription = await prisma.subscription.create({
         data: {
           userId: user.id,
@@ -607,22 +608,26 @@ const handleChargeSuccess = async (event: any, res: Response) => {
             customer?.customer_code || customer?.id?.toString(),
         },
       });
-      console.log("Created new subscription:", subscription.id);
     } else {
-      // Extend existing subscription
+      // Extend existing subscription from current end date
+      const newEndDate = new Date(subscription.endDate);
+      newEndDate.setDate(newEndDate.getDate() + plan.duration);
+
       subscription = await prisma.subscription.update({
         where: { id: subscription.id },
-        data: { endDate },
+        data: {
+          endDate: newEndDate,
+          planId, // Update plan if different
+        },
       });
-      console.log("Extended existing subscription:", subscription.id);
     }
 
-    // Update user subscription status
+    // Update user status
     await prisma.user.update({
       where: { id: user.id },
       data: {
         isSubscribed: true,
-        subscriptionExpiresAt: endDate,
+        subscriptionExpiresAt: subscription.endDate,
       },
     });
 
@@ -632,7 +637,7 @@ const handleChargeSuccess = async (event: any, res: Response) => {
       data: { subscriptionId: subscription.id },
     });
 
-    console.log("Successfully processed charge.success webhook");
+    console.log(`Successfully processed payment for user ${user.email}`);
     return res.sendStatus(200);
   } catch (error) {
     console.error("Error in handleChargeSuccess:", error);
@@ -640,6 +645,172 @@ const handleChargeSuccess = async (event: any, res: Response) => {
   }
 };
 
+// Enhanced verify function that processes payment if webhook hasn't arrived yet
+export const verifyPaystackPayment = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { reference } = req.body;
+    const user = req.user!;
+
+    // Verify with Paystack first
+    const paystackRes = await verifyTransaction(reference);
+
+    // Check if our webhook already processed this
+    let transaction = await prisma.transaction.findFirst({
+      where: {
+        paystackReference: reference,
+        userId: user.id,
+      },
+      include: {
+        subscription: true,
+      },
+    });
+
+    // If payment is successful but not processed by webhook yet, process it now
+    if (paystackRes.status === "success" && !transaction) {
+      console.log(
+        "Payment verified but not processed by webhook, processing now..."
+      );
+
+      try {
+        // Process the payment similar to webhook handler
+        const { amount, currency, metadata } = paystackRes.data;
+
+        // Create transaction record
+        const newTransaction = await prisma.transaction.create({
+          data: {
+            userId: user.id,
+            amount: amount / 100, // Convert from kobo to GHS
+            currency: currency || "GHS",
+            status: "success",
+            paystackReference: reference,
+            paystackTransactionId: paystackRes.data.id?.toString() || reference,
+            description: `${
+              metadata?.description || "Subscription payment"
+            } via verification`,
+            transactionMetadata: JSON.stringify({
+              ...paystackRes.data,
+              processed_via: "verification",
+              processed_at: new Date().toISOString(),
+            }),
+          },
+        });
+
+        // Handle subscription creation/extension
+        const planId = Number(metadata?.planId);
+        if (planId) {
+          const plan = await prisma.subscriptionPlan.findUnique({
+            where: { id: planId },
+          });
+
+          if (plan) {
+            const now = new Date();
+            const endDate = new Date(now);
+            endDate.setDate(endDate.getDate() + plan.duration);
+
+            // Check for existing active subscription
+            let subscription = await prisma.subscription.findFirst({
+              where: {
+                userId: user.id,
+                status: "active",
+                endDate: { gte: now },
+              },
+              orderBy: { endDate: "desc" },
+            });
+
+            if (!subscription) {
+              // Create new subscription
+              subscription = await prisma.subscription.create({
+                data: {
+                  userId: user.id,
+                  planId,
+                  status: "active",
+                  startDate: now,
+                  endDate,
+                  paystackSubscriptionId: metadata?.subscription_id?.toString(),
+                  paystackCustomerId:
+                    paystackRes.data.customer?.customer_code ||
+                    paystackRes.data.customer?.id?.toString(),
+                },
+              });
+            } else {
+              // Extend existing subscription
+              const newEndDate = new Date(subscription.endDate);
+              newEndDate.setDate(newEndDate.getDate() + plan.duration);
+
+              subscription = await prisma.subscription.update({
+                where: { id: subscription.id },
+                data: {
+                  endDate: newEndDate,
+                  planId,
+                },
+              });
+            }
+
+            // Update user status
+            await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                isSubscribed: true,
+                subscriptionExpiresAt: subscription.endDate,
+              },
+            });
+
+            // Link transaction to subscription
+            if (newTransaction) {
+              await prisma.transaction.update({
+                where: { id: newTransaction.id },
+                data: { subscriptionId: subscription.id },
+              });
+            }
+
+            console.log(
+              `Successfully processed payment via verification for user ${user.email}`
+            );
+          }
+        }
+      } catch (processingError) {
+        console.error(
+          "Error processing payment via verification:",
+          processingError
+        );
+        // Don't fail the verification, just log the error
+      }
+    }
+
+    // Re-fetch transaction with subscription data
+    const finalTransaction = await prisma.transaction.findFirst({
+      where: {
+        paystackReference: reference,
+        userId: user.id,
+      },
+      include: {
+        subscription: true,
+      },
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Payment verified and processed",
+      data: {
+        paystack_status: paystackRes.status,
+        transaction_processed: !!finalTransaction,
+        subscription_active:
+          finalTransaction?.subscription?.status === "active",
+        subscription_data: finalTransaction?.subscription,
+      },
+    });
+  } catch (error) {
+    console.error("Paystack verify error:", error);
+    return res.status(500).json({
+      status: false,
+      message: "Failed to verify payment",
+      data: null,
+    });
+  }
+};
 // Handle subscription creation
 const handleSubscriptionCreate = async (event: any, res: Response) => {
   const { customer, plan, subscription_code } = event.data;

@@ -13,7 +13,8 @@
     "db:studio": "prisma studio",
     "db:seed": "ts-node prisma/seed.ts",
     "worker": "node dist/workers/notificationWorker.js",
-    "worker:dev": "nodemon src/workers/notificationWorker.ts"
+    "worker:dev": "nodemon src/workers/notificationWorker.ts",
+    "test:webhook": "node test-webhook.js"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

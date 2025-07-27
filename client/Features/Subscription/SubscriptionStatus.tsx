@@ -145,7 +145,7 @@ export default function SubscriptionStatus({
             <View style={styles.planInfo}>
               <View>
                 <Text style={[styles.planName, { color: Colors.text }]}>
-                  {currentPlan.plan.name} Plan
+                  {currentPlan?.plan?.name} Plan
                 </Text>
                 {/* {currentPlan.plan.description && (
                   <Text
@@ -156,7 +156,7 @@ export default function SubscriptionStatus({
                 )} */}
               </View>
               <Text style={[styles.planAmount, { color: Colors.primary }]}>
-                ₵{currentPlan.plan.amount.toLocaleString()}
+                ₵{currentPlan?.plan?.amount.toLocaleString()}
               </Text>
             </View>
           )}
@@ -176,10 +176,10 @@ export default function SubscriptionStatus({
             </View>
           )}
 
-          {currentPlan?.paystack_customer_id && (
+          {currentPlan?.paystackCustomerId && (
             <View style={styles.customerInfo}>
               <Text style={[styles.customerLabel, { color: Colors.text }]}>
-                Customer ID: {currentPlan.paystack_customer_id}
+                Customer ID: {currentPlan.paystackCustomerId}
               </Text>
             </View>
           )}
@@ -200,7 +200,7 @@ export default function SubscriptionStatus({
 
           {currentPlan && hasExpired && (
             <Text style={[styles.expiredPlan, { color: Colors.text }]}>
-              Previous plan: {currentPlan.plan.name}
+              Previous plan: {currentPlan?.plan?.name}
             </Text>
           )}
 
@@ -244,11 +244,11 @@ export default function SubscriptionStatus({
                 >
                   ₵{transaction.amount.toLocaleString()}
                 </Text>
-                {transaction.created_at && (
+                {transaction.createdAt && (
                   <Text
                     style={[styles.transactionDate, { color: Colors.text }]}
                   >
-                    {formatDate(transaction.created_at)}
+                    {formatDate(transaction.createdAt)}
                   </Text>
                 )}
               </View>
