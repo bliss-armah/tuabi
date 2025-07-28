@@ -1,360 +1,362 @@
 import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "@/Shared/Constants/Colors";
-import { Card } from "@/Shared/Components/UIKitten/Card";
-import { useGetAIInsightsQuery } from "./AIApi";
-import { LoadingView } from "@/Shared/Components/LoadingView";
-import { ErrorView } from "@/Shared/Components/ErrorView";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { Card, CardContent } from "../../Shared/Components/UIKitten/Card";
+import { Colors } from "../../Shared/Constants/Colors";
+import { useGetUserInsightsQuery } from "./AIApi";
+import { LoadingView } from "../../Shared/Components/LoadingView";
+import { ErrorView } from "../../Shared/Components/ErrorView";
 
 interface AIInsightsCardProps {
-  onRecommendationPress?: (debtorId: number) => void;
   compact?: boolean;
+  onRecommendationPress?: (debtorId: number) => void;
 }
 
 export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
-  onRecommendationPress,
   compact = false,
+  onRecommendationPress,
 }) => {
-  const { data, isLoading, error, refetch } = useGetAIInsightsQuery();
+  const {
+    data: insights,
+    isLoading,
+    error,
+    refetch,
+  } = useGetUserInsightsQuery();
 
   if (isLoading) {
     return (
       <Card style={styles.card}>
-        <LoadingView text="Loading AI insights..." />
+        <CardContent>
+          <LoadingView message="Analyzing your debt portfolio..." />
+        </CardContent>
       </Card>
     );
   }
 
-  if (error || !data?.success) {
+  if (error) {
     return (
       <Card style={styles.card}>
-        <ErrorView
-          error="AI insights unavailable"
-          onRetry={refetch}
-          compact={true}
-        />
+        <CardContent>
+          <ErrorView
+            message="Unable to load AI insights"
+            onRetry={refetch}
+            compact={compact}
+          />
+        </CardContent>
       </Card>
     );
   }
 
-  const insights = data.data;
-  const highRiskDebtors = insights.risk_assessments.filter(
-    (assessment) => assessment.risk_level === "high"
-  ).length;
+  if (!insights) {
+    return null;
+  }
 
-  const totalExpected = insights.cash_flow_prediction.total_expected;
-  const topRecommendations = insights.recommendations
-    .sort((a, b) => b.priority - a.priority)
-    .slice(0, compact ? 2 : 3);
-
-  const getRiskLevelColor = (level: string) => {
+  const getRiskColor = (level: string) => {
     switch (level) {
-      case "high":
-        return "#FF6B6B";
-      case "medium":
-        return "#FFB347";
       case "low":
-        return "#51CF66";
+        return Colors.success;
+      case "medium":
+        return Colors.warning;
+      case "high":
+        return Colors.error;
       default:
         return Colors.text;
     }
   };
 
-  const getRiskLevelIcon = (level: string) => {
-    switch (level) {
+  const getConfidenceColor = (confidence: string) => {
+    switch (confidence) {
       case "high":
-        return "warning";
+        return Colors.success;
       case "medium":
-        return "alert-circle";
+        return Colors.warning;
       case "low":
-        return "checkmark-circle";
+        return Colors.error;
       default:
-        return "help-circle";
+        return Colors.text;
     }
   };
 
-  return (
-    <Card style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          <Ionicons name="analytics" size={24} color={Colors.primary} />
-          <Text style={styles.title}>AI Insights</Text>
-        </View>
-        <Text style={styles.subtitle}>Smart debt analysis</Text>
-      </View>
+  if (compact) {
+    return (
+      <Card style={styles.card}>
+        <CardContent>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: Colors.text }]}>
+              🤖 AI Insights
+            </Text>
+          </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Risk Overview */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Risk Overview</Text>
-          <View style={styles.riskContainer}>
-            <View style={styles.riskItem}>
-              <Text style={styles.riskNumber}>{highRiskDebtors}</Text>
-              <Text style={styles.riskLabel}>High Risk</Text>
-            </View>
-            <View style={styles.riskItem}>
-              <Text style={[styles.riskNumber, { color: Colors.primary }]}>
-                {insights.risk_assessments.length - highRiskDebtors}
+          <View style={styles.compactContent}>
+            <View style={styles.statRow}>
+              <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+                High Risk Debtors:
               </Text>
-              <Text style={styles.riskLabel}>Low/Medium Risk</Text>
+              <Text style={[styles.statValue, { color: getRiskColor("high") }]}>
+                {insights.highRiskDebtors}
+              </Text>
             </View>
-          </View>
-        </View>
 
-        {/* Cash Flow Prediction */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Expected Collections</Text>
-          <View style={styles.cashFlowContainer}>
-            <Text style={styles.cashFlowAmount}>
-              GHS{" "}
-              {totalExpected.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </Text>
-            <Text style={styles.cashFlowSubtext}>
-              Next 3 months (estimated)
-            </Text>
-          </View>
-        </View>
+            <View style={styles.statRow}>
+              <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+                Next Month Cash Flow:
+              </Text>
+              <Text
+                style={[
+                  styles.statValue,
+                  {
+                    color: getConfidenceColor(
+                      insights.cashFlowPrediction.confidence
+                    ),
+                  },
+                ]}
+              >
+                ${insights.cashFlowPrediction.nextMonth.toLocaleString()}
+              </Text>
+            </View>
 
-        {/* Top Recommendations */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Smart Recommendations</Text>
-          {topRecommendations.length > 0 ? (
-            topRecommendations.map((recommendation, index) => (
+            {insights.recommendations.length > 0 && (
               <TouchableOpacity
-                key={index}
-                style={styles.recommendationItem}
+                style={styles.recommendationButton}
                 onPress={() =>
-                  onRecommendationPress?.(recommendation.debtor_id)
+                  Alert.alert("AI Recommendations", insights.recommendations[0])
                 }
               >
-                <View style={styles.recommendationContent}>
-                  <View style={styles.recommendationHeader}>
-                    <Ionicons
-                      name={
-                        recommendation.priority >= 4
-                          ? "alert-circle"
-                          : recommendation.priority >= 3
-                          ? "information-circle"
-                          : "checkmark-circle"
-                      }
-                      size={16}
-                      color={
-                        recommendation.priority >= 4
-                          ? "#FF6B6B"
-                          : recommendation.priority >= 3
-                          ? "#FFB347"
-                          : "#51CF66"
-                      }
-                    />
-                    <Text style={styles.recommendationType}>
-                      {recommendation.recommendation_type
-                        .replace(/_/g, " ")
-                        .toUpperCase()}
-                    </Text>
-                  </View>
-                  <Text style={styles.recommendationMessage}>
-                    {recommendation.message}
-                  </Text>
-                  <Text style={styles.recommendationAction}>
-                    {recommendation.suggested_action}
-                  </Text>
-                </View>
-                <Ionicons
-                  name="chevron-forward"
-                  size={16}
-                  color={Colors.textSecondary}
-                />
+                <Text
+                  style={[styles.recommendationText, { color: Colors.primary }]}
+                >
+                  💡 {insights.recommendations[0]}
+                </Text>
               </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.noDataText}>No recommendations available</Text>
-          )}
+            )}
+          </View>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card style={styles.card}>
+      <CardContent>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: Colors.text }]}>
+            🤖 AI Portfolio Analysis
+          </Text>
         </View>
 
-        {/* Payment Predictions Summary */}
-        {!compact && (
+        <View style={styles.content}>
+          {/* Portfolio Overview */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Payment Likelihood</Text>
-            <View style={styles.predictionsSummary}>
-              {insights.payment_predictions
-                .slice(0, 3)
-                .map((prediction, index) => (
-                  <View
-                    key={prediction.debtor_id}
-                    style={styles.predictionItem}
-                  >
-                    <View style={styles.predictionBar}>
-                      <View
-                        style={[
-                          styles.predictionFill,
-                          {
-                            width: `${prediction.likelihood_of_payment * 100}%`,
-                            backgroundColor:
-                              prediction.likelihood_of_payment > 0.7
-                                ? "#51CF66"
-                                : prediction.likelihood_of_payment > 0.4
-                                ? "#FFB347"
-                                : "#FF6B6B",
-                          },
-                        ]}
-                      />
-                    </View>
-                    <Text style={styles.predictionPercentage}>
-                      {Math.round(prediction.likelihood_of_payment * 100)}%
-                    </Text>
-                  </View>
-                ))}
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+              Portfolio Overview
+            </Text>
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: Colors.primary }]}>
+                  {insights.totalDebtors}
+                </Text>
+                <Text
+                  style={[styles.statLabel, { color: Colors.textSecondary }]}
+                >
+                  Total Debtors
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text
+                  style={[styles.statNumber, { color: getRiskColor("high") }]}
+                >
+                  {insights.highRiskDebtors}
+                </Text>
+                <Text
+                  style={[styles.statLabel, { color: Colors.textSecondary }]}
+                >
+                  High Risk
+                </Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: Colors.success }]}>
+                  ${insights.averageDebtPerDebtor.toLocaleString()}
+                </Text>
+                <Text
+                  style={[styles.statLabel, { color: Colors.textSecondary }]}
+                >
+                  Avg Debt
+                </Text>
+              </View>
             </View>
           </View>
-        )}
-      </ScrollView>
+
+          {/* Cash Flow Prediction */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+              Cash Flow Prediction
+            </Text>
+            <View style={styles.cashFlowRow}>
+              <View style={styles.cashFlowItem}>
+                <Text
+                  style={[
+                    styles.cashFlowLabel,
+                    { color: Colors.textSecondary },
+                  ]}
+                >
+                  Next Month
+                </Text>
+                <Text
+                  style={[
+                    styles.cashFlowAmount,
+                    {
+                      color: getConfidenceColor(
+                        insights.cashFlowPrediction.confidence
+                      ),
+                    },
+                  ]}
+                >
+                  ${insights.cashFlowPrediction.nextMonth.toLocaleString()}
+                </Text>
+              </View>
+              <View style={styles.cashFlowItem}>
+                <Text
+                  style={[
+                    styles.cashFlowLabel,
+                    { color: Colors.textSecondary },
+                  ]}
+                >
+                  Next 3 Months
+                </Text>
+                <Text
+                  style={[
+                    styles.cashFlowAmount,
+                    {
+                      color: getConfidenceColor(
+                        insights.cashFlowPrediction.confidence
+                      ),
+                    },
+                  ]}
+                >
+                  $
+                  {insights.cashFlowPrediction.nextThreeMonths.toLocaleString()}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Payment Trends */}
+          <View style={styles.section}>
+            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+              Payment Trends
+            </Text>
+            <Text style={[styles.trendText, { color: Colors.textSecondary }]}>
+              {insights.paymentTrends}
+            </Text>
+          </View>
+
+          {/* Recommendations */}
+          {insights.recommendations.length > 0 && (
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+                AI Recommendations
+              </Text>
+              {insights.recommendations.map((recommendation, index) => (
+                <View key={index} style={styles.recommendationItem}>
+                  <Text
+                    style={[
+                      styles.recommendationText,
+                      { color: Colors.primary },
+                    ]}
+                  >
+                    💡 {recommendation}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+      </CardContent>
     </Card>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 16,
+    marginVertical: 8,
+    marginHorizontal: 16,
+    borderRadius: 12,
   },
   header: {
-    marginBottom: 16,
-  },
-  titleContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 16,
   },
   title: {
     fontSize: 18,
-    fontWeight: "600",
-    color: Colors.text,
-    marginLeft: 8,
+    fontWeight: "bold",
   },
-  subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginLeft: 32,
+  compactContent: {
+    gap: 8,
   },
   content: {
-    maxHeight: 400,
+    gap: 20,
   },
   section: {
-    marginBottom: 20,
+    gap: 12,
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "600",
-    color: Colors.text,
-    marginBottom: 8,
   },
-  riskContainer: {
+  statsGrid: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
   },
-  riskItem: {
+  statItem: {
     alignItems: "center",
+    flex: 1,
   },
-  riskNumber: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#FF6B6B",
-  },
-  riskLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginTop: 4,
-  },
-  cashFlowContainer: {
-    alignItems: "center",
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 16,
-    borderRadius: 8,
-  },
-  cashFlowAmount: {
+  statNumber: {
     fontSize: 20,
     fontWeight: "bold",
-    color: Colors.primary,
   },
-  cashFlowSubtext: {
+  statLabel: {
     fontSize: 12,
-    color: Colors.textSecondary,
     marginTop: 4,
   },
+  statRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  cashFlowRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  cashFlowItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  cashFlowLabel: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  cashFlowAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  trendText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
   recommendationItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 12,
-    borderRadius: 8,
     marginBottom: 8,
   },
-  recommendationContent: {
-    flex: 1,
-  },
-  recommendationHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  recommendationType: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: Colors.textSecondary,
-    marginLeft: 4,
-  },
-  recommendationMessage: {
+  recommendationText: {
     fontSize: 14,
-    color: Colors.text,
-    marginBottom: 4,
+    lineHeight: 20,
   },
-  recommendationAction: {
-    fontSize: 12,
-    color: Colors.primary,
-    fontStyle: "italic",
-  },
-  predictionsSummary: {
-    backgroundColor: Colors.backgroundSecondary,
-    padding: 12,
-    borderRadius: 8,
-  },
-  predictionItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  predictionBar: {
-    flex: 1,
-    height: 8,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  predictionFill: {
-    height: "100%",
-    borderRadius: 4,
-  },
-  predictionPercentage: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: Colors.text,
-    minWidth: 35,
-    textAlign: "right",
-  },
-  noDataText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontStyle: "italic",
-    textAlign: "center",
-    paddingVertical: 16,
+  recommendationButton: {
+    paddingVertical: 8,
   },
 });

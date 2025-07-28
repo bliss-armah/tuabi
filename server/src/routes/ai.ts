@@ -1,31 +1,31 @@
 import express from "express";
+import { authenticateToken } from "../middleware/auth";
 import {
   getAIInsights,
-  getRiskAssessment,
+  getDebtorAnalysis,
   getPaymentPredictions,
-  getCashFlowForecast,
-  getAIRecommendations,
-  retrainAIModels,
-  getAIStatus,
+  getRiskAssessment,
+  getComprehensiveAnalysis,
 } from "../controllers/aiController";
-import { authenticate } from "../middleware/auth";
 
 const router = express.Router();
 
-// All AI routes require authentication
-router.use(authenticate);
+// All routes require authentication
+router.use(authenticateToken);
 
-// Get comprehensive AI insights
+// Get comprehensive AI insights for the user
 router.get("/insights", getAIInsights);
 
-// Get specific AI analyses
-router.get("/risk-assessment", getRiskAssessment);
-router.get("/payment-predictions", getPaymentPredictions);
-router.get("/cash-flow-forecast", getCashFlowForecast);
-router.get("/recommendations", getAIRecommendations);
+// Get analysis for a specific debtor
+router.get("/debtor/:debtorId/analysis", getDebtorAnalysis);
 
-// AI management endpoints
-router.post("/retrain-models", retrainAIModels);
-router.get("/status", getAIStatus);
+// Get payment predictions for all debtors
+router.get("/predictions", getPaymentPredictions);
+
+// Get risk assessment for the portfolio
+router.get("/risk-assessment", getRiskAssessment);
+
+// Get comprehensive analysis (all insights combined)
+router.get("/comprehensive", getComprehensiveAnalysis);
 
 export default router;

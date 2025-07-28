@@ -45,7 +45,7 @@ services:
       PAYSTACK_SECRET_KEY: sk_test_70c6c775e0169588132b6c504761debcf85a6a1d
       PAYSTACK_PUBLIC_KEY: pk_test_ed3746d376ed5f4e09fd8654cc7839e359a831ba
       FRONTEND_URL: http://localhost:3000
-      AI_SERVICE_URL: http://ai-service:8000
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     ports:
       - "3500:3000"
     depends_on:
@@ -59,21 +59,7 @@ services:
       - ./server/uploads:/app/uploads
     restart: unless-stopped
 
-  ai-service:
-    build: ./ai-service
-    environment:
-      DATABASE_URL: postgresql://tuabi_user:tuabi_password@postgres:5432/tuabi_db
-      PORT: 8000
-      LOG_LEVEL: INFO
-    ports:
-      - "8000:8000"
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - ./ai-service:/app
-      - ai_models:/app/app/models/trained
-    restart: unless-stopped
+
 
   worker:
     build: ./server
@@ -102,4 +88,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  ai_models:

@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
-import aiService from "../services/aiService";
+import { openRouterService } from "../services/openRouterService";
 
 export const getAIInsights = async (
   req: AuthenticatedRequest,
@@ -8,19 +8,7 @@ export const getAIInsights = async (
 ) => {
   try {
     const userId = req.user!.id;
-
-    // Check if AI service is healthy
-    const isHealthy = await aiService.checkHealth();
-    if (!isHealthy) {
-      res.status(503).json({
-        success: false,
-        message: "AI service is currently unavailable",
-      });
-      return;
-    }
-
-    // Get comprehensive AI analysis
-    const insights = await aiService.getComprehensiveAnalysis(userId);
+    const insights = await openRouterService.getUserInsights(userId);
 
     res.status(200).json({
       success: true,
@@ -30,33 +18,43 @@ export const getAIInsights = async (
     console.error("Get AI insights error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to get AI insights",
+      message:
+        error instanceof Error ? error.message : "Failed to get AI insights",
     });
   }
 };
 
-export const getRiskAssessment = async (
+export const getDebtorAnalysis = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
     const userId = req.user!.id;
-    const { debtorId } = req.query;
+    const { debtorId } = req.params;
 
-    const assessments = await aiService.getRiskAssessment(
+    if (!debtorId || isNaN(parseInt(debtorId))) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid debtor ID",
+      });
+      return;
+    }
+
+    const analysis = await openRouterService.analyzeDebtor(
       userId,
-      debtorId ? parseInt(debtorId as string) : undefined
+      parseInt(debtorId)
     );
 
     res.status(200).json({
       success: true,
-      data: assessments,
+      data: analysis,
     });
   } catch (error) {
-    console.error("Get risk assessment error:", error);
+    console.error("Get debtor analysis error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to get risk assessment",
+      message:
+        error instanceof Error ? error.message : "Failed to analyze debtor",
     });
   }
 };
@@ -67,12 +65,7 @@ export const getPaymentPredictions = async (
 ) => {
   try {
     const userId = req.user!.id;
-    const { debtorId } = req.query;
-
-    const predictions = await aiService.getPaymentPredictions(
-      userId,
-      debtorId ? parseInt(debtorId as string) : undefined
-    );
+    const predictions = await openRouterService.getPaymentPredictions(userId);
 
     res.status(200).json({
       success: true,
@@ -82,93 +75,71 @@ export const getPaymentPredictions = async (
     console.error("Get payment predictions error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to get payment predictions",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get payment predictions",
     });
   }
 };
 
-export const getCashFlowForecast = async (
+export const getRiskAssessment = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const userId = req.user!.id;
+    const assessment = await openRouterService.getRiskAssessment(userId);
+
+    res.status(200).json({
+      success: true,
+      data: assessment,
+    });
+  } catch (error) {
+    console.error("Get risk assessment error:", error);
+    res.status(500).json({
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get risk assessment",
+    });
+  }
+};
+
+export const getComprehensiveAnalysis = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
   try {
     const userId = req.user!.id;
 
-    const forecast = await aiService.getCashFlowPrediction(userId);
+    // Get all AI insights in parallel
+    const [insights, predictions, riskAssessment] = await Promise.all([
+      openRouterService.getUserInsights(userId),
+      openRouterService.getPaymentPredictions(userId),
+      openRouterService.getRiskAssessment(userId),
+    ]);
+
+    const comprehensiveAnalysis = {
+      insights,
+      predictions,
+      riskAssessment,
+      generatedAt: new Date().toISOString(),
+    };
 
     res.status(200).json({
       success: true,
-      data: forecast,
+      data: comprehensiveAnalysis,
     });
   } catch (error) {
-    console.error("Get cash flow forecast error:", error);
+    console.error("Get comprehensive analysis error:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to get cash flow forecast",
-    });
-  }
-};
-
-export const getAIRecommendations = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const userId = req.user!.id;
-
-    const recommendations = await aiService.getRecommendations(userId);
-
-    res.status(200).json({
-      success: true,
-      data: recommendations,
-    });
-  } catch (error) {
-    console.error("Get AI recommendations error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to get AI recommendations",
-    });
-  }
-};
-
-export const retrainAIModels = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    // This could be restricted to admin users only
-    const result = await aiService.retrainModels();
-
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    console.error("Retrain AI models error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to retrain AI models",
-    });
-  }
-};
-
-export const getAIStatus = async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const isHealthy = await aiService.checkHealth();
-    const modelStatus = isHealthy ? await aiService.getModelStatus() : [];
-
-    res.status(200).json({
-      success: true,
-      data: {
-        service_healthy: isHealthy,
-        models: modelStatus,
-      },
-    });
-  } catch (error) {
-    console.error("Get AI status error:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to get AI status",
+      message:
+        error instanceof Error
+          ? error.message
+          : "Failed to get comprehensive analysis",
     });
   }
 };
