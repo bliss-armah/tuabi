@@ -11,12 +11,10 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
-import DebtorModal from "@/Features/Debtors/DebtorModal";
 import { SearchInput } from "@/Shared/Components/UIKitten";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
-import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 import { Button } from "@/Shared/Components/UIKitten";
 
 type Debtor = {
@@ -26,8 +24,6 @@ type Debtor = {
 };
 
 export default function Debtors() {
-  // Remove useDebtorModal, use router navigation instead
-
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -79,7 +75,7 @@ export default function Debtors() {
             style={[
               styles.amount,
               {
-                color: item.amountOwed > 0 ? Colors.accent : Colors.primary,
+                color: item.amountOwed > 0 ? Colors.text : Colors.secondary,
               },
             ]}
           >
@@ -112,7 +108,7 @@ export default function Debtors() {
       <DebtorHeader
         title="Debtors"
         actionButton={
-          <Ionicons name="add-circle-outline" size={28} color={"#ffffff"} />
+          <Ionicons name="add-circle-outline" size={28} color={Colors.white} />
         }
         onTap={() => router.push("/add-debtor?mode=add")}
       />
@@ -154,8 +150,6 @@ export default function Debtors() {
           </View>
         )}
       </View>
-
-      {/* DebtorModal removed, now handled as a page */}
     </View>
   );
 }
@@ -187,7 +181,7 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 22.5,
-    backgroundColor: "#dfe6e9",
+    backgroundColor: Colors.primary,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 15,
@@ -195,7 +189,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#2d3436",
+    color: Colors.white,
   },
   details: {
     flex: 1,
@@ -205,10 +199,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     textTransform: "capitalize",
+    color: Colors.text,
   },
   status: {
     fontSize: 12,
-    color: "#636e72",
+    color: Colors.textSecondary,
   },
   amount: {
     fontSize: 16,
@@ -216,7 +211,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: StyleSheet.hairlineWidth,
-    backgroundColor: "#ccc",
+    backgroundColor: Colors.border,
     marginLeft: 60,
   },
 
@@ -230,11 +225,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    color: "#2d3436",
+    color: Colors.text,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: "#636e72",
+    color: Colors.textSecondary,
     marginBottom: 20,
     textAlign: "center",
     paddingHorizontal: 20,
@@ -248,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addButtonText: {
-    color: "#fff",
+    color: Colors.white,
     marginLeft: 8,
     fontWeight: "600",
     fontSize: 16,
