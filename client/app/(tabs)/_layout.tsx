@@ -3,6 +3,7 @@ import React from "react";
 import { Platform, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
+import { LiquidGlassTabBar } from "@/Shared/Components/LiquidGlassTabBar";
 
 export default function TabLayout() {
   return (
@@ -13,22 +14,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: Colors.icon,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.card,
-          borderTopColor: Colors.border,
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
-          ...Platform.select({
-            ios: {
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -3 },
-              shadowOpacity: 0.1,
-              shadowRadius: 6,
-            },
-            android: {
-              elevation: 8,
-            },
-          }),
+          display: "none", // Hide default tab bar
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -38,6 +24,7 @@ export default function TabLayout() {
           marginTop: 4,
         },
       }}
+      tabBar={(props) => <LiquidGlassTabBar {...props} />}
     >
       <Tabs.Screen
         name="index"
@@ -45,19 +32,6 @@ export default function TabLayout() {
           title: "Dashboard",
           tabBarIcon: ({ color, focused }) => (
             <View style={{ alignItems: "center" }}>
-              {focused && (
-                <View
-                  style={{
-                    height: 3,
-                    width: 30,
-                    backgroundColor: Colors.primary,
-                    borderBottomRightRadius: 3,
-                    borderBottomLeftRadius: 3,
-                    position: "absolute",
-                    top: -15,
-                  }}
-                />
-              )}
               <Ionicons
                 name={focused ? "home" : "home-outline"}
                 size={24}
@@ -74,18 +48,6 @@ export default function TabLayout() {
           title: "Debtors",
           tabBarIcon: ({ color, focused }) => (
             <View style={{ alignItems: "center" }}>
-              {focused && (
-                <View
-                  style={{
-                    height: 3,
-                    width: 30,
-                    backgroundColor: Colors.primary,
-                    borderRadius: 2,
-                    position: "absolute",
-                    top: -15,
-                  }}
-                />
-              )}
               <Ionicons
                 name={focused ? "people" : "people-outline"}
                 size={24}
@@ -97,23 +59,11 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="subscription"
+        name="plans"
         options={{
-          title: "Subscription",
+          title: "Plans",
           tabBarIcon: ({ color, focused }) => (
             <View style={{ alignItems: "center" }}>
-              {focused && (
-                <View
-                  style={{
-                    height: 3,
-                    width: 30,
-                    backgroundColor: Colors.primary,
-                    borderRadius: 2,
-                    position: "absolute",
-                    top: -15,
-                  }}
-                />
-              )}
               <Ionicons
                 name={focused ? "card" : "card-outline"}
                 size={24}
@@ -130,18 +80,6 @@ export default function TabLayout() {
           title: "Profile",
           tabBarIcon: ({ color, focused }) => (
             <View style={{ alignItems: "center" }}>
-              {focused && (
-                <View
-                  style={{
-                    height: 3,
-                    width: 30,
-                    backgroundColor: Colors.primary,
-                    borderRadius: 2,
-                    position: "absolute",
-                    top: -15,
-                  }}
-                />
-              )}
               <Ionicons
                 name={focused ? "person" : "person-outline"}
                 size={24}

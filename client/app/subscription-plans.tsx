@@ -243,7 +243,7 @@ export default function SubscriptionPlansScreen() {
           </View>
         ) : error ? (
           <View style={styles.centerContainer}>
-            <Text style={[styles.errorText, { color: Colors.accent }]}>
+            <Text style={[styles.errorText, { color: Colors.text }]}>
               Failed to load subscription plans
             </Text>
             <TouchableOpacity
@@ -341,10 +341,7 @@ export default function SubscriptionPlansScreen() {
             disabled={isLoaderVisible}
             loading={isLoaderVisible}
             variant="primary"
-            style={[
-              styles.subscribeButton,
-              { opacity: isLoaderVisible ? 0.5 : 1 },
-            ]}
+            style={styles.subscribeButton}
           />
         )}
       </ScrollView>

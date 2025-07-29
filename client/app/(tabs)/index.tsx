@@ -107,6 +107,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingBottom: 100, // Add padding for floating tab bar
   },
   loadingContainer: {
     flex: 1,

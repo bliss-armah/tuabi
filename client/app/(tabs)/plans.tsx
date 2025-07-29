@@ -13,7 +13,7 @@ import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 import { router } from "expo-router";
 
-export default function SubscriptionScreen() {
+export default function PlansScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme ?? "light";
 
@@ -22,7 +22,7 @@ export default function SubscriptionScreen() {
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
 
       <View style={styles.header}>
-        <Text style={[styles.title, { color: Colors.text }]}>Subscription</Text>
+        <Text style={[styles.title, { color: Colors.text }]}>Plans</Text>
         <TouchableOpacity
           style={styles.settingsButton}
           onPress={() => router.push("/subscription-plans")}
@@ -59,5 +59,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingBottom: 100, // Add padding for floating tab bar
   },
 });
