@@ -1,6 +1,0 @@
-{
-  "compilerOptions": {
-    "types": ["./paystack-api"]
-  },
-  "include": ["src/**/*"]
-}
