@@ -77,7 +77,7 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
           style={[
             styles.amountValue,
             {
-              color: debtor.amountOwed > 0 ? Colors.accent : Colors.primary,
+              color: debtor.amountOwed > 0 ? Colors.text : Colors.secondary,
             },
           ]}
         >
@@ -90,14 +90,14 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
 
       {debtor.description && (
         <View style={styles.infoRow}>
-          <Ionicons name="information-circle" size={20} color="#3498db" />
+          <Ionicons name="information-circle" size={20} color={Colors.icon} />
           <Text style={styles.infoText}>{debtor.description}</Text>
         </View>
       )}
 
       {debtor.phoneNumber && (
         <View style={styles.infoRow}>
-          <Ionicons name="call" size={20} color="#3498db" />
+          <Ionicons name="call" size={20} color={Colors.icon} />
           <Text style={styles.infoText}>{debtor.phoneNumber}</Text>
           <TouchableOpacity
             style={[styles.callButton, { backgroundColor: Colors.primary }]}
@@ -109,7 +109,7 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
       )}
 
       <View style={styles.infoRow}>
-        <Ionicons name="calendar" size={20} color="#3498db" />
+        <Ionicons name="calendar" size={20} color={Colors.icon} />
         <Text style={styles.infoText}>
           Created on {formatDate(debtor.createdAt)}
         </Text>
@@ -126,7 +126,7 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
           title={`Add Debt`}
           onPress={onAddDebt}
           variant="primary"
-          icon={<Ionicons name="arrow-up" size={18} color="#fff" />}
+          icon={<Ionicons name="arrow-up" size={18} color={Colors.white} />}
         />
       </View>
     </View>
@@ -135,11 +135,11 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
 
 const styles = StyleSheet.create({
   debtorInfoCard: {
-    backgroundColor: "#fff",
+    backgroundColor: Colors.white,
     borderRadius: 10,
     margin: 15,
     padding: 20,
-    shadowColor: "#000",
+    shadowColor: Colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -150,11 +150,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
+    borderBottomColor: Colors.border,
   },
   amountLabel: {
     fontSize: 14,
-    color: "#7f8c8d",
+    color: Colors.textSecondary,
   },
   amountValue: {
     fontSize: 32,
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   },
   amountStatus: {
     fontSize: 14,
-    color: "#7f8c8d",
+    color: Colors.textSecondary,
   },
   infoRow: {
     flexDirection: "row",
@@ -172,18 +172,18 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    color: "#34495e",
+    color: Colors.text,
     marginLeft: 10,
     flex: 1,
   },
   callButton: {
-    backgroundColor: "#3498db",
+    backgroundColor: Colors.primary,
     paddingVertical: 5,
     paddingHorizontal: 15,
     borderRadius: 5,
   },
   callButtonText: {
-    color: "#fff",
+    color: Colors.white,
     fontSize: 14,
   },
   actionButtons: {

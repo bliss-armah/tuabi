@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, ScrollView, StyleSheet, Alert, FlatList } from "react-native";
+import { View, StyleSheet, Alert, FlatList } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
 import {
@@ -7,8 +7,6 @@ import {
   useAddPaymentMutation,
   useGetDebtorHistoryQuery,
 } from "@/Features/Debtors/DebtorsApi";
-import DebtorModal from "@/Features/Debtors/DebtorModal";
-import { useDebtorModal } from "@/Shared/Hooks/useDebtorModal";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import { DebtorDetailHeader } from "@/Features/Debtors/DebtorDetails/DebtorDetailHeader";
@@ -19,8 +17,6 @@ import RemindersList from "@/Features/Reminders/RemindersList";
 
 export default function DebtorDetail() {
   const { id } = useLocalSearchParams();
-
-  // Remove useDebtorModal, use router navigation instead
 
   const {
     data: debtor,
@@ -132,7 +128,6 @@ export default function DebtorDetail() {
         onSave={handleAddPayment}
         onCancel={() => setModalVisible(false)}
       />
-      {/* DebtorModal removed, now handled as a page */}
     </View>
   );
 }
@@ -140,6 +135,6 @@ export default function DebtorDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: Colors.background,
   },
 });
