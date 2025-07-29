@@ -18,12 +18,7 @@ export const DebtorHeader: React.FC<DebtorHeaderProps> = ({
       <Text style={styles.headerTitle}>{title}</Text>
 
       {actionButton && (
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: Colors.secondary }]}
-          onPress={onTap}
-        >
-          {actionButton}
-        </TouchableOpacity>
+        <TouchableOpacity onPress={onTap}>{actionButton}</TouchableOpacity>
       )}
     </View>
   );
@@ -35,20 +30,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-      backgroundColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: Colors.white,
     textAlign: "center",
-  },
-  actionButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.secondary,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });
