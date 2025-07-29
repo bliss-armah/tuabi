@@ -23,7 +23,7 @@ const Profile = () => {
           title="Logout"
           onPress={logout}
           variant="secondary"
-          icon={<Ionicons name="log-out-outline" size={24} color={Colors.danger} />}
+          icon={<Ionicons name="log-out-outline" size={24} color={Colors.icon} />}
           style={styles.logoutButton}
         />
       </View>
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   },
   userEmail: {
     fontSize: 16,
-    color: Colors.gray,
+    color: Colors.muted,
     marginBottom: 32,
   },
   optionsContainer: {

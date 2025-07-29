@@ -1,26 +1,34 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- **/
-
-// Purple color scheme
-const primaryPurple = "#8A2BE2"; // Vibrant purple
-const lightPurple = "#8A2BE2"; // Medium purple
-
 export const Colors = {
-  text: "#11181C",
-  textSecondary: "#687076",
-  background: "#fff",
+  // Text
+  text: "#111827",
+  textSecondary: "#4B5563",
+  muted: "#9CA3AF",
+
+  // Background
+  background: "#FFFFFF",
   backgroundGray: "#FAFAFA",
-  offwhite: "#EDEBFF",
-  icon: primaryPurple,
-  primary: primaryPurple,
-  secondary: lightPurple,
-  border: "#E6E8EB",
   card: "#F8F9FA",
-  success: "#28a745",
-  warning: "#ffc107",
-  error: "#dc3545",
-  danger: "#dc3545",
-  gray: "#343434",
+  offwhite: "#F3F4F6", // optional: more neutral than purple-tinted #EDEBFF
+
+  // Brand
+  primary: "#1E3A8A",
+  secondary: "#3B82F6",
+
+  // Utility
+  border: "#E6E8EB",
+  icon: "#4B5563", // softer alternative to #000000
+
+  // Semantic
+  danger: "#EF4444",
+  success: "#10B981",
+  warning: "#F59E0B",
+  info: "#3B82F6",
+
+  // Shades
+  light: "#F9FAFB",
+  dark: "#111827",
+
+  // Basic (optional)
+  white: "#FFFFFF",
+  black: "#000000",
 };

@@ -49,7 +49,7 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
       case "medium":
         return Colors.warning;
       case "high":
-        return Colors.error;
+        return Colors.danger;
       default:
         return Colors.text;
     }
@@ -62,7 +62,7 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
       case "medium":
         return Colors.warning;
       case "low":
-        return Colors.error;
+        return Colors.danger;
       default:
         return Colors.text;
     }
