@@ -1,42 +1,7 @@
 import axios from "axios";
 import prisma from "../config/database";
 
-interface OpenRouterResponse {
-  choices: Array<{
-    message: {
-      content: string;
-    };
-  }>;
-}
 
-interface DebtorAnalysis {
-  debtorId: number;
-  name: string;
-  amountOwed: number;
-  riskLevel: "low" | "medium" | "high";
-  riskFactors: string[];
-  paymentLikelihood: number;
-  recommendedActions: string[];
-  nextPaymentPrediction?: {
-    date: string;
-    amount: number;
-    confidence: number;
-  };
-}
-
-interface UserInsights {
-  totalDebtors: number;
-  totalAmountOwed: number;
-  averageDebtPerDebtor: number;
-  highRiskDebtors: number;
-  paymentTrends: string;
-  recommendations: string[];
-  cashFlowPrediction: {
-    nextMonth: number;
-    nextThreeMonths: number;
-    confidence: "low" | "medium" | "high";
-  };
-}
 
 export class OpenRouterService {
   private apiKey: string;
@@ -375,6 +340,43 @@ export class OpenRouterService {
       throw new Error("Invalid AI response format");
     }
   }
+}
+
+interface OpenRouterResponse {
+  choices: Array<{
+    message: {
+      content: string;
+    };
+  }>;
+}
+
+interface DebtorAnalysis {
+  debtorId: number;
+  name: string;
+  amountOwed: number;
+  riskLevel: "low" | "medium" | "high";
+  riskFactors: string[];
+  paymentLikelihood: number;
+  recommendedActions: string[];
+  nextPaymentPrediction?: {
+    date: string;
+    amount: number;
+    confidence: number;
+  };
+}
+
+interface UserInsights {
+  totalDebtors: number;
+  totalAmountOwed: number;
+  averageDebtPerDebtor: number;
+  highRiskDebtors: number;
+  paymentTrends: string;
+  recommendations: string[];
+  cashFlowPrediction: {
+    nextMonth: number;
+    nextThreeMonths: number;
+    confidence: "low" | "medium" | "high";
+  };
 }
 
 export const openRouterService = new OpenRouterService();

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { Card, CardContent } from "../../Shared/Components/UIKitten/Card";
+import { Card } from "../../Shared/Components/UIKitten/Card";
 import { Colors } from "../../Shared/Constants/Colors";
 import { useGetUserInsightsQuery } from "./AIApi";
 import { LoadingView } from "../../Shared/Components/LoadingView";
@@ -25,9 +25,7 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
   if (isLoading) {
     return (
       <Card style={styles.card}>
-        <CardContent>
-          <LoadingView message="Analyzing your debt portfolio..." />
-        </CardContent>
+        <LoadingView text="Analyzing your debt portfolio..." />
       </Card>
     );
   }
@@ -35,13 +33,7 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
   if (error) {
     return (
       <Card style={styles.card}>
-        <CardContent>
-          <ErrorView
-            message="Unable to load AI insights"
-            onRetry={refetch}
-            compact={compact}
-          />
-        </CardContent>
+        <ErrorView error="Unable to load AI insights" onRetry={refetch} />
       </Card>
     );
   }
@@ -79,30 +71,118 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
   if (compact) {
     return (
       <Card style={styles.card}>
-        <CardContent>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: Colors.text }]}>
-              🤖 AI Insights
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: Colors.text }]}>
+            🤖 AI Insights
+          </Text>
+        </View>
+
+        <View style={styles.compactContent}>
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+              High Risk Debtors:
+            </Text>
+            <Text style={[styles.statValue, { color: getRiskColor("high") }]}>
+              {insights.highRiskDebtors}
             </Text>
           </View>
 
-          <View style={styles.compactContent}>
-            <View style={styles.statRow}>
-              <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
-                High Risk Debtors:
+          <View style={styles.statRow}>
+            <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+              Next Month Cash Flow:
+            </Text>
+            <Text
+              style={[
+                styles.statValue,
+                {
+                  color: getConfidenceColor(
+                    insights.cashFlowPrediction.confidence
+                  ),
+                },
+              ]}
+            >
+              ${insights.cashFlowPrediction.nextMonth.toLocaleString()}
+            </Text>
+          </View>
+
+          {insights.recommendations.length > 0 && (
+            <TouchableOpacity
+              style={styles.recommendationButton}
+              onPress={() =>
+                Alert.alert("AI Recommendations", insights.recommendations[0])
+              }
+            >
+              <Text
+                style={[styles.recommendationText, { color: Colors.primary }]}
+              >
+                💡 {insights.recommendations[0]}
               </Text>
-              <Text style={[styles.statValue, { color: getRiskColor("high") }]}>
-                {insights.highRiskDebtors}
+            </TouchableOpacity>
+          )}
+        </View>
+      </Card>
+    );
+  }
+
+  return (
+    <Card style={styles.card}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: Colors.text }]}>
+          🤖 AI Portfolio Analysis
+        </Text>
+      </View>
+
+      <View style={styles.content}>
+        {/* Portfolio Overview */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+            Portfolio Overview
+          </Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statItem}>
+              <Text style={[styles.statNumber, { color: Colors.primary }]}>
+                {insights.totalDebtors}
+              </Text>
+              <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+                Total Debtors
               </Text>
             </View>
-
-            <View style={styles.statRow}>
+            <View style={styles.statItem}>
+              <Text
+                style={[styles.statNumber, { color: getRiskColor("high") }]}
+              >
+                {insights.highRiskDebtors}
+              </Text>
               <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
-                Next Month Cash Flow:
+                High Risk
+              </Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={[styles.statNumber, { color: Colors.success }]}>
+                ${insights.averageDebtPerDebtor.toLocaleString()}
+              </Text>
+              <Text style={[styles.statLabel, { color: Colors.textSecondary }]}>
+                Avg Debt
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Cash Flow Prediction */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+            Cash Flow Prediction
+          </Text>
+          <View style={styles.cashFlowRow}>
+            <View style={styles.cashFlowItem}>
+              <Text
+                style={[styles.cashFlowLabel, { color: Colors.textSecondary }]}
+              >
+                Next Month
               </Text>
               <Text
                 style={[
-                  styles.statValue,
+                  styles.cashFlowAmount,
                   {
                     color: getConfidenceColor(
                       insights.cashFlowPrediction.confidence
@@ -113,149 +193,46 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
                 ${insights.cashFlowPrediction.nextMonth.toLocaleString()}
               </Text>
             </View>
-
-            {insights.recommendations.length > 0 && (
-              <TouchableOpacity
-                style={styles.recommendationButton}
-                onPress={() =>
-                  Alert.alert("AI Recommendations", insights.recommendations[0])
-                }
+            <View style={styles.cashFlowItem}>
+              <Text
+                style={[styles.cashFlowLabel, { color: Colors.textSecondary }]}
               >
-                <Text
-                  style={[styles.recommendationText, { color: Colors.primary }]}
-                >
-                  💡 {insights.recommendations[0]}
-                </Text>
-              </TouchableOpacity>
-            )}
+                Next 3 Months
+              </Text>
+              <Text
+                style={[
+                  styles.cashFlowAmount,
+                  {
+                    color: getConfidenceColor(
+                      insights.cashFlowPrediction.confidence
+                    ),
+                  },
+                ]}
+              >
+                ${insights.cashFlowPrediction.nextThreeMonths.toLocaleString()}
+              </Text>
+            </View>
           </View>
-        </CardContent>
-      </Card>
-    );
-  }
+        </View>
 
-  return (
-    <Card style={styles.card}>
-      <CardContent>
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: Colors.text }]}>
-            🤖 AI Portfolio Analysis
+        {/* Payment Trends */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: Colors.text }]}>
+            Payment Trends
+          </Text>
+          <Text style={[styles.trendText, { color: Colors.textSecondary }]}>
+            {insights.paymentTrends}
           </Text>
         </View>
 
-        <View style={styles.content}>
-          {/* Portfolio Overview */}
+        {/* Recommendations */}
+        {insights.recommendations.length > 0 && (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: Colors.text }]}>
-              Portfolio Overview
+              AI Recommendations
             </Text>
-            <View style={styles.statsGrid}>
-              <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: Colors.primary }]}>
-                  {insights.totalDebtors}
-                </Text>
-                <Text
-                  style={[styles.statLabel, { color: Colors.textSecondary }]}
-                >
-                  Total Debtors
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text
-                  style={[styles.statNumber, { color: getRiskColor("high") }]}
-                >
-                  {insights.highRiskDebtors}
-                </Text>
-                <Text
-                  style={[styles.statLabel, { color: Colors.textSecondary }]}
-                >
-                  High Risk
-                </Text>
-              </View>
-              <View style={styles.statItem}>
-                <Text style={[styles.statNumber, { color: Colors.success }]}>
-                  ${insights.averageDebtPerDebtor.toLocaleString()}
-                </Text>
-                <Text
-                  style={[styles.statLabel, { color: Colors.textSecondary }]}
-                >
-                  Avg Debt
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Cash Flow Prediction */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
-              Cash Flow Prediction
-            </Text>
-            <View style={styles.cashFlowRow}>
-              <View style={styles.cashFlowItem}>
-                <Text
-                  style={[
-                    styles.cashFlowLabel,
-                    { color: Colors.textSecondary },
-                  ]}
-                >
-                  Next Month
-                </Text>
-                <Text
-                  style={[
-                    styles.cashFlowAmount,
-                    {
-                      color: getConfidenceColor(
-                        insights.cashFlowPrediction.confidence
-                      ),
-                    },
-                  ]}
-                >
-                  ${insights.cashFlowPrediction.nextMonth.toLocaleString()}
-                </Text>
-              </View>
-              <View style={styles.cashFlowItem}>
-                <Text
-                  style={[
-                    styles.cashFlowLabel,
-                    { color: Colors.textSecondary },
-                  ]}
-                >
-                  Next 3 Months
-                </Text>
-                <Text
-                  style={[
-                    styles.cashFlowAmount,
-                    {
-                      color: getConfidenceColor(
-                        insights.cashFlowPrediction.confidence
-                      ),
-                    },
-                  ]}
-                >
-                  $
-                  {insights.cashFlowPrediction.nextThreeMonths.toLocaleString()}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Payment Trends */}
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: Colors.text }]}>
-              Payment Trends
-            </Text>
-            <Text style={[styles.trendText, { color: Colors.textSecondary }]}>
-              {insights.paymentTrends}
-            </Text>
-          </View>
-
-          {/* Recommendations */}
-          {insights.recommendations.length > 0 && (
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: Colors.text }]}>
-                AI Recommendations
-              </Text>
-              {insights.recommendations.map((recommendation, index) => (
+            {insights.recommendations.map(
+              (recommendation: string, index: number) => (
                 <View key={index} style={styles.recommendationItem}>
                   <Text
                     style={[
@@ -266,11 +243,11 @@ export const AIInsightsCard: React.FC<AIInsightsCardProps> = ({
                     💡 {recommendation}
                   </Text>
                 </View>
-              ))}
-            </View>
-          )}
-        </View>
-      </CardContent>
+              )
+            )}
+          </View>
+        )}
+      </View>
     </Card>
   );
 };

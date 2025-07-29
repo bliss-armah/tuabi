@@ -6,46 +6,6 @@
 // Purple color scheme
 const primaryPurple = "#8A2BE2"; // Vibrant purple
 const lightPurple = "#8A2BE2"; // Medium purple
-const darkPurple = "#4B0082"; // Indigo/Dark purple
-const deepPurple = "#301934"; // Very dark purple
-
-const tintColorLight = primaryPurple;
-const tintColorDark = lightPurple;
-
-// will be used later
-
-// export const Colors = {
-//   light: {
-//     text: "#11181C",
-//     background: "#fff",
-//     backgroundGray:"#FAFAFA",
-//     offwhite: "#EDEBFF",
-//     tint: tintColorLight,
-//     icon: darkPurple,
-//     tabIconDefault: "#687076",
-//     tabIconSelected: tintColorLight,
-//     primary: primaryPurple,
-//     secondary: lightPurple,
-//     accent: darkPurple,
-//     border: "#E6E8EB",
-//     card: "#F8F9FA",
-//   },
-//   dark: {
-//     text: "#ECEDEE",
-//     background: "#151718",
-//     backgroundGray:"#0a0a0a",
-//     offwhite: "#151718",
-//     tint: tintColorDark,
-//     icon: lightPurple,
-//     tabIconDefault: "#9BA1A6",
-//     tabIconSelected: tintColorDark,
-//     primary: lightPurple,
-//     secondary: primaryPurple,
-//     accent: "#E0B0FF", // Mauve/light purple
-//     border: "#2E2E3A",
-//     card: "#1E1E2A",
-//   },
-// };
 
 export const Colors = {
   text: "#11181C",
@@ -53,16 +13,11 @@ export const Colors = {
   background: "#fff",
   backgroundGray: "#FAFAFA",
   offwhite: "#EDEBFF",
-  tint: tintColorLight,
-  icon: darkPurple,
-  tabIconDefault: "#687076",
-  tabIconSelected: tintColorLight,
-  primary: darkPurple,
+  icon: primaryPurple,
+  primary: primaryPurple,
   secondary: lightPurple,
-  accent: darkPurple,
   border: "#E6E8EB",
   card: "#F8F9FA",
-  cardBackground: "#F8F9FA",
   success: "#28a745",
   warning: "#ffc107",
   error: "#dc3545",

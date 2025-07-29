@@ -62,13 +62,13 @@ export default function Home() {
           amount={data?.data?.summary?.totalAmountOwed || 0}
         />
 
-        {/* AI Insights Card */}
-        <AIInsightsCard 
+        {/* AI Insights Card - Temporarily disabled for debugging */}
+        {/* <AIInsightsCard 
           compact={true}
           onRecommendationPress={(debtorId) => 
             router.push({ pathname: "/debtor-detail", params: { id: debtorId } })
           }
-        />
+        /> */}
 
         <View style={styles.tipsContainer}>
           <Text style={[styles.tipsTitle, { color: Colors.text }]}>

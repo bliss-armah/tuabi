@@ -1,5 +1,51 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { baseQuery } from "../../Shared/Api/config";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import baseQuery from "@/Shared/Api/config";
+
+// AI API
+export const aiApi = createApi({
+  reducerPath: "aiApi",
+  baseQuery,
+  tagTypes: ["AIInsights", "DebtorAnalysis", "Predictions", "RiskAssessment"],
+  endpoints: (builder) => ({
+    // Get comprehensive user insights
+    getUserInsights: builder.query<UserInsights, void>({
+      query: () => "/ai/insights",
+      providesTags: ["AIInsights"],
+    }),
+
+    // Get analysis for a specific debtor
+    getDebtorAnalysis: builder.query<DebtorAnalysis, string>({
+      query: (debtorId: string) => `/ai/debtor/${debtorId}/analysis`,
+      providesTags: ["DebtorAnalysis"],
+    }),
+
+    // Get payment predictions
+    getPaymentPredictions: builder.query<PaymentPredictions, void>({
+      query: () => "/ai/predictions",
+      providesTags: ["Predictions"],
+    }),
+
+    // Get risk assessment
+    getRiskAssessment: builder.query<RiskAssessment, void>({
+      query: () => "/ai/risk-assessment",
+      providesTags: ["RiskAssessment"],
+    }),
+
+    // Get comprehensive analysis (all insights combined)
+    getComprehensiveAnalysis: builder.query<ComprehensiveAnalysis, void>({
+      query: () => "/ai/comprehensive",
+      providesTags: ["AIInsights", "Predictions", "RiskAssessment"],
+    }),
+  }),
+});
+
+export const {
+  useGetUserInsightsQuery,
+  useGetDebtorAnalysisQuery,
+  useGetPaymentPredictionsQuery,
+  useGetRiskAssessmentQuery,
+  useGetComprehensiveAnalysisQuery,
+} = aiApi;
 
 // Types for AI responses
 export interface DebtorAnalysis {
@@ -65,51 +111,3 @@ export interface ComprehensiveAnalysis {
   riskAssessment: RiskAssessment;
   generatedAt: string;
 }
-
-// AI API
-export const aiApi = createApi({
-  reducerPath: "aiApi",
-  baseQuery,
-  tagTypes: ["AIInsights", "DebtorAnalysis", "Predictions", "RiskAssessment"],
-  endpoints: (builder) => ({
-    // Get comprehensive user insights
-    getUserInsights: builder.query<UserInsights, void>({
-      query: () => "/ai/insights",
-      providesTags: ["AIInsights"],
-    }),
-
-    // Get analysis for a specific debtor
-    getDebtorAnalysis: builder.query<DebtorAnalysis, number>({
-      query: (debtorId) => `/ai/debtor/${debtorId}/analysis`,
-      providesTags: (result, error, debtorId) => [
-        { type: "DebtorAnalysis", id: debtorId },
-      ],
-    }),
-
-    // Get payment predictions
-    getPaymentPredictions: builder.query<PaymentPredictions, void>({
-      query: () => "/ai/predictions",
-      providesTags: ["Predictions"],
-    }),
-
-    // Get risk assessment
-    getRiskAssessment: builder.query<RiskAssessment, void>({
-      query: () => "/ai/risk-assessment",
-      providesTags: ["RiskAssessment"],
-    }),
-
-    // Get comprehensive analysis (all insights combined)
-    getComprehensiveAnalysis: builder.query<ComprehensiveAnalysis, void>({
-      query: () => "/ai/comprehensive",
-      providesTags: ["AIInsights", "Predictions", "RiskAssessment"],
-    }),
-  }),
-});
-
-export const {
-  useGetUserInsightsQuery,
-  useGetDebtorAnalysisQuery,
-  useGetPaymentPredictionsQuery,
-  useGetRiskAssessmentQuery,
-  useGetComprehensiveAnalysisQuery,
-} = aiApi;
