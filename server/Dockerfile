@@ -8,7 +8,7 @@ RUN apk add --no-cache libc6-compat openssl postgresql-client netcat-openbsd
 
 # Copy package files and install all dependencies
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN yarn install
 
 # Copy source code
 COPY . .
