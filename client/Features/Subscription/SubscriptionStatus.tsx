@@ -60,13 +60,10 @@ export default function SubscriptionStatus({
   if (error || !subscriptionResponse?.status) {
     return (
       <View style={[styles.container, { backgroundColor: Colors.card }]}>
-        <Text style={[styles.errorText, { color: Colors.accent }]}>
+        <Text style={[styles.errorText, { color: Colors.text }]}>
           Failed to load subscription status
         </Text>
-        <TouchableOpacity
-          style={[styles.retryButton, { backgroundColor: Colors.primary }]}
-          onPress={() => refetch()}
-        >
+        <TouchableOpacity style={styles.retryButton} onPress={() => refetch()}>
           <Text style={styles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -102,7 +99,7 @@ export default function SubscriptionStatus({
         ) : (
           <View style={styles.compactInactive}>
             <View
-              style={[styles.statusDot, { backgroundColor: Colors.accent }]}
+              style={[styles.statusDot, { backgroundColor: Colors.text }]}
             />
             <Text style={[styles.compactText, { color: Colors.text }]}>
               {hasExpired ? "Expired" : "No Active Subscription"}
@@ -127,9 +124,7 @@ export default function SubscriptionStatus({
           </View>
         )}
         {hasExpired && (
-          <View
-            style={[styles.statusBadge, { backgroundColor: Colors.accent }]}
-          >
+          <View style={[styles.statusBadge, { backgroundColor: Colors.text }]}>
             <Text style={styles.statusBadgeText}>Expired</Text>
           </View>
         )}
@@ -137,25 +132,14 @@ export default function SubscriptionStatus({
 
       {isActiveSubscription ? (
         <View style={styles.activeSubscription}>
-          <Text style={[styles.statusText, { color: Colors.text }]}>
-            Your subscription is active
-          </Text>
-
           {currentPlan && (
             <View style={styles.planInfo}>
               <View>
                 <Text style={[styles.planName, { color: Colors.text }]}>
                   {currentPlan?.plan?.name} Plan
                 </Text>
-                {/* {currentPlan.plan.description && (
-                  <Text
-                    style={[styles.planDescription, { color: Colors.text }]}
-                  >
-                    {currentPlan.plan.description}
-                  </Text>
-                )} */}
               </View>
-              <Text style={[styles.planAmount, { color: Colors.primary }]}>
+              <Text style={[styles.planAmount, { color: Colors.text }]}>
                 ₵{currentPlan?.plan?.amount.toLocaleString()}
               </Text>
             </View>
@@ -170,7 +154,7 @@ export default function SubscriptionStatus({
                 {formatDate(currentPlan?.startDate || "")} -{" "}
                 {formatDate(expirationDate)}
               </Text>
-              <Text style={[styles.daysRemaining, { color: Colors.primary }]}>
+              <Text style={[styles.daysRemaining, { color: Colors.text }]}>
                 {getDaysRemaining(expirationDate)} days remaining
               </Text>
             </View>
@@ -193,7 +177,7 @@ export default function SubscriptionStatus({
           </Text>
 
           {hasExpired && expirationDate && (
-            <Text style={[styles.expiredDate, { color: Colors.accent }]}>
+            <Text style={[styles.expiredDate, { color: Colors.text }]}>
               Expired on {formatDate(expirationDate)}
             </Text>
           )}
@@ -214,7 +198,7 @@ export default function SubscriptionStatus({
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
-                { backgroundColor: Colors.primary },
+                { backgroundColor: Colors.text },
               ]}
               onPress={handleUpgrade}
             >
@@ -226,7 +210,7 @@ export default function SubscriptionStatus({
         </View>
       )}
 
-      {activeTransactions.length > 0 && (
+      {/* {activeTransactions.length > 0 && (
         <View
           style={[
             styles.transactionsSection,
@@ -262,7 +246,7 @@ export default function SubscriptionStatus({
                           ? Colors.primary
                           : transaction.status === "pending"
                           ? "#FFA500"
-                          : Colors.accent,
+                          : Colors.text,
                     },
                   ]}
                 />
@@ -275,7 +259,7 @@ export default function SubscriptionStatus({
                           ? Colors.primary
                           : transaction.status === "pending"
                           ? "#FFA500"
-                          : Colors.accent,
+                          : Colors.text,
                     },
                   ]}
                 >
@@ -303,7 +287,7 @@ export default function SubscriptionStatus({
             </TouchableOpacity>
           )}
         </View>
-      )}
+      )} */}
     </View>
   );
 }

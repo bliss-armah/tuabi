@@ -16,11 +16,8 @@ export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
   return (
     <View style={[styles.header, { backgroundColor: Colors.primary }]}>
       <View style={styles.sideButtonContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -29,11 +26,8 @@ export const DebtorDetailHeader: React.FC<DebtorDetailHeaderProps> = ({
       </Text>
 
       <View style={styles.sideButtonContainer}>
-        <TouchableOpacity
-          style={[styles.editButton, { backgroundColor: Colors.secondary }]}
-          onPress={onEdit}
-        >
-          <Ionicons name="create" size={24} color="#fff" />
+        <TouchableOpacity onPress={onEdit}>
+          <Ionicons name="create" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
     </View>
@@ -45,35 +39,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 20,
-    // backgroundColor: "#3498db", // Remove hardcoded color
   },
   sideButtonContainer: {
     width: 48,
     alignItems: "center",
     justifyContent: "center",
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   headerTitle: {
     flex: 1,
     fontSize: 20,
     fontWeight: "bold",
-    color: "#fff",
+    color: Colors.white,
     textAlign: "center",
     marginHorizontal: 8,
-  },
-  editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

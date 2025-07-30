@@ -225,20 +225,17 @@ export default function DebtorFormPage() {
                 )}
 
                 {mode === "edit" && (
-                  <View
-                    style={[
-                      styles.amountInfo,
-                      {
-                        backgroundColor: Colors.background,
-                        borderLeftColor: Colors.primary,
-                      },
-                    ]}
-                  >
+                  <View style={[styles.amountInfo]}>
+                    <Ionicons
+                      name="information-circle"
+                      size={20}
+                      color={Colors.icon}
+                    />
+
                     <Text
                       style={[styles.amountInfoText, { color: Colors.text }]}
                     >
-                      To update the amount owed, please record a payment or add
-                      debt from the debtor details screen.
+                      Use this page to keep your personal details up to date.
                     </Text>
                   </View>
                 )}
@@ -284,14 +281,18 @@ const styles = StyleSheet.create({
   form: {
     borderRadius: 10,
   },
-  amountInfo: {
-    borderRadius: 5,
-    padding: 15,
+amountInfo: {
+  flexDirection: "row",
+    backgroundColor: "rgba(52, 152, 219, 0.1)",
+    padding: 10,
+    gap: 10,
     marginTop: 15,
-    borderLeftWidth: 4,
+    borderRadius: 10,
   },
+
   amountInfoText: {
     fontSize: 14,
+    width: "92%",
   },
   bottomButtonContainer: {
     backgroundColor: Colors.background,

@@ -19,7 +19,7 @@ export const Colors = {
   icon: "#4B5563", // softer alternative to #000000
 
   // Semantic
-  danger: "#EF4444",
+  danger: "#FF6347", // tomato color
   success: "#10B981",
   warning: "#F59E0B",
   info: "#3B82F6",

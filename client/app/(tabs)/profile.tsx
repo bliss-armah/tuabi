@@ -19,12 +19,14 @@ const Profile = () => {
       </View>
 
       <View style={styles.optionsContainer}>
-        <Button 
+        <Button
           title="Logout"
           onPress={logout}
-          variant="secondary"
-          icon={<Ionicons name="log-out-outline" size={24} color={Colors.icon} />}
+          icon={
+            <Ionicons name="log-out-outline" size={24} color={Colors.danger} />
+          }
           style={styles.logoutButton}
+          textStyle={{ color: Colors.danger }}
         />
       </View>
     </View>
@@ -36,6 +38,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     padding: 20,
+    paddingBottom: 100, // Add padding for floating tab bar
   },
   header: {
     alignItems: "center",
@@ -60,6 +63,7 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 12,
+    backgroundColor: "transparent",
   },
 });
 
