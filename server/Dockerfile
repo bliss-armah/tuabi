@@ -16,6 +16,9 @@ COPY . .
 # Generate Prisma client
 RUN npx prisma generate
 
+# Build the application (move this here)
+RUN yarn build
+
 # Expose port
 EXPOSE 8000
 
@@ -23,7 +26,7 @@ EXPOSE 8000
 ENV PORT=8000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
   CMD node -e "require('http').get('http://localhost:8000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
 # Entrypoint script to choose mode (api or worker, dev or prod)

@@ -90,13 +90,15 @@ wait_for_postgres() {
 
 # Function to wait for Redis (handles both local and remote)
 wait_for_redis() {
+    # Check if REDIS_URL is provided
     if [ -n "$REDIS_URL" ]; then
-        echo "🔍 Checking Redis connectivity..."
+        echo "🔍 Checking Redis connectivity via REDIS_URL..."
         
-        if [ "$ENVIRONMENT" = "local" ] && echo "$REDIS_URL" | grep -q "localhost\|127.0.0.1\|redis:"; then
-            # Local Redis - simple host:port check
-            REDIS_HOST=$(echo "$REDIS_URL" | sed 's|redis[s]*://[^@]*@||' | cut -d':' -f1)
-            REDIS_PORT=$(echo "$REDIS_URL" | cut -d':' -f3 | cut -d'/' -f1)
+        # Parse REDIS_URL properly
+        if echo "$REDIS_URL" | grep -q "redis://"; then
+            # Extract host and port from redis://:password@host:port format
+            REDIS_HOST=$(echo "$REDIS_URL" | sed 's|redis://[^@]*@||' | cut -d':' -f1)
+            REDIS_PORT=$(echo "$REDIS_URL" | sed 's|redis://[^@]*@||' | cut -d':' -f2 | cut -d'/' -f1)
             
             if [ -z "$REDIS_HOST" ]; then
                 REDIS_HOST="localhost"  # Default for local
@@ -104,22 +106,21 @@ wait_for_redis() {
             if [ -z "$REDIS_PORT" ]; then
                 REDIS_PORT="6379"      # Default Redis port
             fi
-        else
-            # Remote Redis (Upstash) - extract from full URL
-            REDIS_FULL=$(echo "$REDIS_URL" | sed 's|redis[s]*://[^@]*@||')
-            REDIS_HOST=$(echo "$REDIS_FULL" | cut -d':' -f1)
-            REDIS_PORT=$(echo "$REDIS_FULL" | cut -d':' -f2 | cut -d'/' -f1)
-        fi
-        
-        if [ -n "$REDIS_HOST" ] && [ -n "$REDIS_PORT" ]; then
+            
             echo "📍 Connecting to Redis at $REDIS_HOST:$REDIS_PORT"
             wait_for_service "$REDIS_HOST" "$REDIS_PORT" "Redis"
         else
-            echo "⚠️  Could not parse Redis URL, skipping connectivity check"
+            echo "⚠️  Invalid Redis URL format, skipping connectivity check"
             echo "🔍 Redis URL format: $REDIS_URL"
         fi
+    # Check if separate Redis variables are provided
+    elif [ -n "$REDIS_HOST" ] && [ -n "$REDIS_PORT" ]; then
+        echo "🔍 Checking Redis connectivity via separate variables..."
+        echo "📍 Connecting to Redis at $REDIS_HOST:$REDIS_PORT"
+        wait_for_service "$REDIS_HOST" "$REDIS_PORT" "Redis"
     else
-        echo "⚠️  No REDIS_URL provided, skipping Redis connectivity check"
+        echo "⚠️  No Redis configuration provided, skipping Redis connectivity check"
+        echo "💡 Set either REDIS_URL or REDIS_HOST+REDIS_PORT+REDIS_PASSWORD"
     fi
 }
 
@@ -291,14 +292,16 @@ fi
 echo "🚀 Starting service: $SERVICE in $NODE_ENV mode"
 if [ "$SERVICE" = "worker" ]; then
     if [ "$NODE_ENV" = "production" ]; then
-        exec npm run build && npm run worker
+        echo "👷 Starting worker..."
+        exec npm run worker
     else
         exec npm run worker:dev
     fi
 else
     # API service
     if [ "$NODE_ENV" = "production" ]; then
-        exec npm run build && npm start
+        echo "🚀 Starting API server..."
+        exec npm start
     else
         exec npm run dev
     fi
