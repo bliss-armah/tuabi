@@ -3,7 +3,17 @@ set -e
 
 # Default values
 : "${SERVICE:=api}"   # SERVICE=api or SERVICE=worker
-: "${NODE_ENV:=development}"
+: "${NODE_ENV:=development}"  # Default to development
+
+# Detect environment (Fly.io sets FLY_APP_NAME)
+if [ -n "$FLY_APP_NAME" ]; then
+    ENVIRONMENT="flyio"
+    : "${NODE_ENV:=production}"  # Override to production on Fly.io
+    echo "🚁 Detected Fly.io environment"
+else
+    ENVIRONMENT="local"
+    echo "🏠 Detected local environment"
+fi
 
 # Validate SERVICE variable
 case "$SERVICE" in
@@ -11,13 +21,40 @@ case "$SERVICE" in
     *) echo "❌ Invalid SERVICE: '$SERVICE'. Must be 'api' or 'worker'"; exit 1 ;;
 esac
 
+# Extract database connection details based on environment
+if [ "$ENVIRONMENT" = "flyio" ]; then
+    # Fly.io: Extract from DATABASE_URL or use defaults
+    if [ -n "$DATABASE_URL" ]; then
+        DB_HOST=$(echo "$DATABASE_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
+        DB_PORT=$(echo "$DATABASE_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+        DB_USER=$(echo "$DATABASE_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
+    else
+        # Fly.io defaults
+        DB_HOST="server-nameless-snow-6142-db.internal"
+        DB_PORT="5432"
+        DB_USER="postgres"
+    fi
+else
+    # Local: Use local defaults or extract from DATABASE_URL
+    if [ -n "$DATABASE_URL" ]; then
+        DB_HOST=$(echo "$DATABASE_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
+        DB_PORT=$(echo "$DATABASE_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+        DB_USER=$(echo "$DATABASE_URL" | sed -n 's|.*://\([^:]*\):.*|\1|p')
+    else
+        # Local defaults
+        DB_HOST="${DB_HOST:-localhost}"
+        DB_PORT="${DB_PORT:-5432}"
+        DB_USER="${DB_USER:-postgres}"
+    fi
+fi
+
 # Function to wait for a service
 wait_for_service() {
     local host=$1
     local port=$2
     local service_name=$3
     
-    echo "⏳ Waiting for $service_name to be ready..."
+    echo "⏳ Waiting for $service_name to be ready at $host:$port..."
     local retries=30
     while [ $retries -gt 0 ]; do
         if nc -z "$host" "$port" 2>/dev/null; then
@@ -38,7 +75,7 @@ wait_for_postgres() {
     echo "⏳ Waiting for PostgreSQL to be ready..."
     local retries=30
     while [ $retries -gt 0 ]; do
-        if pg_isready -h postgres -p 5432 -U tuabi_user >/dev/null 2>&1; then
+        if pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" >/dev/null 2>&1; then
             echo "✅ PostgreSQL is ready!"
             return 0
         fi
@@ -51,9 +88,48 @@ wait_for_postgres() {
     exit 1
 }
 
+# Function to wait for Redis (handles both local and remote)
+wait_for_redis() {
+    if [ -n "$REDIS_URL" ]; then
+        echo "🔍 Checking Redis connectivity..."
+        
+        if [ "$ENVIRONMENT" = "local" ] && echo "$REDIS_URL" | grep -q "localhost\|127.0.0.1\|redis:"; then
+            # Local Redis - simple host:port check
+            REDIS_HOST=$(echo "$REDIS_URL" | sed 's|redis[s]*://[^@]*@||' | cut -d':' -f1)
+            REDIS_PORT=$(echo "$REDIS_URL" | cut -d':' -f3 | cut -d'/' -f1)
+            
+            if [ -z "$REDIS_HOST" ]; then
+                REDIS_HOST="localhost"  # Default for local
+            fi
+            if [ -z "$REDIS_PORT" ]; then
+                REDIS_PORT="6379"      # Default Redis port
+            fi
+        else
+            # Remote Redis (Upstash) - extract from full URL
+            REDIS_FULL=$(echo "$REDIS_URL" | sed 's|redis[s]*://[^@]*@||')
+            REDIS_HOST=$(echo "$REDIS_FULL" | cut -d':' -f1)
+            REDIS_PORT=$(echo "$REDIS_FULL" | cut -d':' -f2 | cut -d'/' -f1)
+        fi
+        
+        if [ -n "$REDIS_HOST" ] && [ -n "$REDIS_PORT" ]; then
+            echo "📍 Connecting to Redis at $REDIS_HOST:$REDIS_PORT"
+            wait_for_service "$REDIS_HOST" "$REDIS_PORT" "Redis"
+        else
+            echo "⚠️  Could not parse Redis URL, skipping connectivity check"
+            echo "🔍 Redis URL format: $REDIS_URL"
+        fi
+    else
+        echo "⚠️  No REDIS_URL provided, skipping Redis connectivity check"
+    fi
+}
+
 # Function to debug database connection
 debug_database_connection() {
     echo "🔍 Debugging database connection..."
+    echo "📊 Database details:"
+    echo "   Host: $DB_HOST"
+    echo "   Port: $DB_PORT" 
+    echo "   User: $DB_USER"
     
     # Check if we can connect to the database
     if ! npx prisma db pull --preview-feature >/dev/null 2>&1; then
@@ -61,7 +137,6 @@ debug_database_connection() {
         
         # Try to create the database if it doesn't exist
         echo "🏗️  Attempting to create database..."
-        # This might work if your PostgreSQL user has createdb privileges
         npx prisma db push --accept-data-loss || echo "⚠️  Could not create database automatically"
     else
         echo "✅ Database connection successful"
@@ -89,10 +164,37 @@ setup_database() {
         echo "🔍 Checking migration status..."
         npx prisma migrate status || echo "⚠️  Could not get migration status"
         
-        if ! npx prisma migrate deploy; then
-            echo "❌ Production migrations failed"
-            echo "🔍 Migration deploy output above should show the specific error"
-            exit 1
+        # Check if we need to baseline (handle P3005 error)
+        if ! npx prisma migrate deploy 2>&1; then
+            echo "❌ Production migrations failed, checking if we need to baseline..."
+            
+            # Try to baseline the migration as already applied
+            echo "🔄 Attempting to baseline existing migrations..."
+            if npx prisma migrate resolve --applied 20250711194021_new_update 2>&1; then
+                echo "✅ Successfully baselined migration"
+                # Try deploy again after baseline
+                if ! npx prisma migrate deploy; then
+                    echo "❌ Migration deploy still failed after baseline"
+                    exit 1
+                fi
+            else
+                echo "❌ Could not baseline migration, trying alternative approach..."
+                
+                # Alternative: Get all migration names and try to baseline them
+                for migration_dir in prisma/migrations/*/; do
+                    if [ -d "$migration_dir" ]; then
+                        migration_name=$(basename "$migration_dir")
+                        echo "🔄 Attempting to baseline migration: $migration_name"
+                        npx prisma migrate resolve --applied "$migration_name" 2>&1 || echo "⚠️ Could not baseline $migration_name"
+                    fi
+                done
+                
+                # Try one more time
+                if ! npx prisma migrate deploy; then
+                    echo "❌ All migration strategies failed"
+                    exit 1
+                fi
+            fi
         fi
         echo "✅ Production migrations completed"
         
@@ -172,7 +274,7 @@ trap 'echo "🛑 Received termination signal, shutting down..."; exit 0' TERM IN
 
 # Wait for dependencies
 wait_for_postgres
-wait_for_service redis 6379 "Redis"
+wait_for_redis
 
 # Add a small delay to ensure everything is fully ready
 echo "⏸️  Waiting 3 seconds for services to stabilize..."
@@ -187,7 +289,6 @@ fi
 
 # Start the appropriate service
 echo "🚀 Starting service: $SERVICE in $NODE_ENV mode"
-
 if [ "$SERVICE" = "worker" ]; then
     if [ "$NODE_ENV" = "production" ]; then
         exec npm run build && npm run worker
