@@ -36,7 +36,7 @@ services:
       dockerfile: Dockerfile
     environment:
       SERVICE: api
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: development
       PORT: 8080
       DATABASE_URL: postgresql://tuabi_user:tuabi_password@postgres:5432/tuabi_db
       REDIS_HOST: redis
@@ -65,7 +65,7 @@ services:
     build: ./server
     environment:
       SERVICE: worker
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: development
       DATABASE_URL: postgresql://tuabi_user:tuabi_password@postgres:5432/tuabi_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
