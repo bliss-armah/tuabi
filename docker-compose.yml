@@ -31,11 +31,13 @@ services:
       retries: 5
 
   api:
-    build: ./server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
     environment:
       SERVICE: api
-      NODE_ENV: ${NODE_ENV:-development}
-      PORT: 3000
+      NODE_ENV: development
+      PORT: 8080
       DATABASE_URL: postgresql://tuabi_user:tuabi_password@postgres:5432/tuabi_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -47,7 +49,7 @@ services:
       FRONTEND_URL: http://localhost:3000
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
     ports:
-      - "3500:3000"
+      - "8080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,13 +61,11 @@ services:
       - ./server/uploads:/app/uploads
     restart: unless-stopped
 
-
-
   worker:
     build: ./server
     environment:
       SERVICE: worker
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: development
       DATABASE_URL: postgresql://tuabi_user:tuabi_password@postgres:5432/tuabi_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
