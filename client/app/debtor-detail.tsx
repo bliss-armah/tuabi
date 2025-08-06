@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert, FlatList } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Alert,
+  FlatList,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Colors } from "@/Shared/Constants/Colors";
 import {
@@ -9,13 +16,17 @@ import {
 } from "@/Features/Debtors/DebtorsApi";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
-import { DebtorDetailHeader } from "@/Features/Debtors/DebtorDetails/DebtorDetailHeader";
 import { DebtorDetailInfoCard } from "@/Features/Debtors/DebtorDetails/DebtorDetailInfoCard";
 import { PaymentHistory } from "@/Features/Debtors/DebtorDetails/PaymentHistory";
 import { PaymentModal } from "@/Features/Debtors/DebtorDetails/PaymentModal";
 import RemindersList from "@/Features/Reminders/RemindersList";
+import { StatusBar } from "expo-status-bar";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function DebtorDetail() {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
   const { id } = useLocalSearchParams();
 
   const {
@@ -92,12 +103,30 @@ export default function DebtorDetail() {
 
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
-      <DebtorDetailHeader
-        debtorName={debtor.data.name}
-        onEdit={() =>
-          router.push(`/edit-debtor?mode=edit&debtorId=${debtor.data.id}`)
-        }
-      />
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+
+      <View style={styles.header}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Text style={[styles.backButtonText, { color: Colors.primary }]}>
+            ← Back
+          </Text>
+        </TouchableOpacity>
+        <Text style={[styles.title, { color: Colors.text }]}>
+          {debtor.data.name}
+        </Text>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() =>
+            router.push(`/edit-debtor?mode=edit&debtorId=${debtor.data.id}`)
+          }
+        >
+          <Ionicons name="create" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={[1]}
         keyExtractor={() => "static"}
@@ -136,5 +165,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    paddingTop: 10,
+  },
+  backButton: {
+    marginRight: 15,
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+  },
+  editButton: {
+    marginLeft: 15,
   },
 });

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   RefreshControl,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,8 +15,9 @@ import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
 import { SearchInput } from "@/Shared/Components/UIKitten";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import { LoadingView } from "@/Shared/Components/LoadingView";
-import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
 import { Button } from "@/Shared/Components/UIKitten";
+import { StatusBar } from "expo-status-bar";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 
 type Debtor = {
   id: number;
@@ -24,6 +26,8 @@ type Debtor = {
 };
 
 export default function Debtors() {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,19 +108,28 @@ export default function Debtors() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      <DebtorHeader
-        title="Debtors"
-        actionButton={
-          <Ionicons name="add-circle-outline" size={28} color={Colors.white} />
-        }
-        onTap={() => router.push("/add-debtor?mode=add")}
-      />
-      <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: Colors.text }]}>My Debtors</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push("/add-debtor?mode=add")}
+        >
+          <Ionicons
+            name="add-circle-outline"
+            size={28}
+            color={Colors.primary}
+          />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {filteredDebtors.length > 0 && (
           <View style={styles.searchContainer}>
             <SearchInput
-              placeholder="Search"
+              placeholder="Search debtors"
               value={searchQuery}
               onChangeText={setSearchQuery}
               onClear={() => setSearchQuery("")}
@@ -125,31 +138,33 @@ export default function Debtors() {
         )}
 
         {filteredDebtors.length ? (
-          <FlatList
-            data={filteredDebtors}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            refreshControl={
-              <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
-            }
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
+          <View style={styles.listContainer}>
+            {filteredDebtors.map((item) => (
+              <View key={item.id}>
+                {renderItem({ item })}
+                <View style={styles.separator} />
+              </View>
+            ))}
+          </View>
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No debtors yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Start by adding someone who owes you.
+            <Text style={[styles.emptyTitle, { color: Colors.text }]}>
+              No debtors yet
+            </Text>
+            <Text
+              style={[styles.emptySubtitle, { color: Colors.textSecondary }]}
+            >
+              Start by adding someone who owes you money.
             </Text>
             <Button
-              title="Add Debtor"
+              title="Add Your First Debtor"
               onPress={() => router.push("/add-debtor?mode=add")}
               variant="primary"
-              style={styles.addButton}
+              style={styles.addFirstButton}
             />
           </View>
         )}
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -157,21 +172,30 @@ export default function Debtors() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    paddingBottom: 100, // Add padding for floating tab bar
   },
   header: {
-    paddingBottom: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    padding: 20,
+    paddingTop: 10,
   },
-  headerTitle: {
-    fontSize: 28,
+  title: {
+    fontSize: 24,
     fontWeight: "bold",
   },
+  addButton: {
+    padding: 5,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
   searchContainer: {
-    paddingBottom: 10,
+    paddingBottom: 20,
+  },
+  listContainer: {
+    gap: 0,
   },
   row: {
     flexDirection: "row",
@@ -215,7 +239,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
     marginLeft: 60,
   },
-
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
@@ -226,27 +249,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    color: Colors.text,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
     marginBottom: 20,
     textAlign: "center",
     paddingHorizontal: 20,
   },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: Colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+  addFirstButton: {
+    height: 50,
     borderRadius: 8,
-  },
-  addButtonText: {
-    color: Colors.white,
-    marginLeft: 8,
-    fontWeight: "600",
-    fontSize: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 20,
   },
 });
