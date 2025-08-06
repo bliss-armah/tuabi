@@ -112,7 +112,7 @@ export default function Debtors() {
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
 
       <View style={styles.header}>
-        <Text style={[styles.title, { color: Colors.text }]}>My Debtors</Text>
+        <Text style={[styles.title, { color: Colors.text }]}>Debtors</Text>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -180,9 +180,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
     padding: 20,
     paddingTop: 10,
   },

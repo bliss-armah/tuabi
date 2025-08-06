@@ -1,5 +1,11 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { DebtHistory } from "@/Features/Debtors/DebtorsApi";
@@ -9,6 +15,8 @@ interface PaymentHistoryProps {
 }
 
 export const PaymentHistory: React.FC<PaymentHistoryProps> = ({ history }) => {
+  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return (
@@ -18,66 +26,133 @@ export const PaymentHistory: React.FC<PaymentHistoryProps> = ({ history }) => {
     );
   };
 
+  const toggleExpanded = (itemId: number) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(itemId)) {
+      newExpanded.delete(itemId);
+    } else {
+      newExpanded.add(itemId);
+    }
+    setExpandedItems(newExpanded);
+  };
+
+  const isExpanded = (itemId: number) => expandedItems.has(itemId);
+
   return (
     <View style={[styles.historyContainer, { backgroundColor: Colors.card }]}>
       <Text style={[styles.historyTitle, { color: Colors.text }]}>
         Payment History
       </Text>
 
-      {history?.length === 0 ? (
+      {!history || history.length === 0 ? (
         <View style={styles.emptyHistory}>
-          <Ionicons name="time" size={40} color="#bdc3c7" />
-          <Text style={styles.emptyHistoryText}>No payment history yet</Text>
+          <Ionicons name="time" size={40} color={Colors.textSecondary} />
+          <Text
+            style={[styles.emptyHistoryText, { color: Colors.textSecondary }]}
+          >
+            No payment history yet
+          </Text>
         </View>
       ) : (
         <ScrollView
-          style={{ maxHeight: 350 }}
+          style={styles.historyList}
           showsVerticalScrollIndicator={false}
+          nestedScrollEnabled={true}
         >
-          {history?.map((item) => (
-            <View key={item.id} style={styles.historyItem}>
-              <View style={styles.historyRow}>
-                <Ionicons
-                  name={item.action === "add" ? "add-circle" : "remove-circle"}
-                  size={20}
-                  color={item.action === "add" ? Colors.accent : Colors.primary}
-                />
-                <View style={{flex:1}}>
-                  <View style={styles.historyRowTitle}>
-                    <Text style={styles.historyAction}>
-                      {item.action === "add"
-                        ? "Debt Added"
-                        : item.action === "reduce"
-                        ? "Payment Received"
-                        : "Settled"}
+          {history.map((item) => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.historyItem}
+              onPress={() => toggleExpanded(item.id)}
+              activeOpacity={0.7}
+            >
+              {/* Main Row - Always Visible */}
+              <View style={styles.mainRow}>
+                <View style={styles.iconContainer}>
+                  <Ionicons
+                    name={
+                      item.action === "add" ? "add-circle" : "remove-circle"
+                    }
+                    size={24}
+                    color={item.action === "add" ? "#e74c3c" : "#27ae60"}
+                  />
+                </View>
+
+                <View style={styles.amountContainer}>
+                  <Text
+                    style={[
+                      styles.amountText,
+                      {
+                        color: item.action === "add" ? "#e74c3c" : "#27ae60",
+                      },
+                    ]}
+                  >
+                    GHS {item.amountChanged.toFixed(2)}
+                  </Text>
+                </View>
+
+                <View style={styles.expandContainer}>
+                  <Ionicons
+                    name={isExpanded(item.id) ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color={Colors.textSecondary}
+                  />
+                </View>
+              </View>
+
+              {/* Expanded Details */}
+              {isExpanded(item.id) && (
+                <View style={styles.expandedDetails}>
+                  <View style={styles.detailRow}>
+                    <Text
+                      style={[
+                        styles.detailLabel,
+                        { color: Colors.textSecondary },
+                      ]}
+                    >
+                      Date:
                     </Text>
-                    <Text style={styles.historyDate}>
+                    <Text style={[styles.detailValue, { color: Colors.text }]}>
                       {formatDate(item.timestamp)}
                     </Text>
                   </View>
-                  <View>
+
+                  <View style={styles.detailRow}>
                     <Text
                       style={[
-                        styles.historyAmount,
-                        {
-                          color:
-                            item.action === "add"
-                              ? Colors.accent
-                              : Colors.primary,
-                        },
+                        styles.detailLabel,
+                        { color: Colors.textSecondary },
                       ]}
                     >
-                      {item.action === "add" ? "+" : "-"}GHS{" "}
-                      {Math.abs(item.amountChanged).toFixed(2)}
+                      Type:
                     </Text>
-
-                    {item.note && (
-                      <Text style={styles.historyNote}>{item.note}</Text>
-                    )}
+                    <Text style={[styles.detailValue, { color: Colors.text }]}>
+                      {item.action === "add"
+                        ? "Debt Added"
+                        : "Payment Received"}
+                    </Text>
                   </View>
+
+                  {item.note && (
+                    <View style={styles.detailRow}>
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          { color: Colors.textSecondary },
+                        ]}
+                      >
+                        Note:
+                      </Text>
+                      <Text
+                        style={[styles.detailValue, { color: Colors.text }]}
+                      >
+                        {item.note}
+                      </Text>
+                    </View>
+                  )}
                 </View>
-              </View>
-            </View>
+              )}
+            </TouchableOpacity>
           ))}
         </ScrollView>
       )}
@@ -113,37 +188,58 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
     marginTop: 10,
   },
+  historyList: {
+    gap: 8,
+    maxHeight: 200,
+  },
   historyItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f0f0",
-    paddingVertical: 15,
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "#e9ecef",
+    marginBottom: 5,
   },
-  historyRow: {
-    flexDirection: "row",
-    columnGap: 15,
-  },
-  historyRowTitle: {
+  mainRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    width:"100%",
   },
-  historyAction: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#2c3e50",
+  iconContainer: {
+    width: 40,
+    alignItems: "center",
   },
-  historyDate: {
-    fontSize: 12,
-    color: "#7f8c8d",
+  amountContainer: {
+    flex: 1,
+    alignItems: "center",
   },
-  historyAmount: {
+  amountText: {
     fontSize: 18,
     fontWeight: "bold",
-    marginVertical: 5,
   },
-  historyNote: {
+  expandContainer: {
+    width: 40,
+    alignItems: "center",
+  },
+  expandedDetails: {
+    paddingTop: 12,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#e9ecef",
+    gap: 8,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  detailLabel: {
     fontSize: 14,
-    color: "#7f8c8d",
+    fontWeight: "600",
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: "normal",
+    flex: 1,
+    textAlign: "right",
   },
 });

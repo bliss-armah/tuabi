@@ -116,7 +116,7 @@ export default function RemindersList({
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return Colors.error;
+      return Colors.danger;
     } else if (diffDays <= 1) {
       return Colors.warning;
     } else {
@@ -126,7 +126,7 @@ export default function RemindersList({
 
   const renderReminderItem = ({ item }: { item: Reminder }) => (
     <View
-      style={[styles.reminderItem, { backgroundColor: Colors.cardBackground }]}
+      style={[styles.reminderItem]}
     >
       <View style={styles.reminderHeader}>
         <View style={styles.reminderInfo}>
@@ -160,16 +160,16 @@ export default function RemindersList({
             <Ionicons name="checkmark" size={16} color="#fff" />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: Colors.accent }]}
+            style={[styles.actionButton]}
             onPress={() => handleEditReminder(item)}
           >
-            <Ionicons name="pencil" size={16} color="#fff" />
+            <Ionicons name="pencil" size={16} color={Colors.primary} />
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: Colors.error }]}
+            style={[styles.actionButton]}
             onPress={() => handleDeleteReminder(item)}
           >
-            <Ionicons name="trash" size={16} color="#fff" />
+            <Ionicons name="trash" size={16} color={Colors.danger} />
           </TouchableOpacity>
         </View>
       </View>

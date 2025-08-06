@@ -115,7 +115,7 @@ export default function DebtorFormPage() {
         ) : (
           <>
             <ScrollView
-              contentContainerStyle={[styles.scroll, { paddingBottom: 120 }]}
+              contentContainerStyle={[styles.scroll]}
               keyboardShouldPersistTaps="handled"
             >
               <View style={styles.header}>
@@ -129,6 +129,7 @@ export default function DebtorFormPage() {
                 <Text style={styles.headerTitle}>
                   {mode === "add" ? "Add Debtor" : "Edit Debtor"}
                 </Text>
+                <Text></Text>
               </View>
               <View style={styles.form}>
                 <Controller
@@ -241,10 +242,7 @@ export default function DebtorFormPage() {
                 )}
               </View>
             </ScrollView>
-            <SafeAreaView
-              edges={["bottom"]}
-              style={styles.bottomButtonContainer}
-            >
+            <SafeAreaView style={styles.bottomButtonContainer}>
               <Button
                 title={mode === "add" ? "Add" : "Save Changes"}
                 disabled={!isValid || isSubmitting}
@@ -263,15 +261,14 @@ export default function DebtorFormPage() {
 
 const styles = StyleSheet.create({
   scroll: {
-    padding: 30,
-    paddingBottom: 60,
-    flexGrow: 1,
+    padding: 20,
+    paddingTop: 10,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 20,
+    marginBottom: 50,
   },
   headerTitle: {
     fontSize: 20,
@@ -281,8 +278,8 @@ const styles = StyleSheet.create({
   form: {
     borderRadius: 10,
   },
-amountInfo: {
-  flexDirection: "row",
+  amountInfo: {
+    flexDirection: "row",
     backgroundColor: "rgba(52, 152, 219, 0.1)",
     padding: 10,
     gap: 10,
@@ -295,12 +292,9 @@ amountInfo: {
     width: "92%",
   },
   bottomButtonContainer: {
-    backgroundColor: Colors.background,
-    paddingHorizontal: 20,
-    paddingBottom: 16,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
   bottomButton: {
     width: "100%",

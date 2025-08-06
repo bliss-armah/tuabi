@@ -83,9 +83,6 @@ export const DebtorDetailInfoCard: React.FC<DebtorDetailInfoCardProps> = ({
         >
           GHS {Math.abs(debtor.amountOwed).toFixed(2)}
         </Text>
-        <Text style={[styles.amountStatus, { color: Colors.text }]}>
-          {debtor.amountOwed > 0 ? "Outstanding" : "Settled"}
-        </Text>
       </View>
 
       {debtor.description && (
