@@ -12,7 +12,9 @@ const redisUrl =
     process.env.REDIS_PORT || "6379"
   }`;
 
-const redis = new Redis(redisUrl);
+const redis = new Redis(redisUrl, {
+  maxRetriesPerRequest: null,
+});
 
 redis.on("error", (error) => {
   console.error("Redis connection error:", error);

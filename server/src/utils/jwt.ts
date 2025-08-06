@@ -3,7 +3,7 @@ import { Request } from "express";
 
 interface JWTPayload {
   userId: number;
-  email: string;
+  phoneNumber: string;
 }
 
 export const generateToken = (payload: JWTPayload): string => {

@@ -9,7 +9,7 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
       select: {
         id: true,
         name: true,
-        email: true,
+        phoneNumber: true,
         isSubscribed: true,
         subscriptionExpiresAt: true,
         createdAt: true,
@@ -18,20 +18,19 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     if (!user) {
-       res.status(404).json({
+      return res.status(404).json({
         success: false,
         message: "User not found",
       });
-      return
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: user,
     });
   } catch (error) {
     console.error("Get profile error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });
@@ -43,23 +42,22 @@ export const updateProfile = async (
   res: Response
 ) => {
   try {
-    const { name, email } = req.body;
+    const { name, phoneNumber } = req.body;
 
-    // Check if email is already taken by another user
-    if (email) {
+    // Check if phoneNumber is already taken by another user
+    if (phoneNumber) {
       const existingUser = await prisma.user.findFirst({
         where: {
-          email,
+          phoneNumber,
           id: { not: req.user!.id },
         },
       });
 
       if (existingUser) {
-         res.status(400).json({
+        return res.status(400).json({
           success: false,
-          message: "Email is already taken",
+          message: "Phone number is already taken",
         });
-        return
       }
     }
 
@@ -67,12 +65,12 @@ export const updateProfile = async (
       where: { id: req.user!.id },
       data: {
         ...(name && { name }),
-        ...(email && { email }),
+        ...(phoneNumber && { phoneNumber }),
       },
       select: {
         id: true,
         name: true,
-        email: true,
+        phoneNumber: true,
         isSubscribed: true,
         subscriptionExpiresAt: true,
         createdAt: true,
@@ -80,14 +78,14 @@ export const updateProfile = async (
       },
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
       data: updatedUser,
     });
   } catch (error) {
     console.error("Update profile error:", error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal server error",
     });

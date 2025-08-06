@@ -1,8 +1,6 @@
 import axios from "axios";
 import prisma from "../config/database";
 
-
-
 export class OpenRouterService {
   private apiKey: string;
   private baseURL = "https://openrouter.ai/api/v1";
@@ -69,7 +67,7 @@ export class OpenRouterService {
         userId: userId,
       },
       include: {
-        history: {
+        debtHistory: {
           orderBy: { timestamp: "desc" },
         },
       },
@@ -80,8 +78,8 @@ export class OpenRouterService {
     }
 
     // Calculate payment statistics
-    const payments = debtor.history.filter((h) => h.action === "reduce");
-    const additions = debtor.history.filter((h) => h.action === "add");
+    const payments = debtor.debtHistory.filter((h) => h.action === "reduce");
+    const additions = debtor.debtHistory.filter((h) => h.action === "add");
     const totalPaid = payments.reduce((sum, p) => sum + p.amountChanged, 0);
     const totalAdded = additions.reduce((sum, a) => sum + a.amountChanged, 0);
     const paymentCount = payments.length;
@@ -133,7 +131,7 @@ export class OpenRouterService {
     const debtors = await prisma.debtor.findMany({
       where: { userId },
       include: {
-        history: {
+        debtHistory: {
           orderBy: { timestamp: "desc" },
         },
       },
@@ -189,7 +187,7 @@ export class OpenRouterService {
       .map(
         (d) => `
     - ${d.name}: $${d.amountOwed} owed, ${
-          d.history.filter((h) => h.action === "reduce").length
+          d.debtHistory.filter((h) => h.action === "reduce").length
         } payments
     `
       )
@@ -229,7 +227,7 @@ export class OpenRouterService {
         amountOwed: { gt: 0 }, // Only active debtors
       },
       include: {
-        history: {
+        debtHistory: {
           where: { action: "reduce" },
           orderBy: { timestamp: "desc" },
         },
@@ -244,7 +242,7 @@ export class OpenRouterService {
       .map(
         (d) => `
     - ${d.name}: $${d.amountOwed} owed
-      Payment History: ${d.history
+      Payment History: ${d.debtHistory
         .map(
           (h) =>
             `$${h.amountChanged} on ${h.timestamp.toISOString().split("T")[0]}`
@@ -285,7 +283,7 @@ export class OpenRouterService {
     const debtors = await prisma.debtor.findMany({
       where: { userId },
       include: {
-        history: {
+        debtHistory: {
           orderBy: { timestamp: "desc" },
         },
       },
@@ -297,8 +295,8 @@ export class OpenRouterService {
     PORTFOLIO RISK DATA:
     ${debtors
       .map((d) => {
-        const payments = d.history.filter((h) => h.action === "reduce");
-        const additions = d.history.filter((h) => h.action === "add");
+        const payments = d.debtHistory.filter((h) => h.action === "reduce");
+        const additions = d.debtHistory.filter((h) => h.action === "add");
         const totalPaid = payments.reduce((sum, p) => sum + p.amountChanged, 0);
         const totalAdded = additions.reduce(
           (sum, a) => sum + a.amountChanged,

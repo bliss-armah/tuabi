@@ -1,14 +1,20 @@
-
 export interface LoginFormData {
-  username: string;
+  phoneNumber: string;
   password: string;
 }
 
-export interface LoginResponse {
-  data: LoginResponseData
+export interface RegisterFormData {
+  name: string;
+  phoneNumber: string;
+  password: string;
+  email?: string;
 }
 
-interface LoginResponseData{
+export interface LoginResponse {
+  data: LoginResponseData;
+}
+
+interface LoginResponseData {
   token: tokenData;
   user: userData;
 }
@@ -21,5 +27,6 @@ interface tokenData {
 interface userData {
   id: number;
   name: string;
-  email: string;
+  phoneNumber: string;
+  email?: string;
 }

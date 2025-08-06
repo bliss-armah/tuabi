@@ -165,8 +165,11 @@ export const initializePaystackPayment = async (
     const { amount, planId, currency } = req.body;
     const user = req.user!;
 
+    // Create synthetic email from phone number
+    const paystackEmail = `${user.phoneNumber}@tuabi.com`;
+
     // Call Paystack to initialize the transaction
-    const paystackRes = await initializeTransaction(user.email, amount, {
+    const paystackRes = await initializeTransaction(paystackEmail, amount, {
       planId,
       userId: user.id,
     });
@@ -192,147 +195,6 @@ export const initializePaystackPayment = async (
     });
   }
 };
-
-// export const verifyPaystackPayment = async (
-//   req: AuthenticatedRequest,
-//   res: Response
-// ) => {
-//   try {
-//     const { reference } = req.body;
-//     const user = req.user!;
-
-//     // Verify with Paystack
-//     const paystackRes = await verifyTransaction(reference);
-
-//     // For Paystack webview, we create the transaction record during verification
-//     // Check if transaction already exists
-//     let transaction = await prisma.transaction.findFirst({
-//       where: { paystackReference: reference, userId: user.id },
-//     });
-
-//     if (!transaction) {
-//       // Try finding by paystackTransactionId as fallback
-//       transaction = await prisma.transaction.findFirst({
-//         where: { paystackTransactionId: reference, userId: user.id },
-//       });
-//     }
-
-//     // If transaction doesn't exist, create it (this happens with webview payments)
-//     if (!transaction) {
-//       transaction = await prisma.transaction.create({
-//         data: {
-//           userId: user.id,
-//           amount: paystackRes.data.amount / 100, // Convert from kobo to naira
-//           currency: paystackRes.data.currency || "GHS",
-//           status: paystackRes.status === "success" ? "success" : "failed",
-//           paystackReference: reference,
-//           paystackTransactionId: paystackRes.data.id?.toString() || reference,
-//           description: `Subscription payment via Paystack webview`,
-//           transactionMetadata: JSON.stringify(paystackRes),
-//         },
-//       });
-//       console.log("Transaction created:");
-//     }
-
-//     // Update transaction status
-//     await prisma.transaction.update({
-//       where: { id: transaction.id },
-//       data: {
-//         status: paystackRes.status === "success" ? "success" : "failed",
-//         paystackTransactionId:
-//           paystackRes.id?.toString() || transaction.paystackTransactionId,
-//         transactionMetadata: JSON.stringify(paystackRes),
-//       },
-//     });
-
-//     // If successful, create or update subscription
-//     if (paystackRes.status === "success") {
-//       const now = new Date();
-//       let planId: number | undefined = undefined;
-
-//       if (paystackRes.data.metadata?.planId) {
-//         planId = Number(paystackRes.data.metadata.planId);
-//       } else if (paystackRes.data.metadata?.planId) {
-//         planId = Number(paystackRes.data.metadata.planId);
-//       } else {
-//         console.log("No plan ID found in metadata");
-//       }
-//       if (!planId) {
-//         return res.status(400).json({
-//           status: false,
-//           message: "planId missing from payment metadata",
-//           data: null,
-//         });
-//       }
-//       // Fetch plan to get duration
-//       const plan = await prisma.subscriptionPlan.findUnique({
-//         where: { id: planId },
-//       });
-//       if (!plan) {
-//         return res.status(400).json({
-//           status: false,
-//           message: "Invalid planId",
-//           data: null,
-//         });
-//       }
-//       const endDate = new Date(now);
-//       endDate.setDate(endDate.getDate() + plan.duration);
-
-//       const subscription = await prisma.subscription.create({
-//         data: {
-//           userId: user.id,
-//           planId,
-//           status: "active",
-//           startDate: now,
-//           endDate,
-//           paystackSubscriptionId: paystackRes.data.subscription
-//             ? paystackRes.data.subscription.toString()
-//             : undefined,
-//           paystackCustomerId: paystackRes.data.customer
-//             ? paystackRes.data.customer.toString()
-//             : undefined,
-//         },
-//       });
-
-//       console.log("Subscription created:");
-
-//       // Update user
-//       const updatedUser = await prisma.user.update({
-//         where: { id: user.id },
-//         data: {
-//           isSubscribed: true,
-//           subscriptionExpiresAt: endDate,
-//         },
-//       });
-
-//       if (transaction) {
-//         await prisma.transaction.update({
-//           where: { id: transaction.id },
-//           data: { subscriptionId: subscription.id },
-//         });
-//         console.log(
-//           "Transaction linked to subscription:",
-//           transaction.id,
-//           "->",
-//           subscription.id
-//         );
-//       }
-//     }
-
-//     return res.status(200).json({
-//       status: true,
-//       message: "Payment verified successfully",
-//       data: paystackRes,
-//     });
-//   } catch (error) {
-//     console.error("Paystack verify error:", error);
-//     return res.status(500).json({
-//       status: false,
-//       message: "Failed to verify payment",
-//       data: null,
-//     });
-//   }
-// };
 
 export const getUserTransactions = async (
   req: AuthenticatedRequest,
@@ -513,10 +375,16 @@ const handleChargeSuccess = async (event: any, res: Response) => {
       return res.status(400).send("Customer email required");
     }
 
-    // Find user by email
-    const user = await prisma.user.findUnique({ where: { email } });
+    // Extract phone number from synthetic email (format: phoneNumber@tuabi.com)
+    const phoneNumber = email.replace("@tuabi.com", "");
+
+    // Find user by phone number
+    const user = await prisma.user.findUnique({
+      where: { phoneNumber },
+    });
+
     if (!user) {
-      console.error(`User not found for email: ${email}`);
+      console.error(`No user found for phone number: ${phoneNumber}`);
       return res.status(404).send("User not found");
     }
 
@@ -604,25 +472,22 @@ const handleChargeSuccess = async (event: any, res: Response) => {
           startDate: now,
           endDate,
           paystackSubscriptionId: metadata?.subscription_id?.toString(),
-          paystackCustomerId:
-            customer?.customer_code || customer?.id?.toString(),
         },
       });
     } else {
-      // Extend existing subscription from current end date
-      const newEndDate = new Date(subscription.endDate);
-      newEndDate.setDate(newEndDate.getDate() + plan.duration);
-
+      // Extend existing subscription
       subscription = await prisma.subscription.update({
         where: { id: subscription.id },
         data: {
-          endDate: newEndDate,
-          planId, // Update plan if different
+          endDate: new Date(
+            subscription.endDate.getTime() + plan.duration * 24 * 60 * 60 * 1000
+          ),
+          paystackSubscriptionId: metadata?.subscription_id?.toString(),
         },
       });
     }
 
-    // Update user status
+    // Update user subscription status
     await prisma.user.update({
       where: { id: user.id },
       data: {
@@ -631,17 +496,11 @@ const handleChargeSuccess = async (event: any, res: Response) => {
       },
     });
 
-    // Link transaction to subscription
-    await prisma.transaction.update({
-      where: { id: transaction.id },
-      data: { subscriptionId: subscription.id },
-    });
-
-    console.log(`Successfully processed payment for user ${user.email}`);
+    console.log(`Successfully processed payment for user ${user.phoneNumber}`);
     return res.sendStatus(200);
   } catch (error) {
-    console.error("Error in handleChargeSuccess:", error);
-    return res.status(500).send("Error processing charge success");
+    console.error("Error processing charge success:", error);
+    return res.status(500).send("Internal server error");
   }
 };
 
@@ -767,7 +626,7 @@ export const verifyPaystackPayment = async (
             }
 
             console.log(
-              `Successfully processed payment via verification for user ${user.email}`
+              `Successfully processed payment via verification for user ${user.phoneNumber}`
             );
           }
         }
@@ -825,26 +684,34 @@ const handleSubscriptionDisable = async (event: any, res: Response) => {
   const { customer, subscription_code } = event.data;
 
   try {
-    // Find and disable subscription
-    const user = await prisma.user.findUnique({
-      where: { email: customer?.email },
-    });
+    // Extract phone number from synthetic email
+    const phoneNumber = customer?.email?.replace("@tuabi.com", "");
 
-    if (user) {
-      await prisma.subscription.updateMany({
-        where: {
-          userId: user.id,
-          paystackSubscriptionId: subscription_code,
-        },
-        data: { status: "cancelled" },
+    if (phoneNumber) {
+      const user = await prisma.user.findUnique({
+        where: { phoneNumber },
       });
 
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { isSubscribed: false },
-      });
+      if (user) {
+        await prisma.subscription.updateMany({
+          where: {
+            userId: user.id,
+            paystackSubscriptionId: subscription_code,
+          },
+          data: { status: "cancelled" },
+        });
 
-      console.log("Disabled subscription for user:", user.email);
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { isSubscribed: false },
+        });
+
+        console.log("Disabled subscription for user:", user.phoneNumber);
+      } else {
+        console.log(`No user found for phone number: ${phoneNumber}`);
+      }
+    } else {
+      console.log(`Invalid email format: ${customer?.email}`);
     }
   } catch (error) {
     console.error("Error disabling subscription:", error);

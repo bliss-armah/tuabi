@@ -58,7 +58,7 @@ export default function SubscriptionPlansScreen() {
       return;
     }
 
-    if (!user || !user.email) {
+    if (!user || !user.phoneNumber) {
       Alert.alert("Error", "User information not found");
       return;
     }
@@ -68,7 +68,7 @@ export default function SubscriptionPlansScreen() {
 
       // Initialize payment to get reference and access code
       const response = await initializePayment({
-        email: user.email,
+        email: `${user.phoneNumber}@tuabi.com`,
         amount: selectedPlan.amount,
         planId: selectedPlan.id.toString(),
         currency: "GHS",
@@ -82,7 +82,7 @@ export default function SubscriptionPlansScreen() {
 
       // Use Paystack popup for in-app payment
       popup.checkout({
-        email: user.email,
+        email: `${user.phoneNumber}@tuabi.com`,
         amount: selectedPlan.amount, // Paystack expects amount in kobo/pesewas
         reference: response.data.reference,
         metadata: {

@@ -22,6 +22,7 @@ export default function Register() {
   const theme = colorScheme ?? "light";
 
   const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,8 +30,11 @@ export default function Register() {
   const [registerMutation] = useRegisterMutation();
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!name || !phoneNumber || !password) {
+      Alert.alert(
+        "Error",
+        "Please fill in all required fields (Name, Phone Number, Password)"
+      );
       return;
     }
 
@@ -41,10 +45,17 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await registerMutation({ name, email, password }).unwrap();
+      const registerData = {
+        name,
+        phoneNumber,
+        password,
+        ...(email && { email }), // Only include email if provided
+      };
+
+      await registerMutation(registerData).unwrap();
       Alert.alert(
         "Registration Successful",
-        "You can now login with your credentials",
+        "You can now login with your phone number and password",
         [{ text: "OK", onPress: () => router.push("/") }]
       );
     } catch (error: any) {
@@ -88,7 +99,15 @@ export default function Register() {
             status="basic"
           />
           <Input
-            placeholder="Email"
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+            autoCapitalize="none"
+            status="basic"
+          />
+          <Input
+            placeholder="Email (Optional)"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -117,7 +136,7 @@ export default function Register() {
             </Text>
           </TouchableOpacity>
         </ScrollView>
-        <SafeAreaView edges={["bottom"]} style={styles.bottomButtonContainer}>
+        <SafeAreaView style={styles.bottomButtonContainer}>
           <Button
             title="Register"
             onPress={handleRegister}

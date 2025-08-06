@@ -5,8 +5,8 @@ import { hashPassword, verifyPassword } from "../utils/hash";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username: email, password } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
+    const { phoneNumber, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { phoneNumber } });
 
     if (!user) {
       res.status(401).json({ success: false, message: "Invalid credentials" });
@@ -19,7 +19,10 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const token = generateToken({ userId: user.id, email: user.email });
+    const token = generateToken({
+      userId: user.id,
+      phoneNumber: user.phoneNumber,
+    });
     const { password: _, ...userWithoutPassword } = user;
 
     res.status(200).json({
@@ -41,48 +44,45 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password } = req.body;
+    const { name, phoneNumber, password } = req.body;
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { phoneNumber },
     });
 
     if (existingUser) {
       res.status(400).json({
         success: false,
-        message: "User with this email already exists",
+        message: "User with this phone number already exists",
       });
       return;
     }
 
-    // Hash password
     const hashedPassword = await hashPassword(password);
 
-    // Create new user
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        phoneNumber,
         password: hashedPassword,
       },
     });
 
-    // Generate JWT token
     const token = generateToken({
       userId: user.id,
-      email: user.email,
+      phoneNumber: user.phoneNumber,
     });
-
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
 
     res.status(201).json({
       success: true,
       message: "User registered successfully",
       data: {
+        user: {
+          id: user.id,
+          name: user.name,
+          phoneNumber: user.phoneNumber,
+        },
         token,
-        user: userWithoutPassword,
       },
     });
   } catch (error) {

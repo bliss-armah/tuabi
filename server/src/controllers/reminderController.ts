@@ -54,7 +54,7 @@ export const createReminder = async (
         user: {
           select: {
             name: true,
-            email: true,
+            phoneNumber: true,
             expoPushToken: true,
           },
         },
@@ -244,7 +244,7 @@ export const updateReminder = async (
         user: {
           select: {
             name: true,
-            email: true,
+            phoneNumber: true,
             expoPushToken: true,
           },
         },

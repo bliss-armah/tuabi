@@ -8,7 +8,6 @@ export interface NotificationJobData {
   debtorName: string;
   amountOwed: number;
   phoneNumber: string | null;
-  userEmail: string;
   expoPushToken: string | null;
   title: string;
   message: string;
@@ -72,7 +71,6 @@ export class QueueService {
         debtorName: reminder.debtor.name,
         amountOwed: reminder.debtor.amountOwed,
         phoneNumber: reminder.debtor.phoneNumber,
-        userEmail: reminder.user.email,
         expoPushToken: reminder.user.expoPushToken,
         title: reminder.title,
         message: reminder.message,
@@ -109,7 +107,6 @@ export class QueueService {
       debtorName: reminder.debtor.name,
       amountOwed: reminder.debtor.amountOwed,
       phoneNumber: reminder.debtor.phoneNumber,
-      userEmail: reminder.user.email,
       expoPushToken: reminder.user.expoPushToken,
       title: reminder.title,
       message: reminder.message,

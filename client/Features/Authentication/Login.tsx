@@ -11,20 +11,20 @@ import { TouchableOpacity } from "react-native";
 
 export default function Login() {
   const [loginMutation] = useLoginMutation();
-  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
+    if (!phoneNumber || !password) {
+      Alert.alert("Error", "Please enter both phone number and password");
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await loginMutation({
-        username: email,
+        phoneNumber,
         password,
       }).unwrap();
 
@@ -44,7 +44,7 @@ export default function Login() {
       console.error("Login error:", error);
 
       // Handle different types of errors
-      let errorMessage = "Invalid email or password";
+      let errorMessage = "Invalid phone number or password";
 
       if (error?.data?.message) {
         errorMessage = error.data.message;
@@ -73,10 +73,10 @@ export default function Login() {
 
       <View style={[styles.formContainer, { backgroundColor: Colors.card }]}>
         <Input
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
+          placeholder="Phone Number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
           autoCapitalize="none"
           status="basic"
         />
@@ -100,7 +100,7 @@ export default function Login() {
 
         <TouchableOpacity onPress={() => router.push("/register")}>
           <Text style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}>
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <Text style={{ fontWeight: "bold" }}>Register</Text>
           </Text>
         </TouchableOpacity>
