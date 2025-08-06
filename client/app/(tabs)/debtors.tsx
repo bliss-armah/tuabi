@@ -113,20 +113,10 @@ export default function Debtors() {
 
       <View style={styles.header}>
         <Text style={[styles.title, { color: Colors.text }]}>My Debtors</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push("/add-debtor?mode=add")}
-        >
-          <Ionicons
-            name="add-circle-outline"
-            size={28}
-            color={Colors.primary}
-          />
-        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {filteredDebtors.length > 0 && (
+        {(filteredDebtors.length > 0 || searchQuery.trim() !== "") && (
           <View style={styles.searchContainer}>
             <SearchInput
               placeholder="Search debtors"
@@ -146,7 +136,20 @@ export default function Debtors() {
               </View>
             ))}
           </View>
+        ) : searchQuery.trim() !== "" ? (
+          // Show "no search results" when searching
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyTitle, { color: Colors.text }]}>
+              No debtors found
+            </Text>
+            <Text
+              style={[styles.emptySubtitle, { color: Colors.textSecondary }]}
+            >
+              No debtors match "{searchQuery}"
+            </Text>
+          </View>
         ) : (
+          // Show "no debtors yet" when there are no debtors at all
           <View style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: Colors.text }]}>
               No debtors yet
@@ -154,17 +157,20 @@ export default function Debtors() {
             <Text
               style={[styles.emptySubtitle, { color: Colors.textSecondary }]}
             >
-              Start by adding someone who owes you money.
+              Tap the + button to add your first debtor.
             </Text>
-            <Button
-              title="Add Your First Debtor"
-              onPress={() => router.push("/add-debtor?mode=add")}
-              variant="primary"
-              style={styles.addFirstButton}
-            />
           </View>
         )}
       </ScrollView>
+
+      {/* Floating Action Button - Always visible */}
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: Colors.primary }]}
+        onPress={() => router.push("/add-debtor?mode=add")}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="add" size={24} color={Colors.white} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -175,7 +181,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     padding: 20,
     paddingTop: 10,
@@ -183,9 +189,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-  },
-  addButton: {
-    padding: 5,
   },
   content: {
     flex: 1,
@@ -256,11 +259,30 @@ const styles = StyleSheet.create({
     textAlign: "center",
     paddingHorizontal: 20,
   },
-  addFirstButton: {
-    height: 50,
-    borderRadius: 8,
+  fab: {
+    position: "absolute",
+    bottom: 100, // Account for tab bar
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  clearSearchButton: {
     marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  clearSearchText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
