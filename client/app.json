@@ -18,7 +18,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/main2.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.tuabi.app"
     },
     "web": {
       "favicon": "./assets/images/main2.png"
@@ -26,7 +27,8 @@
     "plugins": [
       "expo-font",
       "expo-router",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true

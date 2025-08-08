@@ -13,15 +13,12 @@ import {
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Input, Button } from "@/Shared/Components/UIKitten";
 import { useRegisterMutation } from "@/Features/Authentication/AuthAPI";
 
 export default function Register() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme ?? "light";
-
   const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,8 +26,11 @@ export default function Register() {
   const [registerMutation] = useRegisterMutation();
 
   const handleRegister = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!name || !phoneNumber || !email || !password) {
+      Alert.alert(
+        "Error",
+        "Please fill in all required fields (Name, Email, Phone Number, Password)"
+      );
       return;
     }
 
@@ -41,18 +41,25 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      await registerMutation({ name, email, password }).unwrap();
+      const registerData = {
+        name,
+        email,
+        phoneNumber,
+        password,
+      };
+
+      await registerMutation(registerData).unwrap();
       Alert.alert(
         "Registration Successful",
-        "You can now login with your credentials",
+        "You can now login with your email or phone number and password",
         [{ text: "OK", onPress: () => router.push("/") }]
       );
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "Registration Failed";
-      if (error.response?.data?.detail) {
-        errorMessage = error.response.data.detail;
-      } else if (error.message) {
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.message) {
         errorMessage = error.message;
       }
       Alert.alert("Error", errorMessage);
@@ -88,10 +95,18 @@ export default function Register() {
             status="basic"
           />
           <Input
-            placeholder="Email"
+            placeholder="Email Address"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
+            autoCapitalize="none"
+            status="basic"
+          />
+          <Input
+            placeholder="Phone Number (e.g., 0245289983)"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
             autoCapitalize="none"
             status="basic"
           />
@@ -117,7 +132,7 @@ export default function Register() {
             </Text>
           </TouchableOpacity>
         </ScrollView>
-        <SafeAreaView edges={["bottom"]} style={styles.bottomButtonContainer}>
+        <SafeAreaView style={styles.bottomButtonContainer}>
           <Button
             title="Register"
             onPress={handleRegister}

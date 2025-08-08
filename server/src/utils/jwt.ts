@@ -3,6 +3,7 @@ import { Request } from "express";
 
 interface JWTPayload {
   userId: number;
+  phoneNumber: string;
   email: string;
 }
 

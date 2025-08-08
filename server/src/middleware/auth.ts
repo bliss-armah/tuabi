@@ -5,6 +5,7 @@ import prisma from "../config/database";
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: number;
+    phoneNumber: string;
     email: string;
     pushToken?: string;
   };
@@ -42,6 +43,7 @@ export const authenticateToken = async (
 
     req.user = {
       id: user.id,
+      phoneNumber: user.phoneNumber,
       email: user.email,
     };
 

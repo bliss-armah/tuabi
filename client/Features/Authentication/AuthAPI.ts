@@ -2,25 +2,25 @@
 
 import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "@/Shared/Api/config";
-import { LoginFormData, LoginResponse } from "./types";
+import { LoginFormData, LoginResponse, RegisterFormData } from "./types";
 
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery,
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginFormData>({
-      query: ({ username, password }) => ({
+      query: ({ identifier, password }) => ({
         url: "/auth/login",
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/json",
         },
-        body: new URLSearchParams({ username, password }).toString(),
+        body: { identifier, password },
       }),
     }),
 
     // Register
-    register: builder.mutation<any, any>({
+    register: builder.mutation<any, RegisterFormData>({
       query: (data) => ({
         url: "/auth/register",
         method: "POST",
@@ -35,6 +35,16 @@ export const authApi = createApi({
         method: "GET",
       }),
     }),
+
+    // Add email for Paystack payments
+    addEmailForPaystack: builder.mutation<any, { email: string }>({
+      query: (data) => ({
+        url: "/users/add-email",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
     savePushToken: builder.mutation<any, { pushToken: string }>({
       query: ({ pushToken }) => ({
         url: "/push-token",
@@ -45,5 +55,10 @@ export const authApi = createApi({
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useGetCurrentUserQuery,useSavePushTokenMutation } =
-  authApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useGetCurrentUserQuery,
+  useAddEmailForPaystackMutation,
+  useSavePushTokenMutation,
+} = authApi;

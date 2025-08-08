@@ -44,9 +44,7 @@ export const getDebtorById = async (
         userId: req.user!.id,
       },
       include: {
-        history: {
-          orderBy: { timestamp: "desc" },
-        },
+        debtHistory: true,
       },
     });
     if (!debtor) {
@@ -78,9 +76,8 @@ export const createDebtor = async (
     const debtor = await prisma.debtor.create({
       data: {
         name,
-        amountOwed: parseFloat(amountOwed),
-        description,
         phoneNumber,
+        amountOwed: parseFloat(amountOwed),
         userId: req.user!.id,
       },
     });

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/Shared/Constants/Colors";
-import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 import { Input, Button } from "@/Shared/Components/UIKitten";
 import { useLoginMutation } from "@/Features/Authentication/AuthAPI";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -11,20 +10,20 @@ import { TouchableOpacity } from "react-native";
 
 export default function Login() {
   const [loginMutation] = useLoginMutation();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
+    if (!identifier || !password) {
+      Alert.alert("Error", "Please enter both email/phone number and password");
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await loginMutation({
-        username: email,
+        identifier,
         password,
       }).unwrap();
 
@@ -44,7 +43,7 @@ export default function Login() {
       console.error("Login error:", error);
 
       // Handle different types of errors
-      let errorMessage = "Invalid email or password";
+      let errorMessage = "Invalid email/phone number or password";
 
       if (error?.data?.message) {
         errorMessage = error.data.message;
@@ -61,6 +60,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+
   return (
     <View style={[styles.container, { backgroundColor: Colors.background }]}>
       <StatusBar style={"dark"} />
@@ -73,9 +73,9 @@ export default function Login() {
 
       <View style={[styles.formContainer, { backgroundColor: Colors.card }]}>
         <Input
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
+          placeholder="Email or Phone Number"
+          value={identifier}
+          onChangeText={setIdentifier}
           keyboardType="email-address"
           autoCapitalize="none"
           status="basic"
@@ -100,7 +100,7 @@ export default function Login() {
 
         <TouchableOpacity onPress={() => router.push("/register")}>
           <Text style={{ color: "#3498db", textAlign: "center", marginTop: 6 }}>
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <Text style={{ fontWeight: "bold" }}>Register</Text>
           </Text>
         </TouchableOpacity>

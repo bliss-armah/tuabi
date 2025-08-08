@@ -60,18 +60,20 @@ class NotificationWorker {
           isCompleted: false,
         },
         include: {
-          debtor: {
-            select: {
-              name: true,
-              amountOwed: true,
-              phoneNumber: true,
-            },
-          },
           user: {
             select: {
+              id: true,
               name: true,
-              email: true,
+              phoneNumber: true,
               expoPushToken: true,
+            },
+          },
+          debtor: {
+            select: {
+              id: true,
+              name: true,
+              phoneNumber: true,
+              amountOwed: true,
             },
           },
         },

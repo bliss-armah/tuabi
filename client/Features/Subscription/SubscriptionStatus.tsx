@@ -198,7 +198,7 @@ export default function SubscriptionStatus({
             <TouchableOpacity
               style={[
                 styles.upgradeButton,
-                { backgroundColor: Colors.text },
+                { backgroundColor: Colors.primary },
               ]}
               onPress={handleUpgrade}
             >

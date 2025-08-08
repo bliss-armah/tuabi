@@ -6,16 +6,18 @@ import {
   StyleSheet,
   RefreshControl,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
 import { SearchInput } from "@/Shared/Components/UIKitten";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import { LoadingView } from "@/Shared/Components/LoadingView";
-import { DebtorHeader } from "@/Features/Debtors/DebtorHeader";
 import { Button } from "@/Shared/Components/UIKitten";
+import { StatusBar } from "expo-status-bar";
+import { useColorScheme } from "@/Shared/Hooks/useColorScheme";
 
 type Debtor = {
   id: number;
@@ -24,14 +26,25 @@ type Debtor = {
 };
 
 export default function Debtors() {
+  const colorScheme = useColorScheme();
+  const theme = colorScheme ?? "light";
   const [debtors, setDebtors] = useState<Debtor[]>([]);
   const [filteredDebtors, setFilteredDebtors] = useState<Debtor[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, isLoading, error, refetch } = useGetDebtorsQuery();
 
+  // Refetch data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("Debtors screen focused - refetching data");
+      refetch();
+    }, [refetch])
+  );
+
   useEffect(() => {
     if (data?.data) {
+      console.log("Debtors data received:", data.data.length, "debtors");
       setDebtors(data.data);
       setFilteredDebtors(data.data);
     }
@@ -104,19 +117,24 @@ export default function Debtors() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: Colors.background }}>
-      <DebtorHeader
-        title="Debtors"
-        actionButton={
-          <Ionicons name="add-circle-outline" size={28} color={Colors.white} />
+    <View style={[styles.container, { backgroundColor: Colors.background }]}>
+      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: Colors.text }]}>Debtors</Text>
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
         }
-        onTap={() => router.push("/add-debtor?mode=add")}
-      />
-      <View style={styles.container}>
-        {filteredDebtors.length > 0 && (
+      >
+        {(filteredDebtors.length > 0 || searchQuery.trim() !== "") && (
           <View style={styles.searchContainer}>
             <SearchInput
-              placeholder="Search"
+              placeholder="Search debtors"
               value={searchQuery}
               onChangeText={setSearchQuery}
               onClear={() => setSearchQuery("")}
@@ -125,31 +143,49 @@ export default function Debtors() {
         )}
 
         {filteredDebtors.length ? (
-          <FlatList
-            data={filteredDebtors}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderItem}
-            refreshControl={
-              <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
-            }
-            ItemSeparatorComponent={() => <View style={styles.separator} />}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          />
-        ) : (
+          <View style={styles.listContainer}>
+            {filteredDebtors.map((item) => (
+              <View key={item.id}>
+                {renderItem({ item })}
+                <View style={styles.separator} />
+              </View>
+            ))}
+          </View>
+        ) : searchQuery.trim() !== "" ? (
+          // Show "no search results" when searching
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No debtors yet</Text>
-            <Text style={styles.emptySubtitle}>
-              Start by adding someone who owes you.
+            <Text style={[styles.emptyTitle, { color: Colors.text }]}>
+              No debtors found
             </Text>
-            <Button
-              title="Add Debtor"
-              onPress={() => router.push("/add-debtor?mode=add")}
-              variant="primary"
-              style={styles.addButton}
-            />
+            <Text
+              style={[styles.emptySubtitle, { color: Colors.textSecondary }]}
+            >
+              No debtors match "{searchQuery}"
+            </Text>
+          </View>
+        ) : (
+          // Show "no debtors yet" when there are no debtors at all
+          <View style={styles.emptyState}>
+            <Text style={[styles.emptyTitle, { color: Colors.text }]}>
+              No debtors yet
+            </Text>
+            <Text
+              style={[styles.emptySubtitle, { color: Colors.textSecondary }]}
+            >
+              Tap the + button to add your first debtor.
+            </Text>
           </View>
         )}
-      </View>
+      </ScrollView>
+
+      {/* Floating Action Button - Always visible */}
+      <TouchableOpacity
+        style={[styles.fab, { backgroundColor: Colors.primary }]}
+        onPress={() => router.push("/add-debtor?mode=add")}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="add" size={24} color={Colors.white} />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -157,21 +193,24 @@ export default function Debtors() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    paddingBottom: 100, // Add padding for floating tab bar
   },
   header: {
-    paddingBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    padding: 20,
+    paddingTop: 10,
   },
-  headerTitle: {
-    fontSize: 28,
+  title: {
+    fontSize: 24,
     fontWeight: "bold",
   },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
   searchContainer: {
-    paddingBottom: 10,
+    paddingBottom: 20,
+  },
+  listContainer: {
+    gap: 0,
   },
   row: {
     flexDirection: "row",
@@ -215,7 +254,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.border,
     marginLeft: 60,
   },
-
   emptyState: {
     alignItems: "center",
     justifyContent: "center",
@@ -226,27 +264,37 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 10,
-    color: Colors.text,
   },
   emptySubtitle: {
     fontSize: 14,
-    color: Colors.textSecondary,
     marginBottom: 20,
     textAlign: "center",
     paddingHorizontal: 20,
   },
-  addButton: {
-    flexDirection: "row",
+  fab: {
+    position: "absolute",
+    bottom: 100, // Account for tab bar
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
     alignItems: "center",
-    backgroundColor: Colors.primary,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  clearSearchButton: {
+    marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
-  addButtonText: {
+  clearSearchText: {
     color: Colors.white,
-    marginLeft: 8,
-    fontWeight: "600",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
