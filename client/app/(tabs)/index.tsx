@@ -15,7 +15,6 @@ import { useAuth } from "@/Shared/Hooks/useAuth";
 import { LoadingView } from "@/Shared/Components/LoadingView";
 import { ErrorView } from "@/Shared/Components/ErrorView";
 import DashboardSummaryCard from "@/Features/Debtors/DashboardSummaryCard";
-import { Navbar } from "@/Shared/Components/Navbar";
 import { AIInsightsCard } from "@/Features/AI/AIInsightsCard";
 // import SubscriptionStatus from "@/Features/Subscription/SubscriptionStatus";
 
@@ -45,7 +44,6 @@ export default function Home() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Navbar />
       <ScrollView
         style={[styles.container, { backgroundColor: Colors.background }]}
         refreshControl={

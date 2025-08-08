@@ -16,6 +16,8 @@ model User {
   expoPushToken         String? 
   isSubscribed          Boolean   @default(false)
   subscriptionExpiresAt DateTime?
+  resetCode             String?
+  resetExpiresAt        DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 

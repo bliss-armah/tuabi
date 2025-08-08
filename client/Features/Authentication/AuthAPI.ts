@@ -28,6 +28,27 @@ export const authApi = createApi({
       }),
     }),
 
+    // Request password reset
+    requestPasswordReset: builder.mutation<any, { identifier: string }>({
+      query: ({ identifier }) => ({
+        url: "/auth/request-reset",
+        method: "POST",
+        body: { identifier },
+      }),
+    }),
+
+    // Reset password
+    resetPassword: builder.mutation<
+      any,
+      { identifier: string; resetCode: string; newPassword: string }
+    >({
+      query: ({ identifier, resetCode, newPassword }) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body: { identifier, resetCode, newPassword },
+      }),
+    }),
+
     // Get current user
     getCurrentUser: builder.query<any, void>({
       query: () => ({
@@ -58,6 +79,8 @@ export const authApi = createApi({
 export const {
   useLoginMutation,
   useRegisterMutation,
+  useRequestPasswordResetMutation,
+  useResetPasswordMutation,
   useGetCurrentUserQuery,
   useAddEmailForPaystackMutation,
   useSavePushTokenMutation,

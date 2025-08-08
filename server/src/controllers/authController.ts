@@ -184,3 +184,170 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
+export const requestPasswordReset = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { identifier } = req.body; // email or phone number
+
+    if (!identifier) {
+      res.status(400).json({
+        success: false,
+        message: "Please provide email or phone number",
+      });
+      return;
+    }
+
+    const isEmail = identifier.includes("@");
+    let user;
+
+    if (isEmail) {
+      user = await prisma.user.findUnique({
+        where: { email: identifier.toLowerCase() },
+      });
+    } else {
+      try {
+        const normalizedPhone = normalizePhoneNumber(identifier);
+        user = await prisma.user.findUnique({
+          where: { phoneNumber: normalizedPhone },
+        });
+      } catch (error) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid phone number format",
+        });
+        return;
+      }
+    }
+
+    if (!user) {
+      // Don't reveal if user exists or not for security
+      res.status(200).json({
+        success: true,
+        message: "If the account exists, a reset code has been sent",
+      });
+      return;
+    }
+
+    // Generate a simple 6-digit reset code
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        resetCode,
+        resetExpiresAt,
+      },
+    });
+
+    // In a real app, you'd send this via SMS/email
+    // For now, we'll return it in the response for testing
+    res.status(200).json({
+      success: true,
+      message: "Reset code sent successfully",
+      data: {
+        resetCode, // Remove this in production
+        expiresIn: "10 minutes",
+      },
+    });
+  } catch (error) {
+    console.error("Password reset request error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { identifier, resetCode, newPassword } = req.body;
+
+    if (!identifier || !resetCode || !newPassword) {
+      res.status(400).json({
+        success: false,
+        message: "Please provide identifier, reset code, and new password",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
+      return;
+    }
+
+    const isEmail = identifier.includes("@");
+    let user;
+
+    if (isEmail) {
+      user = await prisma.user.findUnique({
+        where: { email: identifier.toLowerCase() },
+      });
+    } else {
+      try {
+        const normalizedPhone = normalizePhoneNumber(identifier);
+        user = await prisma.user.findUnique({
+          where: { phoneNumber: normalizedPhone },
+        });
+      } catch (error) {
+        res.status(400).json({
+          success: false,
+          message: "Invalid phone number format",
+        });
+        return;
+      }
+    }
+
+    if (!user) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid reset request",
+      });
+      return;
+    }
+
+    // Check if reset code matches and is not expired
+    if (
+      user.resetCode !== resetCode ||
+      !user.resetExpiresAt ||
+      user.resetExpiresAt < new Date()
+    ) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset code",
+      });
+      return;
+    }
+
+    // Hash new password and update user
+    const hashedPassword = await hashPassword(newPassword);
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetCode: null,
+        resetExpiresAt: null,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    console.error("Password reset error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
