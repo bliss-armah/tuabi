@@ -9,13 +9,28 @@ import { router } from "expo-router";
  */
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: process.env.EXPO_PUBLIC_API_URL,
-  // baseUrl: "http://192.168.3.63:8080/api",
+  // baseUrl: "http://192.168.0.174:8080/api",
   prepareHeaders: async (headers) => {
     const tokenString = await AsyncStorage.getItem("token");
-    const token = tokenString ? JSON.parse(tokenString) : null;
+    let token = null;
+
+    try {
+      if (tokenString) {
+        const parsedToken = JSON.parse(tokenString);
+        // Handle both string tokens and object tokens
+        token =
+          typeof parsedToken === "string"
+            ? parsedToken
+            : parsedToken.access_token;
+      }
+    } catch (error) {
+      console.error("Error parsing token:", error);
+    }
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
+    } else {
+      console.log("No token found for request");
     }
 
     return headers;
@@ -35,6 +50,8 @@ const rawBaseQuery = fetchBaseQuery({
  * from this behavior to prevent logout loops during authentication.
  */
 const baseQuery = async (args: any, api: any, extraOptions: any) => {
+  console.log("Making API request to:", args.url);
+
   const result = await rawBaseQuery(args, api, extraOptions);
 
   const userString = await AsyncStorage.getItem("user");
@@ -74,6 +91,8 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
         };
       }
     }
+  } else {
+    console.log("API request successful:", args.url);
   }
 
   return result;

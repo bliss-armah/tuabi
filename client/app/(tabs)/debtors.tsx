@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/Shared/Constants/Colors";
 import { useGetDebtorsQuery } from "@/Features/Debtors/DebtorsApi";
@@ -34,8 +34,17 @@ export default function Debtors() {
 
   const { data, isLoading, error, refetch } = useGetDebtorsQuery();
 
+  // Refetch data when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log("Debtors screen focused - refetching data");
+      refetch();
+    }, [refetch])
+  );
+
   useEffect(() => {
     if (data?.data) {
+      console.log("Debtors data received:", data.data.length, "debtors");
       setDebtors(data.data);
       setFilteredDebtors(data.data);
     }
@@ -115,7 +124,13 @@ export default function Debtors() {
         <Text style={[styles.title, { color: Colors.text }]}>Debtors</Text>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={onRefresh} />
+        }
+      >
         {(filteredDebtors.length > 0 || searchQuery.trim() !== "") && (
           <View style={styles.searchContainer}>
             <SearchInput
