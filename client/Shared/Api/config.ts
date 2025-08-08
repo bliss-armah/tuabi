@@ -8,8 +8,8 @@ import { router } from "expo-router";
  * Handles authentication headers and 401 error responses
  */
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: process.env.EXPO_PUBLIC_API_URL,
-  // baseUrl: "http://192.168.0.174:8080/api",
+  // baseUrl: process.env.EXPO_PUBLIC_API_URL,
+  baseUrl: "http://192.168.0.174:8080/api",
   prepareHeaders: async (headers) => {
     const tokenString = await AsyncStorage.getItem("token");
     let token = null;

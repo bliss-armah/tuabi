@@ -1,13 +1,13 @@
 export interface LoginFormData {
-  phoneNumber: string;
+  identifier: string; // email or phone number
   password: string;
 }
 
 export interface RegisterFormData {
   name: string;
+  email: string;
   phoneNumber: string;
   password: string;
-  email?: string;
 }
 
 export interface LoginResponse {
@@ -27,6 +27,6 @@ interface tokenData {
 interface userData {
   id: number;
   name: string;
+  email: string;
   phoneNumber: string;
-  email?: string;
 }

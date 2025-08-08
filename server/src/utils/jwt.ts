@@ -4,6 +4,7 @@ import { Request } from "express";
 interface JWTPayload {
   userId: number;
   phoneNumber: string;
+  email: string;
 }
 
 export const generateToken = (payload: JWTPayload): string => {

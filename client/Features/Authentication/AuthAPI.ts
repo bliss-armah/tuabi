@@ -9,13 +9,13 @@ export const authApi = createApi({
   baseQuery,
   endpoints: (builder) => ({
     login: builder.mutation<LoginResponse, LoginFormData>({
-      query: ({ phoneNumber, password }) => ({
+      query: ({ identifier, password }) => ({
         url: "/auth/login",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: { phoneNumber, password },
+        body: { identifier, password },
       }),
     }),
 
